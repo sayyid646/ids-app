@@ -74,6 +74,13 @@ export function AppLayout() {
   const [lainnya, setLainnya] = useState(false)
   const [pembuka, setPembuka] = useState(perluPembuka)
   const kunciHalaman = lokasi.pathname.split('/').slice(0, 2).join('/')
+  // Catat halaman pertama saat aplikasi dibuka: panah pemandu hanya tampil bila halaman pertamanya Beranda.
+  useState(() => {
+    try {
+      if (!sessionStorage.getItem('ids-halaman-pertama')) sessionStorage.setItem('ids-halaman-pertama', lokasi.pathname)
+    } catch { /* abaikan */ }
+    return null
+  })
 
   return (
     <div className="min-h-dvh bg-ice-50 lg:pl-64">

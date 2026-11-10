@@ -330,7 +330,7 @@ function Tampilan() {
           <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={pembuka} onChange={(e) => { setPembuka(e.target.checked); aturAnimasiPembuka(e.target.checked) }} />
         </label>
         <label className="flex items-center justify-between gap-3 rounded-xl bg-ice-50 px-4 py-3">
-          <span><span className="block font-semibold text-navy-900">Kursor pemandu di Beranda</span><span className="text-sm text-ink-soft">Panah kecil yang sesekali menyorot judul dan angka.</span></span>
+          <span><span className="block font-semibold text-navy-900">Panah pemandu saat aplikasi dibuka</span><span className="text-sm text-ink-soft">Sekali saja di tampilan depan: panah menyorot judul dan angka, lalu hilang.</span></span>
           <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={kursor} onChange={(e) => { setKursor(e.target.checked); aturKursorPemandu(e.target.checked) }} />
         </label>
       </div>

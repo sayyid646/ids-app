@@ -117,7 +117,12 @@ export function Pembuka({ selesai }: { selesai: () => void }) {
       initial={{ opacity: 1 }}
       animate={keluar ? { opacity: 0, scale: 1.03 } : { opacity: 1, scale: 1 }}
       transition={{ duration: keluar ? 0.45 : 0, ease: [0.22, 1, 0.36, 1] }}
-      onAnimationComplete={() => keluar && selesaiRef.current()}
+      onAnimationComplete={() => {
+        if (!keluar) return
+        window.dispatchEvent(new Event('ids-pembuka-selesai'))
+        selesaiRef.current()
+      }}
+      data-pembuka
       onClick={akhiri}
       role="presentation"
       aria-hidden
