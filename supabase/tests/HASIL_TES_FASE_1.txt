@@ -1,0 +1,217 @@
+== Persiapan akun
+  ✓ profil dibuat otomatis untuk akun baru
+  ✓ akun baru berperan none
+  ✓ admin berperan admin
+  ✓ jadikan_admin untuk email yang belum ada (ditolak: Akun dengan email x@ids.test belum ada. Buat dulu di Authentication > Users.)
+== T1 Data awal: 9 pengrajin dan 8 kategori
+  ✓ 9 slot pengrajin
+  ✓ kode IDS 001 sampai IDS 009
+  ✓ nama 7 pengrajin sesuai data
+  ✓ IDS 008 dan IDS 009 tanpa nama karangan
+  ✓ semua pengrajin aktif
+  ✓ 8 kategori urut
+  ✓ pengaturan tepat satu baris
+  ✓ zona waktu bawaan WITA
+  ✓ penambahan 9 pengrajin tercatat di riwayat
+== T2 Pengunjung belum login (anon) tidak bisa apa-apa
+  ✓ anon baca pengrajin (ditolak: permission denied for table craftsmen)
+  ✓ anon baca order (ditolak: permission denied for table orders)
+  ✓ anon baca view barang (ditolak: permission denied for view v_items)
+  ✓ anon baca riwayat (ditolak: permission denied for table activity_logs)
+  ✓ anon panggil statistik (ditolak: permission denied for function statistik_dashboard)
+  ✓ anon buat order (ditolak: permission denied for function buat_order)
+== T3 Akun login yang bukan admin tidak melihat data usaha
+  ✓ bukan admin: is_admin false
+  ✓ bukan admin: 0 pengrajin terlihat
+  ✓ bukan admin: 0 kategori terlihat
+  ✓ bukan admin: 0 riwayat terlihat
+  ✓ bukan admin: pengaturan tidak terlihat
+  ✓ bukan admin: hanya profil sendiri
+  ✓ bukan admin: tidak bisa mengubah pengrajin
+  ✓ bukan admin: tambah pengrajin (ditolak: new row violates row-level security policy for table "craftsmen")
+  ✓ bukan admin: buat order (ditolak: Akses ditolak. Akun ini bukan administrator IDS.)
+  ✓ bukan admin: statistik (ditolak: Akses ditolak. Akun ini bukan administrator IDS.)
+  ✓ bukan admin: menaikkan peran sendiri (ditolak: permission denied for table profiles)
+  ✓ bukan admin: memanggil jadikan_admin (ditolak: permission denied for function jadikan_admin)
+  ✓ bukan admin: hapus pengrajin (ditolak: permission denied for table craftsmen)
+  ✓ nama pengrajin tetap utuh
+== T4 Admin melihat semua data
+  ✓ admin: is_admin true
+  ✓ admin: 9 pengrajin di halaman pengrajin
+  ✓ admin: 8 kategori
+  ✓ admin bisa mengubah nama profilnya
+== T5 Order satu barang
+  ✓ nama pelanggan dirapikan
+  ✓ nomor WA jadi format 62
+  ✓ jumlah barang 1
+  ✓ status awal Dalam Proses
+  ✓ bulan produksi otomatis dari tanggal diberikan
+  ✓ bulan produksi bukan manual
+  ✓ tanggal selesai masih kosong
+  ✓ tanggal serah masih kosong
+  ✓ tanggal order
+  ✓ label status
+  ✓ riwayat order_dibuat atas nama admin
+  ✓ riwayat pengrajin_ditugaskan tercatat
+== T6 Order banyak barang (jumlah 3)
+  ✓ jumlah barang 3
+  ✓ nomor barang 1,2,3
+  ✓ tiap barang bisa dilacak sendiri
+  ✓ WA +62 dirapikan
+  ✓ riwayat barang_ditambahkan 3x
+== T7 Nomor order ganda terdeteksi
+  ✓ cek nomor " 2574 " menemukan order lama
+  ✓ cek nomor mengecualikan order sendiri saat edit
+  ✓ cek nomor baru kosong
+  ✓ simpan nomor yang sama ditolak (ditolak: Nomor order 2574 sudah dipakai. Tambahkan barang ke order yang ada atau gunakan )
+  ✓ nomor dengan spasi " 25 74 " juga ditolak (ditolak: Nomor order 25 74 sudah dipakai. Tambahkan barang ke order yang ada atau gunakan)
+  ✓ insert langsung ke tabel juga dijaga (ditolak: duplicate key value violates unique constraint "orders_number_uq")
+== T8 Tambah barang ke order yang sudah ada
+  ✓ 1 barang ditambahkan
+  ✓ jumlah order 2574 jadi 2
+  ✓ barang kedua bernomor 2
+== T9 Status: selesai TIDAK sama dengan sudah diserahkan
+  ✓ ubah_status mengubah 1 barang
+  ✓ tanggal selesai tercatat (WITA)
+  ✓ selesai belum berarti diserahkan
+  ✓ status order jadi sebagian
+  ✓ tanggal serah tercatat otomatis
+  ✓ tanggal selesai tidak berubah saat diserahkan
+  ✓ 3 barang sekaligus jadi selesai
+  ✓ order 2575 berstatus selesai
+  ✓ order 2575: 0 diserahkan
+  ✓ mengulang status yang sama tidak mengubah apa pun
+== T10 Ubah status langsung di tabel juga mengisi tanggal otomatis
+  ✓ tanggal selesai terisi otomatis
+  ✓ semua barang 2574 selesai (satu sudah diserahkan): order selesai
+== T11 Data tidak masuk akal ditolak
+  ✓ selesai sebelum tanggal diberikan (ditolak: Tanggal selesai dikerjakan tidak boleh sebelum tanggal diberikan ke pengrajin.)
+  ✓ selesai di masa depan (ditolak: Tanggal selesai dikerjakan tidak boleh di masa depan.)
+  ✓ diserahkan sebelum selesai (ditolak: Tanggal diserahkan ke pembeli tidak boleh sebelum tanggal selesai dikerjakan.)
+  ✓ tanggal diberikan di masa depan (ditolak: Tanggal diberikan ke pengrajin tidak boleh di masa depan.)
+  ✓ nomor WA huruf ditolak (ditolak: Nomor WhatsApp "abc" tidak valid. Contoh yang benar: 0812 3456 7890.)
+  ✓ nomor WA terlalu pendek ditolak (ditolak: Nomor WhatsApp "12345" tidak valid. Contoh yang benar: 0812 3456 7890.)
+  ✓ order tanpa barang ditolak (ditolak: Order harus berisi minimal satu barang.)
+  ✓ jumlah 0 ditolak (ditolak: Jumlah barang harus 1 sampai 100.)
+  ✓ nama pelanggan kosong ditolak (ditolak: new row for relation "orders" violates check constraint "orders_customer_name_ch)
+  ✓ gender selain LADY/MAN ditolak (ditolak: invalid input value for enum public.gender_category: "ANAK")
+  ✓ order 3001 tidak tersimpan sebagian
+== T12 Koreksi tanggal selesai tercatat di riwayat
+  ✓ riwayat tanggal_selesai_diubah ada
+  ✓ nilai baru di riwayat
+  ✓ nilai lama di riwayat tidak kosong
+  ✓ riwayat tanggal_serah_diubah ada
+== T13 Kembali ke Dalam Proses menghapus tanggal dan tercatat
+  ✓ tanggal selesai dikosongkan
+  ✓ riwayat status lama selesai
+  ✓ tanggal selesai tanpa status selesai ditolak (ditolak: new row for relation "order_items" violates check constraint "order_items_status)
+  ✓ dari diserahkan ke selesai: tanggal selesai tetap
+  ✓ dari diserahkan ke selesai: tanggal serah dikosongkan
+== T14 Ganti pengrajin tercatat
+  ✓ riwayat pengrajin lama IDS 002
+  ✓ riwayat pengrajin baru IDS 003
+== T15 Kelola pengrajin: nonaktif, ganti nama dan ID, tambah, arsip
+  ✓ riwayat pengrajin_dinonaktifkan
+  ✓ barang baru ke pengrajin nonaktif ditolak (ditolak: Pengrajin IDS 003 sedang nonaktif. Aktifkan dulu atau pilih pengrajin lain.)
+  ✓ barang lama pengrajin nonaktif tetap bisa diperbarui
+  ✓ pengrajin nonaktif tetap tampil di daftar
+  ✓ riwayat barangnya tetap
+  ✓ ID pengrajin bisa diganti dan dirapikan
+  ✓ dikembalikan ke IDS 008 tanpa nama
+  ✓ perubahan ID dan nama tercatat 2x
+  ✓ ID pengrajin ganda ditolak (ditolak: duplicate key value violates unique constraint "craftsmen_code_uq")
+  ✓ pengrajin baru bisa ditambah
+  ✓ nomor HP pengrajin dirapikan
+  ✓ pengrajin diarsipkan tidak tampil
+  ✓ pengrajin diarsipkan otomatis nonaktif
+  ✓ pengrajin arsip tidak bisa diubah (ditolak: Pengrajin ini sudah dihapus (diarsipkan) dan tidak bisa diubah.)
+== T16 Data tidak bisa dihapus permanen
+  ✓ admin hapus pengrajin (ditolak: permission denied for table craftsmen)
+  ✓ admin hapus order (ditolak: permission denied for table orders)
+  ✓ admin hapus barang (ditolak: permission denied for table order_items)
+  ✓ admin ubah riwayat (ditolak: permission denied for table activity_logs)
+  ✓ admin hapus riwayat (ditolak: permission denied for table activity_logs)
+  ✓ pemilik database hapus pengrajin (ditolak: Data craftsmen tidak boleh dihapus permanen. Gunakan batalkan atau nonaktifkan.)
+  ✓ pemilik database hapus order (ditolak: Data orders tidak boleh dihapus permanen. Gunakan batalkan atau nonaktifkan.)
+  ✓ pemilik database hapus barang (ditolak: Data order_items tidak boleh dihapus permanen. Gunakan batalkan atau nonaktifkan)
+  ✓ pemilik database ubah riwayat (ditolak: Riwayat aktivitas tidak boleh diubah atau dihapus.)
+  ✓ pemilik database hapus riwayat (ditolak: Riwayat aktivitas tidak boleh diubah atau dihapus.)
+== T17 Batalkan dan pulihkan order
+  ✓ batal tanpa alasan ditolak (ditolak: Alasan pembatalan wajib diisi.)
+  ✓ order berstatus dibatalkan
+  ✓ riwayat order_dibatalkan
+  ✓ barang order batal tidak aktif
+  ✓ status barang order batal tidak bisa diubah (ditolak: Order ini sudah dibatalkan. Status barang tidak bisa diubah.)
+  ✓ tambah barang ke order batal ditolak (ditolak: Order ini sudah dibatalkan atau diarsipkan, tidak bisa ditambah atau diubah.)
+  ✓ data order batal tidak hilang
+  ✓ order dipulihkan kembali selesai
+  ✓ riwayat order_dipulihkan
+== T18 Kategori bisa diubah tanpa merusak riwayat
+  ✓ nama kategori dirapikan huruf besar
+  ✓ order lama ikut nama baru
+  ✓ riwayat kategori_diubah
+  ✓ kategori nonaktif tidak bisa dipakai barang baru (ditolak: Kategori LIONTIN sedang nonaktif.)
+  ✓ nama kategori ganda ditolak (ditolak: duplicate key value violates unique constraint "jewelry_categories_name_uq")
+  ✓ kategori tidak bisa dihapus (ditolak: permission denied for table jewelry_categories)
+== T19 Bulan produksi: otomatis atau koreksi manual
+  ✓ bulan manual disimpan sebagai tanggal 1
+  ✓ ditandai manual
+  ✓ bulan manual tidak berubah saat tanggal diganti
+  ✓ bulan otomatis ikut tanggal baru
+  ✓ koreksi manual lewat ubah data
+  ✓ kembali sama dengan bulan otomatis = bukan manual
+  ✓ mulai produksi sebelum tanggal diberikan (ditolak: Tanggal mulai produksi tidak boleh sebelum tanggal diberikan ke pengrajin.)
+  ✓ tanggal mulai produksi tersimpan
+== T20 Perhitungan dashboard tepat (data 2025 khusus tes)
+  ✓ 2025: total order (S4 batal tidak dihitung)
+  ✓ 2025: total barang (barang batal tidak dihitung)
+  ✓ 2025: dalam proses
+  ✓ 2025: selesai belum diserahkan
+  ✓ 2025: sudah diserahkan
+  ✓ 2025: selesai dikerjakan (selesai + diserahkan)
+  ✓ 2025: belum diserahkan
+  ✓ 2025: selesai pada periode
+  ✓ 2025: diserahkan pada periode
+  ✓ pengrajin aktif = 8 (IDS 003 nonaktif)
+  ✓ angka saat ini cocok dengan hitungan langsung
+  ✓ angka siap diserahkan cocok
+  ✓ Jan 2025: 1 order
+  ✓ Jan 2025: 2 barang
+  ✓ Jan 2025: 2 selesai pada periode
+  ✓ Jan 2025: 0 diserahkan pada periode (diserahkan Feb)
+  ✓ 31 Mar: selesai 23:30 WITA terhitung 31 Mar
+  ✓ 31 Mar: diserahkan 00:30 WITA 1 Apr tidak terhitung
+  ✓ 1 Apr: diserahkan terhitung 1 Apr
+  ✓ grafik bulanan Jan-Apr 2025
+  ✓ produktivitas IDS 004 (tugas/selesai/serah/proses/rata hari)
+  ✓ produktivitas IDS 005 (order batal tidak dihitung)
+  ✓ jumlah tugas semua pengrajin = total barang
+  ✓ semua pengrajin tampil di produktivitas
+  ✓ rincian kategori dan gender 2025
+  ✓ rentang tanggal terbalik ditolak (ditolak: Rentang tanggal tidak valid.)
+== T21 Pencarian global
+  ✓ cari nomor order 2574
+  ✓ cari nama pengrajin "iskandar"
+  ✓ cari ID pengrajin "ids001" tanpa spasi
+  ✓ cari ID pengrajin "IDS 004"
+  ✓ cari nama pelanggan "siti"
+  ✓ cari WA dengan 0 di depan "0812 3456"
+  ✓ cari kategori "sultan"
+  ✓ cari status "sudah diserahkan"
+  ✓ cari gabungan "iskandar premium"
+  ✓ pencarian kosong tidak mengembalikan apa pun
+  ✓ hasil aktif di urutan atas
+== T22 Pengaturan
+  ✓ WA usaha dirapikan
+  ✓ riwayat pengaturan_diubah
+  ✓ zona waktu salah ditolak (ditolak: Zona waktu "Mars/Olympus" tidak dikenal.)
+  ✓ baris pengaturan kedua ditolak (ditolak: permission denied for table app_settings)
+== T23 Sinkronisasi, penyimpanan foto, riwayat
+  ✓ 6 tabel ikut Realtime
+  ✓ bucket foto privat
+  ✓ semua riwayat punya pelaku
+  ✓ riwayat admin tercatat atas nama admin
+  ✓ RLS aktif di semua tabel
+  ✓ anon tidak punya hak tabel apa pun
+  ✓ tidak ada hak DELETE untuk akun login
+== SEMUA TES LULUS

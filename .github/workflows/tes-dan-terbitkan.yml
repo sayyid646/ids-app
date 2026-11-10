@@ -1,0 +1,87 @@
+name: Tes dan terbitkan
+
+# Setiap perubahan di cabang main:
+#   1. menguji semua aturan database di PostgreSQL 16,
+#   2. memeriksa tipe TypeScript dan menjalankan tes unit,
+#   3. membangun aplikasi,
+#   4. menerbitkan ke GitHub Pages hanya bila semua langkah di atas lulus.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: terbitkan
+  cancel-in-progress: true
+
+jobs:
+  tes-database:
+    name: Tes database
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Jalankan tes aturan bisnis
+        shell: bash
+        env:
+          PGHOST: localhost
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: bash supabase/tests/jalankan_tes.sh 2>&1 | tee hasil-tes.txt
+      - name: Ringkasan
+        if: always()
+        run: |
+          echo "### Tes database" >> "$GITHUB_STEP_SUMMARY"
+          echo "Lulus: $(grep -c 'NOTICE:  ok' hasil-tes.txt || true) pemeriksaan" >> "$GITHUB_STEP_SUMMARY"
+          grep -E 'GAGAL|ERROR' hasil-tes.txt >> "$GITHUB_STEP_SUMMARY" || true
+
+  aplikasi:
+    name: Periksa dan bangun aplikasi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Pasang paket
+        run: npm install --no-audit --no-fund
+      - name: Periksa tipe TypeScript
+        run: npm run typecheck
+      - name: Tes unit
+        run: npm test
+      - name: Bangun
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+        run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  terbitkan:
+    name: Terbitkan ke GitHub Pages
+    needs: [tes-database, aplikasi]
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
