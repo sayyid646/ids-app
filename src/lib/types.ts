@@ -119,3 +119,45 @@ export const LABEL_AKSI: Record<string, string> = {
   kategori_diubah: 'Kategori diubah',
   pengaturan_diubah: 'Pengaturan diubah',
 }
+
+export interface Kategori {
+  id: string
+  name: string
+  sort_order: number
+  is_active: boolean
+}
+
+export type StatusOrder = 'dalam_proses' | 'sebagian' | 'selesai' | 'diserahkan' | 'dibatalkan' | 'kosong'
+
+/** Baris view v_orders: order + jumlah barang per status. */
+export interface OrderRingkas {
+  id: string
+  order_number: string
+  customer_name: string
+  customer_whatsapp: string | null
+  notes: string | null
+  cancelled_at: string | null
+  cancel_reason: string | null
+  created_at: string
+  updated_at: string
+  quantity: number
+  qty_dalam_proses: number
+  qty_selesai: number
+  qty_diserahkan: number
+  order_date: string | null
+  last_completed_at: string | null
+  last_delivered_at: string | null
+  order_status: StatusOrder
+  craftsman_codes: string | null
+  craftsman_names: string | null
+  category_names: string | null
+}
+
+export const LABEL_STATUS_ORDER: Record<StatusOrder, string> = {
+  dalam_proses: 'Dalam Proses',
+  sebagian: 'Sebagian Selesai',
+  selesai: 'Selesai Dikerjakan',
+  diserahkan: 'Sudah Diserahkan',
+  dibatalkan: 'Dibatalkan',
+  kosong: 'Tanpa Barang',
+}

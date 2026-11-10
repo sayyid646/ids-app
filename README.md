@@ -13,8 +13,8 @@ Dikerjakan bertahap. Setiap fase baru dianggap selesai bila tesnya lulus.
 | 1 | Database: tabel, aturan bisnis, keamanan RLS, riwayat, statistik | Selesai, 192 pemeriksaan lulus |
 | 2 | Koneksi Supabase, login admin, lupa kata sandi, sesi, sinkronisasi realtime | Selesai |
 | 3a | Pendataan pengrajin: daftar, tambah, ubah, aktif/nonaktif, detail, riwayat | Selesai |
-| 3b | Pendataan order: satu dan banyak barang, cek nomor ganda | Berikutnya |
-| 4 | Status barang dan koreksi tanggal | |
+| 3b | Pendataan order: satu dan banyak barang, cek nomor ganda, ubah, tambah, batal | Selesai |
+| 4 | Status barang (sudah ada) dan koreksi tanggal dengan riwayat | Sebagian |
 | 5 | Dashboard, laporan, pencarian | |
 | 6 | Nota pengrajin, nota serah terima, WhatsApp | |
 | 7 | Animasi, penyempurnaan tampilan, PWA | |

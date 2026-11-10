@@ -10,6 +10,9 @@ import { SandiBaru } from './pages/SandiBaru'
 import { BelumDiatur, BukanAdmin, GalatAuth, LayarMemuat, TidakDitemukan } from './pages/Layar'
 import { DaftarPengrajin } from './pages/pengrajin/DaftarPengrajin'
 import { DetailPengrajin } from './pages/pengrajin/DetailPengrajin'
+import { DaftarOrder } from './pages/order/DaftarOrder'
+import { OrderBaru } from './pages/order/OrderBaru'
+import { DetailOrder } from './pages/order/DetailOrder'
 
 /** Rute terlindungi: hanya administrator yang bisa masuk. */
 function KhususAdmin() {
@@ -35,7 +38,10 @@ const router = createHashRouter([
       {
         element: <AppLayout />,
         children: [
-          { index: true, element: <Navigate to="/pengrajin" replace /> },
+          { index: true, element: <Navigate to="/order" replace /> },
+          { path: 'order', element: <DaftarOrder /> },
+          { path: 'order/baru', element: <OrderBaru /> },
+          { path: 'order/:id', element: <DetailOrder /> },
           { path: 'pengrajin', element: <DaftarPengrajin /> },
           { path: 'pengrajin/:id', element: <DetailPengrajin /> },
           { path: '*', element: <TidakDitemukan /> },

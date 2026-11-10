@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { LogOut, UserRound, Users, WifiOff } from 'lucide-react'
+import { Gem, LogOut, UserRound, Users, WifiOff } from 'lucide-react'
 import { useAuth } from '../../auth/AuthProvider'
 import { useSinkron, type StatusSinkron } from '../../sync/SyncProvider'
 import { Logo } from './Logo'
@@ -8,7 +8,10 @@ import { Konfirmasi } from '../ui/Dialog'
 import { cx } from '../ui/ui'
 
 // Menu hanya berisi modul yang sudah berfungsi penuh. Modul berikutnya ditambahkan per fase.
-const MENU = [{ ke: '/pengrajin', label: 'Pengrajin', Ikon: Users }]
+const MENU = [
+  { ke: '/order', label: 'Order', Ikon: Gem },
+  { ke: '/pengrajin', label: 'Pengrajin', Ikon: Users },
+]
 
 const LABEL_SINKRON: Record<StatusSinkron, string> = {
   tersinkron: 'Tersinkron',

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Archive, ArrowLeft, ChevronLeft, ChevronRight, MapPin, Pencil, Phone, Power, Search } from 'lucide-react'
 import { db } from '../../lib/supabase'
 import type { Barang, PengrajinRingkas, Riwayat, StatusBarang } from '../../lib/types'
-import { LABEL_AKSI, LABEL_STATUS } from '../../lib/types'
+import { LABEL_STATUS } from '../../lib/types'
 import { formatAngka, formatTanggal, formatTanggalPendek, formatTanggalWaktu, tglLokal } from '../../lib/format'
 import { tampilkanWa } from '../../lib/wa'
 import { useMuat } from '../../sync/useMuat'
@@ -14,6 +14,7 @@ import {
 import { Konfirmasi } from '../../components/ui/Dialog'
 import { useNotifikasi } from '../../components/ui/Notifikasi'
 import { FormPengrajin } from './FormPengrajin'
+import { DaftarRiwayat } from '../../components/DaftarRiwayat'
 import { KonfirmasiStatusPengrajin } from './AksiPengrajin'
 
 const PER_HALAMAN = 25
@@ -287,24 +288,7 @@ export function DetailPengrajin() {
         <h2 id="judul-aktivitas" className="font-display text-2xl font-semibold text-navy-900">Aktivitas terakhir</h2>
         <div className="mt-3">
           {riwayat.galat && <KotakGalat pesan={riwayat.galat} ulangi={riwayat.muatUlang} />}
-          {riwayat.data && riwayat.data.length === 0 && <p className="text-sm text-ink-muted">Belum ada aktivitas.</p>}
-          {riwayat.data && riwayat.data.length > 0 && (
-            <Kartu>
-              <ol className="divide-y divide-ice-100">
-                {riwayat.data.map((r) => (
-                  <li key={r.id} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
-                    <span className="w-44 shrink-0 text-xs tabular-nums text-ink-muted">{formatTanggalWaktu(r.created_at, zona)}</span>
-                    <span className="flex-1 text-sm text-navy-900">
-                      <strong className="font-semibold">{LABEL_AKSI[r.action] ?? r.action}</strong>
-                      {r.order_number && <span className="text-ink-soft"> · Order {r.order_number}</span>}
-                      <RingkasPerubahan r={r} />
-                    </span>
-                    <span className="truncate text-xs text-ink-muted">{r.actor_email}</span>
-                  </li>
-                ))}
-              </ol>
-            </Kartu>
-          )}
+          {riwayat.data && <DaftarRiwayat data={riwayat.data} zona={zona} />}
         </div>
       </section>
 
@@ -341,32 +325,4 @@ export function DetailPengrajin() {
       />
     </>
   )
-}
-
-function nilaiTeks(v: unknown): string {
-  if (v === null || v === undefined || v === '') return 'kosong'
-  if (typeof v === 'boolean') return v ? 'ya' : 'tidak'
-  if (typeof v === 'string' && v in LABEL_STATUS) return LABEL_STATUS[v as StatusBarang]
-  return String(v)
-}
-
-/** Ringkasan singkat nilai lama ke nilai baru untuk satu catatan riwayat. */
-function RingkasPerubahan({ r }: { r: Riwayat }) {
-  const lama = r.old_value ?? {}
-  const baru = r.new_value ?? {}
-  if (r.action === 'pengrajin_ditugaskan' && r.old_value) {
-    return <span className="text-ink-soft"> · dari {nilaiTeks(lama['kode'])} ke {nilaiTeks(baru['kode'])}</span>
-  }
-  if (r.action === 'status_diubah') {
-    return <span className="text-ink-soft"> · {nilaiTeks(lama['status'])} → {nilaiTeks(baru['status'])}</span>
-  }
-  if (r.action === 'pengrajin_diubah') {
-    const label: Record<string, string> = { code: 'ID', name: 'nama', phone: 'HP', address: 'alamat', notes: 'catatan' }
-    const isi = Object.keys(baru)
-      .filter((k) => k in label)
-      .map((k) => `${label[k]}: ${nilaiTeks(lama[k])} → ${nilaiTeks(baru[k])}`)
-      .join('; ')
-    return isi ? <span className="text-ink-soft"> · {isi}</span> : null
-  }
-  return null
 }
