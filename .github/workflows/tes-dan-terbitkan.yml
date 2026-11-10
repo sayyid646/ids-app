@@ -67,9 +67,7 @@ jobs:
       - name: Tes unit
         run: npm test
       - name: Bangun
-        env:
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+        # Alamat dan kunci publik Supabase dibaca dari file .env.production
         run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

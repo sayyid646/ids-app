@@ -51,12 +51,8 @@ ids-app/
 2. **Alamat login:** di Supabase, buka **Authentication**, lalu **URL Configuration**.
    - **Site URL:** `https://sayyid646.github.io/ids-app/`
    - **Redirect URLs:** tambahkan `https://sayyid646.github.io/ids-app/**`
-3. **Sambungkan aplikasi:** di GitHub repo ini, buka **Settings**, lalu **Secrets and variables**, lalu **Actions**, tab **Variables**. Buat dua variabel:
-   - `VITE_SUPABASE_URL` berisi Project URL
-   - `VITE_SUPABASE_ANON_KEY` berisi anon/publishable key
-
-   Jangan pernah memasukkan service_role key atau secret key.
-4. Buka tab **Actions**, pilih **Tes dan terbitkan**, lalu **Run workflow**. Setelah hijau, aplikasi siap di alamat di atas.
+3. **Sambungkan aplikasi:** isi Project URL dan anon/publishable key di file `.env.production`, lalu simpan ke cabang `main`. Kunci ini memang publik. Jangan pernah memasukkan service_role key atau secret key.
+4. GitHub Actions membangun dan menerbitkan otomatis. Setelah hijau, aplikasi siap di alamat di atas.
 
 ## Cara kerja tanpa komputer
 
