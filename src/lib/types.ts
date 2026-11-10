@@ -89,6 +89,7 @@ export interface Pengaturan {
   wa_template_selesai: string
   wa_template_diserahkan: string
   appearance: 'terang' | 'gelap' | 'otomatis'
+  updated_at: string
 }
 
 export const LABEL_STATUS: Record<StatusBarang, string> = {

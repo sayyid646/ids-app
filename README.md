@@ -10,19 +10,18 @@ Dikerjakan bertahap. Setiap fase baru dianggap selesai bila tesnya lulus.
 
 | Fase | Isi | Status |
 |---|---|---|
-| 1 | Database: tabel, aturan bisnis, keamanan RLS, riwayat, statistik | Selesai, 192 pemeriksaan lulus |
+| 1 | Database: tabel, aturan bisnis, keamanan RLS, riwayat, statistik | Selesai, 193 pemeriksaan lulus |
 | 2 | Koneksi Supabase, login admin, lupa kata sandi, sesi, sinkronisasi realtime | Selesai |
-| 3a | Pendataan pengrajin: daftar, tambah, ubah, aktif/nonaktif, detail, riwayat | Selesai |
-| 3b | Pendataan order: satu dan banyak barang, cek nomor ganda, ubah, tambah, batal | Selesai |
-| 4 | Status barang (sudah ada) dan koreksi tanggal dengan riwayat | Sebagian |
-| 5 | Dashboard, laporan, pencarian | |
-| 6 | Nota pengrajin, nota serah terima, WhatsApp | |
-| 7 | Animasi, penyempurnaan tampilan, PWA | |
-| 8 | Pengujian menyeluruh | |
+| 3 | Pendataan 9 pengrajin dan order (satu/banyak barang, cek nomor ganda) | Selesai |
+| 4 | Status barang, tanggal otomatis, koreksi tanggal dengan riwayat | Selesai |
+| 5 | Dashboard dan grafik, laporan (CSV, PDF, cetak), cari dan saring | Selesai |
+| 6 | Nota pengrajin, nota serah terima (A4 / thermal), WhatsApp | Selesai |
+| 7 | Animasi pembuka, kursor pemandu, tampilan desktop dan HP, PWA | Selesai |
+| 8 | Tes otomatis database dan logika aplikasi di setiap perubahan | Selesai |
 
 ## Teknologi
 
-React 18, TypeScript, Vite, Tailwind CSS, React Router, React Hook Form, Zod, Lucide, Supabase (PostgreSQL, Auth, Realtime, Storage). Paket lain (Framer Motion, Recharts, PWA) ditambahkan di fase yang memakainya.
+React 18, TypeScript, Vite, Tailwind CSS, React Router, React Hook Form, Zod, Lucide, Supabase (PostgreSQL, Auth, Realtime, Storage). Framer Motion (animasi), Recharts (grafik), jsPDF (ekspor PDF), PWA (pasang di layar utama).
 
 ## Struktur folder
 

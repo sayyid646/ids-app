@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Ban, CheckCheck, Pencil, Phone, Plus, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Ban, CalendarClock, CheckCheck, MessageCircle, Pencil, Phone, Plus, Printer, RotateCcw } from 'lucide-react'
 import { db } from '../../lib/supabase'
 import type { Barang, OrderRingkas, Riwayat } from '../../lib/types'
 import { formatBulan, formatTanggal, formatTanggalWaktu, hariIni as tglHariIni } from '../../lib/format'
@@ -13,12 +13,12 @@ import { Konfirmasi } from '../../components/ui/Dialog'
 import { useNotifikasi } from '../../components/ui/Notifikasi'
 import { Kartu, KodePengrajin, Kosong, KotakGalat, LencanaStatus, NamaPengrajin, Pemuat, Tombol, cx } from '../../components/ui/ui'
 import { LencanaOrder } from './DaftarOrder'
-import { DialogBarang, DialogBatal, DialogStatus, DialogUbahOrder } from './DialogOrder'
+import { DialogBarang, DialogBatal, DialogKoreksiTanggal, DialogStatus, DialogUbahOrder, DialogWhatsApp } from './DialogOrder'
 
 export function DetailOrder() {
   const { id = '' } = useParams()
   const [param, setParam] = useSearchParams()
-  const { zona } = useSinkron()
+  const { zona, pengaturan } = useSinkron()
   const { beri } = useNotifikasi()
   const master = useMaster()
   const versi = useVersiData(['orders', 'order_items', 'craftsmen', 'jewelry_categories'])
@@ -32,6 +32,8 @@ export function DetailOrder() {
   const [pulihkan, setPulihkan] = useState(false)
   const [batalBarang, setBatalBarang] = useState<Barang | null>(null)
   const [tampilBatal, setTampilBatal] = useState(false)
+  const [koreksi, setKoreksi] = useState<Barang | null>(null)
+  const [wa, setWa] = useState(false)
 
   const data = useMuat(async () => {
     const [o, b] = await Promise.all([
@@ -119,6 +121,17 @@ export function DetailOrder() {
             {batal && <Tombol ikon={<RotateCcw className="h-4 w-4" />} onClick={() => setPulihkan(true)}>Pulihkan order</Tombol>}
           </div>
         </div>
+        {!batal && aktif.length > 0 && (
+          <div className="relative mt-5 flex flex-wrap gap-2 border-t border-ice-200 pt-4">
+            <Tombol kecil ragam="kedua" ikon={<MessageCircle className="h-4 w-4 text-[#1E8E4E]" />} onClick={() => setWa(true)}>Kirim via WhatsApp</Tombol>
+            <Link to={`/cetak/pengrajin/${o.id}`} className="inline-flex h-9 items-center gap-2 rounded-xl border border-gold-300 bg-white px-3 text-sm font-semibold text-navy-900 hover:bg-gold-50">
+              <Printer className="h-4 w-4" /> Nota pengrajin
+            </Link>
+            <Link to={`/cetak/serah/${o.id}`} className="inline-flex h-9 items-center gap-2 rounded-xl border border-gold-300 bg-white px-3 text-sm font-semibold text-navy-900 hover:bg-gold-50">
+              <Printer className="h-4 w-4" /> Nota serah terima
+            </Link>
+          </div>
+        )}
       </Kartu>
 
       <section className="mt-8" aria-labelledby="judul-barang">
@@ -164,6 +177,9 @@ export function DetailOrder() {
                     <div className="mt-4 flex flex-wrap gap-2 pt-1">
                       <Tombol kecil onClick={() => setStatusUntuk([b])}>Ubah status</Tombol>
                       <Tombol kecil ragam="kedua" ikon={<Pencil className="h-4 w-4" />} onClick={() => setDialogBarang({ buka: true, barang: b })}>Ubah</Tombol>
+                      {b.status !== 'dalam_proses' && (
+                        <Tombol kecil ragam="kedua" ikon={<CalendarClock className="h-4 w-4" />} onClick={() => setKoreksi(b)}>Koreksi tanggal</Tombol>
+                      )}
                       <Tombol kecil ragam="hantu" className="ml-auto" onClick={() => setBatalBarang(b)}>Batalkan barang</Tombol>
                     </div>
                   )}
@@ -194,6 +210,8 @@ export function DetailOrder() {
           barang={dialogBarang.barang}
         />
       )}
+      <DialogKoreksiTanggal barang={koreksi} tutup={() => setKoreksi(null)} berubah={muatUlang} zona={zona} />
+      <DialogWhatsApp order={o} barang={aktif} terbuka={wa} tutup={() => setWa(false)} zona={zona} pengaturan={pengaturan} />
       <DialogStatus barang={statusUntuk} tutup={() => setStatusUntuk(null)} berubah={muatUlang} zona={zona} />
       <DialogBatal
         judul={`Batalkan order ${o.order_number}?`}

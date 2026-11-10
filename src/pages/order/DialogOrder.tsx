@@ -5,10 +5,11 @@ import { z } from 'zod'
 import { db } from '../../lib/supabase'
 import { pesanGalat } from '../../lib/errors'
 import { muatanBarang, skemaBarang, type DataBarang, type MasukanBarang } from '../../lib/orderSchema'
-import type { Barang, OrderRingkas, StatusBarang } from '../../lib/types'
+import type { Barang, OrderRingkas, Pengaturan, StatusBarang } from '../../lib/types'
 import { LABEL_STATUS } from '../../lib/types'
-import { normalisasiWa, tampilkanWa, waValid } from '../../lib/wa'
-import { formatTanggalWaktu, tglLokal } from '../../lib/format'
+import { normalisasiWa, tampilkanWa, tautanWa, waValid } from '../../lib/wa'
+import { isiTemplate, jenisPesanUntuk, templateDari, type JenisPesan } from '../../lib/waTemplate'
+import { formatTanggalPanjang, formatTanggalWaktu, isoKeLokal, lokalKeIso, tglLokal } from '../../lib/format'
 import type { DataMaster } from '../../sync/useMaster'
 import { Jendela } from '../../components/ui/Dialog'
 import { useNotifikasi } from '../../components/ui/Notifikasi'
@@ -212,8 +213,10 @@ export function DialogStatus({
     setGalat(null)
     if (pakaiWaktuLain && status !== 'dalam_proses') {
       if (!waktu) { setGalat('Isi tanggal dan jam.'); return }
-      if (new Date(waktu).getTime() > Date.now() + 5 * 60_000) { setGalat('Waktu tidak boleh di masa depan.'); return }
-      const tgl = tglLokal(new Date(waktu), zona)
+      const iso = lokalKeIso(waktu, zona)
+      if (!iso) { setGalat('Isi tanggal dan jam dengan lengkap.'); return }
+      if (new Date(iso).getTime() > Date.now() + 5 * 60_000) { setGalat('Waktu tidak boleh di masa depan.'); return }
+      const tgl = tglLokal(iso, zona)
       const lebihAwal = barang.find((b) => tgl < b.assigned_date)
       if (lebihAwal) { setGalat(`Waktu itu sebelum tanggal barang #${lebihAwal.item_no} diberikan ke pengrajin.`); return }
     }
@@ -222,7 +225,7 @@ export function DialogStatus({
       const { data, error } = await db().rpc('ubah_status', {
         p_items: barang.map((b) => b.id),
         p_status: status,
-        p_waktu: pakaiWaktuLain && status !== 'dalam_proses' ? new Date(waktu).toISOString() : null,
+        p_waktu: pakaiWaktuLain && status !== 'dalam_proses' ? lokalKeIso(waktu, zona) : null,
       })
       if (error) throw error
       const n = Number(data ?? 0)
@@ -317,6 +320,125 @@ export function DialogBatal({
           <IsianPanjang id="alasan-batal" rows={2} value={alasan} onChange={(e) => setAlasan(e.target.value)} placeholder="Contoh: pembeli membatalkan pesanan" />
         </Bidang>
       </div>
+    </Jendela>
+  )
+}
+
+// ------------------------------------------------------ koreksi tanggal
+/** Koreksi tanggal selesai dan tanggal serah tanpa mengubah status. Tercatat di riwayat. */
+export function DialogKoreksiTanggal({ barang, tutup, berubah, zona }: { barang: Barang | null; tutup: () => void; berubah: () => void; zona: string }) {
+  const { beri } = useNotifikasi()
+  const [selesai, setSelesai] = useState('')
+  const [serah, setSerah] = useState('')
+  const [proses, setProses] = useState(false)
+  const [galat, setGalat] = useState<string | null>(null)
+  useEffect(() => {
+    if (!barang) return
+    setSelesai(isoKeLokal(barang.completed_at, zona))
+    setSerah(isoKeLokal(barang.delivered_at, zona))
+    setGalat(null)
+  }, [barang, zona])
+  if (!barang) return null
+  const adaSerah = barang.status === 'diserahkan'
+  const simpan = async () => {
+    setGalat(null)
+    const isoSelesai = lokalKeIso(selesai, zona)
+    const isoSerah = adaSerah ? lokalKeIso(serah, zona) : null
+    if (!isoSelesai || (adaSerah && !isoSerah)) { setGalat('Isi tanggal dan jam dengan lengkap.'); return }
+    if (tglLokal(isoSelesai, zona) < barang.assigned_date) { setGalat('Tanggal selesai tidak boleh sebelum tanggal diberikan ke pengrajin.'); return }
+    if (isoSerah && isoSerah < isoSelesai) { setGalat('Tanggal diserahkan tidak boleh sebelum tanggal selesai dikerjakan.'); return }
+    const ubahan: Record<string, string> = {}
+    if (isoSelesai !== (barang.completed_at && new Date(barang.completed_at).toISOString())) ubahan.completed_at = isoSelesai
+    if (isoSerah && isoSerah !== (barang.delivered_at && new Date(barang.delivered_at).toISOString())) ubahan.delivered_at = isoSerah
+    if (!Object.keys(ubahan).length) { tutup(); return }
+    setProses(true)
+    try {
+      const { error } = await db().from('order_items').update(ubahan).eq('id', barang.id)
+      if (error) throw error
+      beri('Tanggal dikoreksi dan dicatat di riwayat.')
+      berubah()
+      tutup()
+    } catch (e) {
+      setGalat(pesanGalat(e))
+    } finally {
+      setProses(false)
+    }
+  }
+  return (
+    <Jendela terbuka tutup={tutup} terkunci={proses} judul={`Koreksi tanggal barang #${barang.item_no}`}
+      kaki={<><Tombol ragam="hantu" onClick={tutup} disabled={proses}>Batal</Tombol><Tombol onClick={simpan} memuat={proses}>Simpan koreksi</Tombol></>}>
+      <div className="space-y-4">
+        <p className="text-sm text-ink-soft">Diberikan ke pengrajin {formatTanggalPanjang(barang.assigned_date)}. Setiap koreksi tercatat di riwayat beserta nilai lamanya.</p>
+        <Bidang label="Selesai dikerjakan (tanggal dan jam)" id="k-selesai">
+          <Isian id="k-selesai" type="datetime-local" value={selesai} onChange={(e) => setSelesai(e.target.value)} />
+        </Bidang>
+        {adaSerah && (
+          <Bidang label="Diserahkan ke pembeli (tanggal dan jam)" id="k-serah">
+            <Isian id="k-serah" type="datetime-local" value={serah} onChange={(e) => setSerah(e.target.value)} />
+          </Bidang>
+        )}
+        {galat && <p role="alert" className="rounded-xl bg-bad-50 p-3 text-sm text-bad-700">{galat}</p>}
+      </div>
+    </Jendela>
+  )
+}
+
+// ------------------------------------------------------------- WhatsApp
+/** Pesan WhatsApp yang bisa diubah dulu sebelum dikirim. Tidak ada yang terkirim tanpa admin menekan tombol. */
+export function DialogWhatsApp({ order, barang, terbuka, tutup, zona, pengaturan }: {
+  order: OrderRingkas; barang: Barang[]; terbuka: boolean; tutup: () => void; zona: string; pengaturan: Pengaturan | null
+}) {
+  const [jenis, setJenis] = useState<JenisPesan>(jenisPesanUntuk(order.order_status))
+  const [pesan, setPesan] = useState('')
+  const isi = useMemo(() => {
+    const kategori = [...new Set(barang.map((b) => b.category_name))].join(', ') || '-'
+    const tSelesai = barang.reduce<string | null>((m, b) => (b.completed_at && (!m || b.completed_at > m) ? b.completed_at : m), null)
+    const tSerah = barang.reduce<string | null>((m, b) => (b.delivered_at && (!m || b.delivered_at > m) ? b.delivered_at : m), null)
+    return {
+      nama: order.customer_name, nomor_order: order.order_number, kategori, jumlah: String(barang.length),
+      tanggal_selesai: tSelesai ? formatTanggalPanjang(tglLokal(tSelesai, zona)) : '-',
+      tanggal_serah: tSerah ? formatTanggalPanjang(tglLokal(tSerah, zona)) : '-',
+      nama_usaha: pengaturan?.business_name ?? 'Intan Dua Saudara',
+    }
+  }, [order, barang, zona, pengaturan])
+  useEffect(() => {
+    if (terbuka) setJenis(jenisPesanUntuk(order.order_status))
+  }, [terbuka, order.order_status])
+  useEffect(() => {
+    if (terbuka) setPesan(isiTemplate(templateDari(pengaturan, jenis), isi))
+  }, [terbuka, jenis, isi, pengaturan])
+
+  const nomor = order.customer_whatsapp
+  return (
+    <Jendela terbuka={terbuka} tutup={tutup} judul="Kirim via WhatsApp"
+      kaki={<>
+        <Tombol ragam="hantu" onClick={tutup}>Batal</Tombol>
+        {nomor && pesan.trim() ? (
+          <a href={tautanWa(nomor, pesan)} target="_blank" rel="noopener noreferrer" onClick={tutup}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1E8E4E] px-5 text-[15px] font-semibold text-white hover:bg-[#177540]">
+            Buka WhatsApp
+          </a>
+        ) : null}
+      </>}>
+      {!nomor ? (
+        <p className="rounded-xl bg-gold-50 p-3 text-sm text-gold-700">Order ini belum punya nomor WhatsApp pelanggan. Tambahkan lewat tombol Ubah order.</p>
+      ) : (
+        <div className="space-y-4">
+          <p className="text-sm text-ink-soft">Ke <strong className="text-navy-900">{order.customer_name}</strong> · {tampilkanWa(nomor)}</p>
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Jenis pesan">
+            {(['proses', 'selesai', 'diserahkan'] as JenisPesan[]).map((j) => (
+              <button key={j} type="button" aria-pressed={jenis === j} onClick={() => setJenis(j)}
+                className={cx('rounded-full border px-3 py-1.5 text-xs font-semibold', jenis === j ? 'border-navy-900 bg-navy-900 text-white' : 'border-ice-300 bg-white text-ink-soft')}>
+                {j === 'proses' ? 'Dalam proses' : j === 'selesai' ? 'Selesai dikerjakan' : 'Sudah diserahkan'}
+              </button>
+            ))}
+          </div>
+          <Bidang label="Pesan (bisa diubah)" id="wa-pesan">
+            <IsianPanjang id="wa-pesan" rows={11} value={pesan} onChange={(e) => setPesan(e.target.value)} />
+          </Bidang>
+          <p className="text-xs text-ink-muted">WhatsApp akan terbuka dengan pesan ini. Pesan baru terkirim setelah Anda menekan kirim di WhatsApp.</p>
+        </div>
+      )}
     </Jendela>
   )
 }

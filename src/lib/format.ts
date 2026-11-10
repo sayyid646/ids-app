@@ -8,12 +8,26 @@ export const NAMA_BULAN = [
 
 const POLA_TANGGAL = /^(\d{4})-(\d{2})-(\d{2})/
 
-/** '2026-09-03' -> '03 September 2026'. Kosong -> '-'. */
+/** Gaya tanggal dari pengaturan: 'dd MMMM yyyy' (03 September 2026) atau 'dd/MM/yyyy' (03/09/2026). */
+let gayaTanggal = 'dd MMMM yyyy'
+export function aturGayaTanggal(gaya: string | null | undefined): void {
+  gayaTanggal = gaya === 'dd/MM/yyyy' ? 'dd/MM/yyyy' : 'dd MMMM yyyy'
+}
+
+/** '2026-09-03' -> '03 September 2026' (atau '03/09/2026'). Kosong -> '-'. */
 export function formatTanggal(tanggal: string | null | undefined): string {
   if (!tanggal) return '-'
   const m = POLA_TANGGAL.exec(tanggal)
   if (!m) return '-'
+  if (gayaTanggal === 'dd/MM/yyyy') return `${m[3]}/${m[2]}/${m[1]}`
   return `${m[3]} ${NAMA_BULAN[Number(m[2]) - 1]} ${m[1]}`
+}
+
+/** Tanggal lengkap dengan nama bulan, apa pun gaya tanggalnya (untuk nota). */
+export function formatTanggalPanjang(tanggal: string | null | undefined): string {
+  if (!tanggal) return '-'
+  const m = POLA_TANGGAL.exec(tanggal)
+  return m ? `${m[3]} ${NAMA_BULAN[Number(m[2]) - 1]} ${m[1]}` : '-'
 }
 
 /** '2026-09-03' -> '03/09' */
@@ -64,3 +78,35 @@ const ANGKA = new Intl.NumberFormat('id-ID')
 export function formatAngka(n: number | null | undefined): string {
   return ANGKA.format(Number(n ?? 0))
 }
+
+/** Selisih zona waktu (ms) pada saat `ts` untuk zona tertentu. */
+function selisihZona(ts: number, zona: string): number {
+  const b = bagian(new Date(ts), zona)
+  const lokal = Date.UTC(Number(b.year), Number(b.month) - 1, Number(b.day), Number(b.hour), Number(b.minute))
+  return lokal - Math.floor(ts / 60_000) * 60_000
+}
+
+/** Isian 'YYYY-MM-DDTHH:mm' yang dibaca sebagai jam di zona waktu usaha -> waktu ISO (UTC). */
+export function lokalKeIso(nilai: string, zona: string): string | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(nilai)
+  if (!m) return null
+  const tebak = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5]))
+  let ts = tebak - selisihZona(tebak, zona)
+  ts = tebak - selisihZona(ts, zona)
+  return new Date(ts).toISOString()
+}
+
+/** Waktu ISO -> 'YYYY-MM-DDTHH:mm' di zona waktu usaha (untuk isian datetime-local). */
+export function isoKeLokal(waktu: string | null | undefined, zona: string): string {
+  if (!waktu) return ''
+  const d = new Date(waktu)
+  if (Number.isNaN(d.getTime())) return ''
+  const b = bagian(d, zona)
+  return `${b.year}-${b.month}-${b.day}T${b.hour}:${b.minute}`
+}
+
+export const ZONA_WAKTU: { nilai: string; label: string }[] = [
+  { nilai: 'Asia/Jakarta', label: 'WIB (Jakarta, Sumatra, Jawa, Kalimantan Barat dan Tengah)' },
+  { nilai: 'Asia/Makassar', label: 'WITA (Bali, NTB, NTT, Sulawesi, Kalimantan Selatan dan Timur)' },
+  { nilai: 'Asia/Jayapura', label: 'WIT (Maluku, Papua)' },
+]

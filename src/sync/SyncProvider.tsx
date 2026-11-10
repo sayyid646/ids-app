@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Pengaturan } from '../lib/types'
+import { aturGayaTanggal } from '../lib/format'
 
 // Sinkronisasi antarperangkat.
 // Satu saluran Realtime mendengarkan semua tabel. Setiap perubahan menaikkan "versi" tabel itu,
@@ -99,7 +100,10 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       .eq('id', 1)
       .maybeSingle()
       .then(({ data }) => {
-        if (aktif && data) setPengaturan(data as Pengaturan)
+        if (aktif && data) {
+          aturGayaTanggal((data as Pengaturan).date_format)
+          setPengaturan(data as Pengaturan)
+        }
       })
     return () => {
       aktif = false
