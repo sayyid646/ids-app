@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Pencil, Plus, Power, Search } from 'lucide-react'
+import { Grid3x3, LayoutGrid, Pencil, Plus, Power, Search } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { db } from '../../lib/supabase'
 import type { PengrajinRingkas } from '../../lib/types'
 import { formatAngka } from '../../lib/format'
@@ -11,6 +12,7 @@ import {
 } from '../../components/ui/ui'
 import { FormPengrajin } from './FormPengrajin'
 import { KonfirmasiStatusPengrajin } from './AksiPengrajin'
+import { aturTampilanPengrajin, tampilanPengrajin, type TampilanPengrajin } from '../../components/animasi/pengaturanAnimasi'
 
 type Saring = 'semua' | 'aktif' | 'nonaktif'
 
@@ -26,6 +28,8 @@ export function DaftarPengrajin() {
   const [saring, setSaring] = useState<Saring>('semua')
   const [form, setForm] = useState<{ buka: boolean; p: PengrajinRingkas | null }>({ buka: false, p: null })
   const [ubahStatus, setUbahStatus] = useState<PengrajinRingkas | null>(null)
+  const [tampilan, setTampilan] = useState<TampilanPengrajin>(tampilanPengrajin)
+  const pilihTampilan = (t: TampilanPengrajin) => { setTampilan(t); aturTampilanPengrajin(t) }
 
   const semua = data ?? []
   const tampil = useMemo(() => {
@@ -66,6 +70,14 @@ export function DaftarPengrajin() {
             </button>
           ))}
         </div>
+        <div className="flex self-start rounded-xl border border-ice-300 bg-white p-1 sm:self-auto" role="group" aria-label="Pilih tampilan">
+          {([['kartu', LayoutGrid, 'Kartu besar'], ['ringkas', Grid3x3, 'Ringkas, semua terlihat']] as const).map(([t, Ikon, label]) => (
+            <button key={t} type="button" aria-pressed={tampilan === t} title={label} aria-label={label} onClick={() => pilihTampilan(t)}
+              className={cx('inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold', tampilan === t ? 'bg-navy-900 text-white' : 'text-ink-soft hover:text-navy-900')}>
+              <Ikon className="h-4 w-4" aria-hidden /> <span>{t === 'kartu' ? 'Kartu' : 'Ringkas'}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {galat && <div className="mb-4"><KotakGalat pesan={galat} ulangi={muatUlang} /></div>}
@@ -76,6 +88,29 @@ export function DaftarPengrajin() {
           judul={semua.length === 0 ? 'Belum ada pengrajin' : 'Tidak ada yang cocok'}
           isi={semua.length === 0 ? 'Tambahkan pengrajin pertama untuk mulai mencatat order.' : 'Coba kata pencarian atau saringan lain.'}
         />
+      ) : tampilan === 'ringkas' ? (
+        <>
+          <ul className="grid grid-cols-3 gap-2 sm:gap-3 md:grid-cols-5 xl:grid-cols-9">
+            {tampil.map((p, i) => (
+              <motion.li key={p.id} initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 420, damping: 22, delay: i * 0.03 }}>
+                <Link to={`/pengrajin/${p.id}`}
+                  className={cx('kaca flex h-full flex-col rounded-xl border border-ice-200 bg-white p-2.5 shadow-card transition-shadow hover:shadow-pop focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400', !p.is_active && 'opacity-60')}>
+                  <span className="flex items-center justify-between gap-1">
+                    <span className="text-[11px] font-bold tracking-wider text-gold-700">{p.code}</span>
+                    <span className={cx('h-2 w-2 shrink-0 rounded-full', p.is_active ? 'bg-ok-600' : 'bg-ink-muted')} title={p.is_active ? 'Aktif' : 'Nonaktif'} />
+                  </span>
+                  <NamaPengrajin nama={p.name} className="mt-1 block truncate text-sm font-semibold text-navy-900" />
+                  <span className="mt-2 grid grid-cols-3 gap-1 text-center">
+                    <span><span className="block text-sm font-bold tabular-nums text-navy-900">{formatAngka(p.qty_dalam_proses)}</span><span className="block text-[9px] font-semibold text-ink-muted">Proses</span></span>
+                    <span><span className="block text-sm font-bold tabular-nums text-gold-600">{formatAngka(p.qty_selesai)}</span><span className="block text-[9px] font-semibold text-ink-muted">Selesai</span></span>
+                    <span><span className="block text-sm font-bold tabular-nums text-ok-600">{formatAngka(p.qty_diserahkan)}</span><span className="block text-[9px] font-semibold text-ink-muted">Serah</span></span>
+                  </span>
+                </Link>
+              </motion.li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs text-ink-muted">Ketuk pengrajin untuk melihat detail, mengubah data, atau menonaktifkan.</p>
+        </>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {tampil.map((p) => (

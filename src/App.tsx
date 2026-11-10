@@ -23,6 +23,7 @@ const Laporan = lazy(() => import('./pages/Laporan'))
 const Riwayat = lazy(() => import('./pages/Riwayat'))
 const Pengaturan = lazy(() => import('./pages/Pengaturan'))
 const Nota = lazy(() => import('./pages/Nota'))
+const Sampah = lazy(() => import('./pages/Sampah'))
 
 /** Rute terlindungi: hanya administrator yang bisa masuk. */
 function KhususAdmin() {
@@ -59,6 +60,7 @@ const router = createHashRouter([
           { path: 'pengrajin/:id', element: <DetailPengrajin /> },
           { path: 'laporan', element: <Laporan /> },
           { path: 'riwayat', element: <Riwayat /> },
+          { path: 'sampah', element: <Sampah /> },
           { path: 'pengaturan', element: <Pengaturan /> },
           { path: '*', element: <TidakDitemukan /> },
         ],

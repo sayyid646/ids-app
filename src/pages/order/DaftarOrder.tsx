@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Search, Trash2 } from 'lucide-react'
 import { db } from '../../lib/supabase'
 import type { OrderRingkas, StatusOrder } from '../../lib/types'
 import { LABEL_STATUS_ORDER } from '../../lib/types'
@@ -8,6 +8,8 @@ import { formatAngka, formatTanggal } from '../../lib/format'
 import { normalisasiWa } from '../../lib/wa'
 import { useMuat } from '../../sync/useMuat'
 import { useVersiData } from '../../sync/SyncProvider'
+import { Konfirmasi } from '../../components/ui/Dialog'
+import { useNotifikasi } from '../../components/ui/Notifikasi'
 import { Isian, Kartu, KepalaHalaman, Kosong, KotakGalat, Pemuat, Tombol, cx } from '../../components/ui/ui'
 
 const PER_HALAMAN = 20
@@ -42,6 +44,8 @@ export function DaftarOrder() {
   const [cariAktif, setCariAktif] = useState('')
   const [saring, setSaring] = useState<Saring>('semua')
   const [halaman, setHalaman] = useState(0)
+  const [hapusBatal, setHapusBatal] = useState(false)
+  const { beri } = useNotifikasi()
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -105,6 +109,14 @@ export function DaftarOrder() {
         </div>
       </div>
 
+      {saring === 'dibatalkan' && data && data.baris.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl2 border border-bad-600/15 bg-bad-50/60 px-4 py-3 text-sm text-bad-700">
+          <span className="flex-1">Order yang dibatalkan bisa dihapus supaya daftar bersih. Yang terhapus masuk Sampah dan bisa dipulihkan selama 7 hari.</span>
+          <Tombol kecil ragam="bahaya" ikon={<Trash2 className="h-4 w-4" />} onClick={() => setHapusBatal(true)}>
+            Hapus {data.baris.length} order dibatalkan
+          </Tombol>
+        </div>
+      )}
       {galat && <div className="mb-4"><KotakGalat pesan={galat} ulangi={muatUlang} /></div>}
       {memuat && !data ? (
         <Pemuat />
@@ -180,6 +192,25 @@ export function DaftarOrder() {
           </div>
         </>
       ) : null}
+
+      <Konfirmasi
+        terbuka={hapusBatal}
+        tutup={() => setHapusBatal(false)}
+        judul="Hapus order yang dibatalkan?"
+        pesan={<p>{data?.baris.length ?? 0} order dibatalkan yang tampil di halaman ini pindah ke <strong className="text-navy-900">Sampah</strong>. Selama 7 hari masih bisa dipulihkan dari menu Sampah.</p>}
+        labelYa="Pindahkan ke Sampah"
+        bahaya
+        jalankan={async () => {
+          const daftar = (data?.baris ?? []).filter((o) => o.cancelled_at !== null)
+          for (const o of daftar) {
+            const { error } = await db().rpc('hapus_order', { p_order: o.id })
+            if (error) throw error
+          }
+          beri(`${daftar.length} order dipindah ke Sampah.`)
+          setHalaman(0)
+          muatUlang()
+        }}
+      />
     </>
   )
 }

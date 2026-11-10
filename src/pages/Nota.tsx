@@ -11,7 +11,7 @@ import { useSinkron } from '../sync/SyncProvider'
 import { KotakGalat, Pemuat, cx } from '../components/ui/ui'
 import { kelompokPengrajin } from '../lib/nota'
 
-type Kertas = 'A4' | '80mm' | '58mm'
+type Kertas = 'A4' | 'A5' | '80mm' | '58mm'
 
 function Kop({ nama, alamat, wa, logo, sempit }: { nama: string; alamat: string | null; wa: string | null; logo: string | null; sempit: boolean }) {
   return (
@@ -82,7 +82,7 @@ export default function Nota() {
   // Ukuran kertas untuk dialog cetak browser.
   useEffect(() => {
     const gaya = document.createElement('style')
-    gaya.textContent = kertas === 'A4' ? '@page { size: A4; margin: 14mm; }' : `@page { size: ${kertas} auto; margin: 3mm; }`
+    gaya.textContent = kertas === 'A4' ? '@page { size: A4; margin: 14mm; }' : kertas === 'A5' ? '@page { size: A5; margin: 10mm; }' : `@page { size: ${kertas} auto; margin: 3mm; }`
     document.head.appendChild(gaya)
     return () => gaya.remove()
   }, [kertas])
@@ -96,10 +96,10 @@ export default function Nota() {
   const diserahkan = semua.filter((b) => b.status === 'diserahkan')
   const isiSerah = diserahkan.length ? diserahkan : semua
   const tglSerah = diserahkan.reduce<string | null>((m, b) => (b.delivered_at && (!m || b.delivered_at > m) ? b.delivered_at : m), null)
-  const sempit = kertas !== 'A4'
+  const sempit = kertas === '80mm' || kertas === '58mm'
   const nama = pengaturan?.business_name ?? 'Intan Dua Saudara'
   const tandaTangan = pengaturan?.receipt_show_signature ?? true
-  const lebar = kertas === 'A4' ? 'max-w-[190mm]' : kertas === '80mm' ? 'max-w-[74mm]' : 'max-w-[52mm]'
+  const lebar = kertas === 'A4' ? 'max-w-[190mm]' : kertas === 'A5' ? 'max-w-[128mm]' : kertas === '80mm' ? 'max-w-[74mm]' : 'max-w-[52mm]'
 
   return (
     <div className="min-h-dvh bg-ice-100 print:bg-white">
@@ -107,7 +107,7 @@ export default function Nota() {
         <Link to={`/order/${o.id}`} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-soft"><ArrowLeft className="h-4 w-4" /> Kembali</Link>
         <div className="ml-auto flex items-center gap-2">
           <select aria-label="Ukuran kertas" value={kertas} onChange={(e) => setKertas(e.target.value as Kertas)} className="h-10 rounded-xl border border-ice-300 bg-white px-3 text-sm">
-            <option value="A4">A4</option><option value="80mm">Thermal 80 mm</option><option value="58mm">Thermal 58 mm</option>
+            <option value="A4">A4</option><option value="A5">A5</option><option value="80mm">Thermal 80 mm</option><option value="58mm">Thermal 58 mm</option>
           </select>
           <button type="button" onClick={() => window.print()} className="inline-flex h-10 items-center gap-2 rounded-xl bg-navy-900 px-4 text-sm font-semibold text-white">
             <Printer className="h-4 w-4" /> Cetak
@@ -119,7 +119,7 @@ export default function Nota() {
         </p>
       </div>
 
-      <div className={cx('mx-auto my-6 bg-white p-6 text-black shadow-card print:my-0 print:max-w-none print:p-0 print:shadow-none', lebar, sempit ? 'text-[11px]' : 'text-[13px]')}>
+      <div className={cx('mx-auto my-6 bg-white p-6 text-black shadow-card print:my-0 print:max-w-none print:p-0 print:shadow-none', lebar, sempit ? 'text-[11px]' : kertas === 'A5' ? 'text-[12px]' : 'text-[13px]')}>
         {(serah ? [{ id: 'serah', kode: '', nama: null, barang: isiSerah }] : kelompokPengrajin(semua)).map((g, gi, arr) => (
           <section key={g.id} className={cx(gi < arr.length - 1 && 'break-after-page pb-10 print:pb-0')}>
             <Kop nama={nama} alamat={pengaturan?.business_address ?? null} wa={pengaturan?.business_whatsapp ?? null} logo={logo} sempit={sempit} />

@@ -2,6 +2,7 @@ import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type R
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import type { StatusBarang } from '../../lib/types'
 import { LABEL_STATUS } from '../../lib/types'
+import { TeksHuruf } from '../animasi/TeksHuruf'
 
 export function cx(...k: (string | false | null | undefined)[]): string {
   return k.filter(Boolean).join(' ')
@@ -177,14 +178,14 @@ export function Kosong({ judul, isi, aksi }: { judul: string; isi?: string; aksi
 }
 
 export function Kartu({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cx('rounded-xl2 border border-ice-200 bg-white shadow-card', className)}>{children}</div>
+  return <div className={cx('kaca rounded-xl2 border border-ice-200 bg-white shadow-card', className)}>{children}</div>
 }
 
 export function KepalaHalaman({ judul, sub, aksi }: { judul: string; sub?: ReactNode; aksi?: ReactNode }) {
   return (
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <h1 className="font-display text-3xl font-semibold leading-tight text-navy-900 sm:text-4xl">{judul}</h1>
+        <h1 className="font-display text-3xl font-semibold leading-tight text-navy-900 sm:text-4xl"><TeksHuruf key={judul} teks={judul} /></h1>
         {sub && <div className="mt-1 text-sm text-ink-soft">{sub}</div>}
       </div>
       {aksi && <div className="flex flex-wrap gap-2">{aksi}</div>}

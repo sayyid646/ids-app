@@ -58,7 +58,7 @@ export function Jendela({ terbuka, tutup, judul, children, kaki, lebar = 'md', t
         aria-modal="true"
         aria-labelledby={idJudul}
         tabIndex={-1}
-        className={`relative flex max-h-[92dvh] w-full flex-col rounded-t-3xl bg-white shadow-pop outline-none sm:rounded-3xl ${maks}`}
+        className={`kaca-kuat relative flex max-h-[92dvh] w-full flex-col rounded-t-3xl bg-white shadow-pop outline-none sm:rounded-3xl ${maks}`}
       >
         <div className="flex items-center justify-between gap-4 border-b border-ice-200 px-5 py-4 sm:px-6">
           <h2 id={idJudul} className="font-display text-2xl font-semibold text-navy-900">{judul}</h2>

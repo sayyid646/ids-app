@@ -557,4 +557,108 @@ do $$ begin
 end $$;
 
 \echo
+\echo '== T24 Sampah 7 hari: hapus dan pulihkan order dan barang'
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false);
+do $$
+declare v uuid; i1 uuid; i2 uuid; sebelum jsonb; sesudah jsonb;
+begin
+  sebelum := public.statistik_dashboard('2026-10-01', '2026-10-31');
+  v := public.buat_order(jsonb_build_object('order_number', '7700', 'customer_name', 'Uji Sampah',
+    'items', jsonb_build_array(tes.item('IDS 001', 'HIGH', 'MAN', '2026-10-05'), tes.item('IDS 001', 'LUXURY', 'LADY', '2026-10-05'))));
+  perform tes.simpan('o7700', v);
+  i1 := tes.barang(v, 1); i2 := tes.barang(v, 2);
+  perform tes.simpan('i7700_2', i2);
+  perform tes.sama('order uji 2 barang', (select quantity from public.v_orders where id = v)::text, '2');
+
+  -- hapus satu barang (salah ketik)
+  perform public.hapus_barang(i2);
+  perform tes.sama('barang terhapus hilang dari daftar barang', (select count(*) from public.v_items where id = i2)::text, '0');
+  perform tes.sama('jumlah barang order jadi 1', (select quantity from public.v_orders where id = v)::text, '1');
+  perform tes.sama('barang terhapus tidak dihitung dashboard',
+    ((public.statistik_dashboard('2026-10-01', '2026-10-31') ->> 'total_barang')::int - (sebelum ->> 'total_barang')::int)::text, '1');
+  perform tes.sama('barang terhapus tidak ikut pencarian', (select count(*) from public.cari_global('7700') c where c.id = i2)::text, '0');
+  perform tes.sama('barang ada di Sampah', (select jenis || ':' || item_no from public.v_sampah where id = i2), 'barang:2');
+  perform tes.sama('Sampah menyebut batas 7 hari',
+    (select (hilang_pada - deleted_at)::text from public.v_sampah where id = i2), '7 days');
+  perform tes.sama('riwayat barang_dihapus', (select count(*) from public.activity_logs where item_id = i2 and action = 'barang_dihapus')::text, '1');
+  perform tes.gagal('barang di Sampah tidak bisa diubah', format($q$update public.order_items set notes = 'x' where id = %L$q$, i2), 'ada di Sampah');
+  perform tes.gagal('barang di Sampah tidak bisa diubah statusnya', format($q$select public.ubah_status(array[%L::uuid], 'selesai')$q$, i2), 'Sampah|tidak ditemukan|0');
+  perform tes.gagal('hapus dua kali ditolak', format('select public.hapus_barang(%L)', i2), 'sudah di Sampah');
+
+  -- pulihkan barang
+  perform public.pulihkan_sampah('barang', i2);
+  perform tes.sama('barang kembali', (select quantity from public.v_orders where id = v)::text, '2');
+  perform tes.sama('barang keluar dari Sampah', (select count(*) from public.v_sampah where id = i2)::text, '0');
+  perform tes.sama('riwayat barang_dipulihkan_sampah', (select count(*) from public.activity_logs where item_id = i2 and action = 'barang_dipulihkan_sampah')::text, '1');
+  perform tes.sama('barang dipulihkan tidak tercatat barang_diubah', (select count(*) from public.activity_logs where item_id = i2 and action = 'barang_diubah')::text, '0');
+
+  -- hapus seluruh order
+  perform public.hapus_order(v);
+  perform tes.sama('order terhapus hilang dari daftar order', (select count(*) from public.v_orders where id = v)::text, '0');
+  perform tes.sama('barang order terhapus hilang', (select count(*) from public.v_items where order_id = v)::text, '0');
+  perform tes.sama('order terhapus tidak dihitung dashboard',
+    (public.statistik_dashboard('2026-10-01', '2026-10-31') ->> 'total_barang'), sebelum ->> 'total_barang');
+  perform tes.sama('order ada di Sampah dengan 2 barang', (select jenis || ':' || jumlah_barang from public.v_sampah where id = v), 'order:2');
+  perform tes.sama('barangnya tidak tampil terpisah di Sampah', (select count(*) from public.v_sampah where order_id = v and jenis = 'barang')::text, '0');
+  perform tes.sama('riwayat order_dihapus', (select count(*) from public.activity_logs where order_id = v and action = 'order_dihapus')::text, '1');
+  perform tes.gagal('order di Sampah tidak bisa diubah', format($q$update public.orders set customer_name = 'Y' where id = %L$q$, v), 'ada di Sampah');
+  perform tes.gagal('tambah barang ke order di Sampah ditolak', format('select public.tambah_barang(%L, %L)', v, tes.item('IDS 001', 'HIGH', 'MAN', '2026-10-06')), '.');
+  perform tes.gagal('barang dari order di Sampah tidak bisa dipulihkan sendiri', format($q$select public.pulihkan_sampah('barang', %L)$q$, i1), 'tidak ditemukan');
+  perform tes.sama('nomor order bisa dipakai lagi selama di Sampah', (select count(*) from public.cek_nomor_order('7700'))::text, '0');
+end $$;
+
+-- nomor dipakai order baru, lalu order lama dipulihkan: harus ditolak
+do $$
+declare b uuid;
+begin
+  b := public.buat_order(jsonb_build_object('order_number', '7700', 'customer_name', 'Pengganti',
+    'items', jsonb_build_array(tes.item('IDS 001', 'PREMIUM', 'MAN', '2026-10-07'))));
+  perform tes.gagal('pulihkan order bernomor kembar ditolak', format($q$select public.pulihkan_sampah('order', %L)$q$, tes.id('o7700')), 'sudah dipakai');
+  perform public.hapus_order(b);
+  perform public.pulihkan_sampah('order', tes.id('o7700'));
+  perform tes.sama('order dipulihkan lengkap', (select quantity from public.v_orders where id = tes.id('o7700'))::text, '2');
+  perform tes.sama('riwayat order_dipulihkan_sampah', (select count(*) from public.activity_logs where order_id = tes.id('o7700') and action = 'order_dipulihkan_sampah')::text, '1');
+  perform tes.sama('order lain tetap di Sampah', (select count(*) from public.v_sampah where id = b)::text, '1');
+  perform tes.simpan('o7700b', b);
+  -- order batal juga bisa dihapus
+  perform public.batalkan_order(tes.id('o7700'), 'Uji batal');
+  perform public.hapus_order(tes.id('o7700'));
+  perform tes.sama('order batal masuk Sampah', (select count(*) from public.v_sampah where id = tes.id('o7700'))::text, '1');
+  perform public.pulihkan_sampah('order', tes.id('o7700'));
+  perform tes.sama('order batal dipulihkan tetap batal', (select order_status from public.v_orders where id = tes.id('o7700')), 'dibatalkan');
+  perform public.hapus_barang(tes.id('i7700_2'));
+end $$;
+reset role;
+
+-- lewat 7 hari (dimundurkan langsung sebagai pemilik database, tanpa pemicu)
+set session_replication_role = replica;
+update public.orders set deleted_at = now() - interval '8 days' where id = tes.id('o7700b');
+update public.order_items set deleted_at = now() - interval '8 days' where id = tes.id('i7700_2');
+set session_replication_role = origin;
+
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false);
+do $$ begin
+  perform tes.sama('lewat 7 hari tidak tampil di Sampah', (select count(*) from public.v_sampah where id in (tes.id('o7700b'), tes.id('i7700_2')))::text, '0');
+  perform tes.gagal('order lewat 7 hari tidak bisa dipulihkan', format($q$select public.pulihkan_sampah('order', %L)$q$, tes.id('o7700b')), 'lebih dari 7 hari');
+  perform tes.gagal('barang lewat 7 hari tidak bisa dipulihkan', format($q$select public.pulihkan_sampah('barang', %L)$q$, tes.id('i7700_2')), 'lebih dari 7 hari');
+  perform tes.gagal('jenis Sampah tak dikenal', format($q$select public.pulihkan_sampah('x', %L)$q$, tes.id('o7700b')), 'tidak dikenal');
+  perform tes.gagal('hapus permanen tetap ditolak', format('delete from public.orders where id = %L', tes.id('o7700b')), 'permission denied|tidak boleh');
+  update public.app_settings set receipt_paper = 'A5' where id = 1;
+  perform tes.sama('kertas nota A5 diterima', (select receipt_paper from public.app_settings), 'A5');
+  perform tes.gagal('kertas A3 ditolak', $q$update public.app_settings set receipt_paper = 'A3' where id = 1$q$, 'check');
+end $$;
+reset role;
+
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', false);
+do $$ begin
+  perform tes.gagal('bukan admin: hapus order', format('select public.hapus_order(%L)', tes.id('o7700')), 'bukan administrator');
+  perform tes.gagal('bukan admin: pulihkan', format($q$select public.pulihkan_sampah('order', %L)$q$, tes.id('o7700')), 'bukan administrator');
+  perform tes.sama('bukan admin: Sampah kosong', (select count(*) from public.v_sampah)::text, '0');
+end $$;
+reset role;
+
+\echo
 \echo '== SEMUA TES LULUS'

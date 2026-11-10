@@ -2,7 +2,7 @@ import { Suspense, useState, type FormEvent } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  BarChart3, Gem, History, LayoutDashboard, LogOut, MoreHorizontal, Search, Settings, Users, WifiOff, X,
+  BarChart3, Gem, History, LayoutDashboard, LogOut, MoreHorizontal, Search, Settings, Trash2, Users, WifiOff, X,
 } from 'lucide-react'
 import { useAuth } from '../../auth/AuthProvider'
 import { useSinkron, type StatusSinkron } from '../../sync/SyncProvider'
@@ -20,6 +20,7 @@ const MENU = [
   { ke: '/pengrajin', label: 'Pengrajin', Ikon: Users },
   { ke: '/laporan', label: 'Laporan', Ikon: BarChart3 },
   { ke: '/riwayat', label: 'Riwayat', Ikon: History },
+  { ke: '/sampah', label: 'Sampah', Ikon: Trash2 },
   { ke: '/pengaturan', label: 'Pengaturan', Ikon: Settings },
 ]
 const MENU_BAWAH = MENU.slice(0, 4)
@@ -74,22 +75,15 @@ export function AppLayout() {
   const [lainnya, setLainnya] = useState(false)
   const [pembuka, setPembuka] = useState(perluPembuka)
   const kunciHalaman = lokasi.pathname.split('/').slice(0, 2).join('/')
-  // Catat halaman pertama saat aplikasi dibuka: panah pemandu hanya tampil bila halaman pertamanya Beranda.
-  useState(() => {
-    try {
-      if (!sessionStorage.getItem('ids-halaman-pertama')) sessionStorage.setItem('ids-halaman-pertama', lokasi.pathname)
-    } catch { /* abaikan */ }
-    return null
-  })
 
   return (
-    <div className="min-h-dvh bg-ice-50 lg:pl-64">
+    <div className="latar-app min-h-dvh bg-ice-50 lg:pl-64">
       {pembuka && <Pembuka selesai={() => setPembuka(false)} />}
 
       {/* Sidebar komputer */}
       <motion.aside
-        className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-navy-900 text-white print:hidden lg:flex"
-        initial={{ x: -24, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, delay: pembuka ? 3.6 : 0, ease: [0.22, 1, 0.36, 1] }}
+        className="kaca-gelap fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-navy-900 text-white print:hidden lg:flex"
+        initial={{ x: -24, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, delay: pembuka ? 3.2 : 0, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="px-6 pb-6 pt-7">
           <Logo />
@@ -122,14 +116,14 @@ export function AppLayout() {
       </motion.aside>
 
       {/* Bilah atas komputer */}
-      <header className="sticky top-0 z-20 hidden items-center gap-4 border-b border-ice-200 bg-white/85 px-10 py-3 backdrop-blur print:hidden lg:flex">
+      <header className="kaca-bilah sticky top-0 z-20 hidden items-center gap-4 border-b border-ice-200 bg-white/85 px-10 py-3 backdrop-blur print:hidden lg:flex">
         <CariAtas />
         <span className="ml-auto text-sm text-ink-soft">{formatTanggalPanjang(hariIni(zona))}</span>
         <PenandaSinkron />
       </header>
 
       {/* Kepala HP */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-ice-200 bg-white/90 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur print:hidden lg:hidden">
+      <header className="kaca-bilah sticky top-0 z-30 flex items-center justify-between border-b border-ice-200 bg-white/90 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur print:hidden lg:hidden">
         <Logo terang={false} kecil />
         <PenandaSinkron />
       </header>
@@ -150,7 +144,7 @@ export function AppLayout() {
       </main>
 
       {/* Navigasi bawah HP */}
-      <nav aria-label="Menu utama" className="fixed inset-x-0 bottom-0 z-30 flex justify-around border-t border-ice-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur print:hidden lg:hidden">
+      <nav aria-label="Menu utama" className="kaca-bilah fixed inset-x-0 bottom-0 z-30 flex justify-around border-t border-ice-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur print:hidden lg:hidden">
         {MENU_BAWAH.map(({ ke, label, Ikon }) => (
           <NavLink key={ke} to={ke} className={({ isActive }) => cx('flex min-w-[64px] flex-col items-center gap-1 px-2 py-2.5 text-[11px] font-semibold', isActive ? 'text-navy-900' : 'text-ink-muted')}>
             {({ isActive }) => (
@@ -177,13 +171,13 @@ export function AppLayout() {
           <div className="fixed inset-0 z-50 lg:hidden">
             <motion.div className="absolute inset-0 bg-navy-950/45" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setLainnya(false)} />
             <motion.div role="dialog" aria-modal="true" aria-label="Menu lainnya"
-              className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-white px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 shadow-pop"
+              className="kaca-kuat absolute inset-x-0 bottom-0 rounded-t-3xl bg-white px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 shadow-pop"
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', stiffness: 380, damping: 34 }}>
               <div className="mb-3 flex items-center justify-between">
                 <p className="truncate text-sm text-ink-soft">{email}</p>
                 <button type="button" aria-label="Tutup" onClick={() => setLainnya(false)} className="rounded-full p-2 hover:bg-ice-100"><X className="h-5 w-5" /></button>
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {MENU_LAIN.map(({ ke, label, Ikon }) => (
                   <NavLink key={ke} to={ke} onClick={() => setLainnya(false)}
                     className={({ isActive }) => cx('flex flex-col items-center gap-2 rounded-2xl border p-4 text-sm font-semibold', isActive ? 'border-gold-400 bg-gold-50 text-navy-900' : 'border-ice-200 text-navy-800')}>

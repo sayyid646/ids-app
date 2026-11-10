@@ -17,7 +17,7 @@ import { useSinkron } from '../sync/SyncProvider'
 import { useMaster } from '../sync/useMaster'
 import { useNotifikasi } from '../components/ui/Notifikasi'
 import { Bidang, Isian, IsianPanjang, Kartu, KepalaHalaman, LencanaAktif, Pemuat, Tombol, cx } from '../components/ui/ui'
-import { animasiPembukaAktif, aturAnimasiPembuka, aturKursorPemandu, kursorPemanduAktif } from '../components/animasi/pengaturanAnimasi'
+import { animasiPembukaAktif, aturAnimasiPembuka, aturTema, temaAktif, type Tema } from '../components/animasi/pengaturanAnimasi'
 
 function Bagian({ judul, sub, children }: { judul: string; sub?: string; children: ReactNode }) {
   return (
@@ -36,7 +36,7 @@ const skemaUsaha = z.object({
   business_whatsapp: z.string().optional().refine((v) => !v || !v.trim() || waValid(v), 'Nomor WhatsApp tidak valid'),
   timezone: z.string(),
   date_format: z.enum(['dd MMMM yyyy', 'dd/MM/yyyy']),
-  receipt_paper: z.enum(['A4', '80mm', '58mm']),
+  receipt_paper: z.enum(['A4', 'A5', '80mm', '58mm']),
   receipt_show_signature: z.boolean(),
   receipt_footer: z.string().max(300),
   wa_template_proses: z.string().trim().min(1, 'Template tidak boleh kosong').max(2000),
@@ -109,7 +109,7 @@ function FormUsaha({ p }: { p: TPengaturan }) {
         <div className="grid gap-4 sm:grid-cols-2">
           <Bidang label="Ukuran kertas bawaan" id="s-kertas" bantuan="Bisa diganti di halaman cetak.">
             <select id="s-kertas" className={kelasPilih} {...register('receipt_paper')}>
-              <option value="A4">A4</option><option value="80mm">Printer thermal 80 mm</option><option value="58mm">Printer thermal 58 mm</option>
+              <option value="A4">A4</option><option value="A5">A5 (setengah A4)</option><option value="80mm">Printer thermal 80 mm</option><option value="58mm">Printer thermal 58 mm</option>
             </select>
           </Bidang>
           <label className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-navy-900">
@@ -319,19 +319,37 @@ function Profil() {
   )
 }
 
+const PILIHAN_TEMA: { nilai: Tema; judul: string; isi: string; contoh: string }[] = [
+  { nilai: 'glass', judul: 'Glass', isi: 'Kaca bening dengan emas, biru langit, putih, dan hitam.', contoh: 'bg-[radial-gradient(circle_at_20%_20%,#BFE3FA,transparent_55%),radial-gradient(circle_at_85%_30%,#E8D3A9,transparent_50%),linear-gradient(#F7FBFF,#EAF4FC)]' },
+  { nilai: 'klasik', judul: 'Klasik', isi: 'Putih bersih dengan menu navy.', contoh: 'bg-ice-50' },
+]
+
 function Tampilan() {
   const [pembuka, setPembuka] = useState(animasiPembukaAktif)
-  const [kursor, setKursor] = useState(kursorPemanduAktif)
+  const [tema, setTema] = useState<Tema>(temaAktif)
   return (
     <Bagian judul="Tampilan dan animasi" sub="Berlaku untuk perangkat ini saja. Animasi otomatis mati bila perangkat diatur untuk mengurangi gerakan.">
-      <div className="space-y-3">
+      <div className="space-y-4">
+        <fieldset>
+          <legend className="mb-2 text-sm font-semibold text-navy-900">Tema</legend>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {PILIHAN_TEMA.map((t) => (
+              <label key={t.nilai} className={cx('flex cursor-pointer items-center gap-3 rounded-xl border-2 p-3 transition-colors', tema === t.nilai ? 'border-gold-400 bg-gold-50/60' : 'border-ice-200 hover:border-ice-300')}>
+                <input type="radio" name="tema" className="sr-only" checked={tema === t.nilai} onChange={() => { setTema(t.nilai); aturTema(t.nilai) }} />
+                <span className={cx('relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border border-ice-200', t.contoh)} aria-hidden>
+                  <span className={cx('absolute inset-y-0 left-0 w-5', t.nilai === 'glass' ? 'bg-black/80' : 'bg-navy-900')} />
+                  <span className={cx('absolute left-7 top-2 h-4 w-10 rounded', t.nilai === 'glass' ? 'border border-white/80 bg-white/60' : 'border border-ice-200 bg-white')} />
+                  <span className={cx('absolute left-7 top-8 h-4 w-10 rounded', t.nilai === 'glass' ? 'border border-white/80 bg-white/60' : 'border border-ice-200 bg-white')} />
+                  <span className="absolute left-1.5 top-2 h-2 w-2 rotate-45 bg-gold-400" />
+                </span>
+                <span><span className="block font-semibold text-navy-900">{t.judul}</span><span className="text-sm text-ink-soft">{t.isi}</span></span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <label className="flex items-center justify-between gap-3 rounded-xl bg-ice-50 px-4 py-3">
-          <span><span className="block font-semibold text-navy-900">Animasi pembuka</span><span className="text-sm text-ink-soft">Logo IDS dan kursor emas saat aplikasi dibuka, sekali per sesi.</span></span>
+          <span><span className="block font-semibold text-navy-900">Animasi pembuka</span><span className="text-sm text-ink-soft">Logo IDS di atas kaca, huruf muncul satu per satu saat aplikasi dibuka, sekali per sesi.</span></span>
           <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={pembuka} onChange={(e) => { setPembuka(e.target.checked); aturAnimasiPembuka(e.target.checked) }} />
-        </label>
-        <label className="flex items-center justify-between gap-3 rounded-xl bg-ice-50 px-4 py-3">
-          <span><span className="block font-semibold text-navy-900">Panah pemandu saat aplikasi dibuka</span><span className="text-sm text-ink-soft">Sekali saja di tampilan depan: panah menyorot judul dan angka, lalu hilang.</span></span>
-          <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={kursor} onChange={(e) => { setKursor(e.target.checked); aturKursorPemandu(e.target.checked) }} />
         </label>
       </div>
     </Bagian>

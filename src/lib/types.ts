@@ -82,7 +82,7 @@ export interface Pengaturan {
   logo_path: string | null
   timezone: string
   date_format: string
-  receipt_paper: 'A4' | '80mm' | '58mm'
+  receipt_paper: 'A4' | 'A5' | '80mm' | '58mm'
   receipt_show_signature: boolean
   receipt_footer: string
   wa_template_proses: string
@@ -104,6 +104,10 @@ export const LABEL_AKSI: Record<string, string> = {
   order_dibatalkan: 'Order dibatalkan',
   order_dipulihkan: 'Order dipulihkan',
   order_diarsipkan: 'Order diarsipkan',
+  order_dihapus: 'Order dipindah ke Sampah',
+  order_dipulihkan_sampah: 'Order dipulihkan dari Sampah',
+  barang_dihapus: 'Barang dipindah ke Sampah',
+  barang_dipulihkan_sampah: 'Barang dipulihkan dari Sampah',
   barang_ditambahkan: 'Barang ditambahkan',
   barang_diubah: 'Barang diubah',
   barang_dibatalkan: 'Barang dibatalkan',

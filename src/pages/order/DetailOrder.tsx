@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Ban, CalendarClock, CheckCheck, MessageCircle, Pencil, Phone, Plus, Printer, RotateCcw } from 'lucide-react'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { ArrowLeft, Ban, CalendarClock, CheckCheck, MessageCircle, Pencil, Phone, Plus, Printer, RotateCcw, Trash2 } from 'lucide-react'
 import { db } from '../../lib/supabase'
 import type { Barang, OrderRingkas, Riwayat } from '../../lib/types'
 import { formatBulan, formatTanggal, formatTanggalWaktu, hariIni as tglHariIni } from '../../lib/format'
@@ -34,6 +34,9 @@ export function DetailOrder() {
   const [tampilBatal, setTampilBatal] = useState(false)
   const [koreksi, setKoreksi] = useState<Barang | null>(null)
   const [wa, setWa] = useState(false)
+  const [hapusOrder, setHapusOrder] = useState(false)
+  const [hapusBarang, setHapusBarang] = useState<Barang | null>(null)
+  const navigasi = useNavigate()
 
   const data = useMuat(async () => {
     const [o, b] = await Promise.all([
@@ -119,6 +122,7 @@ export function DetailOrder() {
               </>
             )}
             {batal && <Tombol ikon={<RotateCcw className="h-4 w-4" />} onClick={() => setPulihkan(true)}>Pulihkan order</Tombol>}
+            <Tombol ragam="hantu" className="text-bad-700 hover:bg-bad-50" ikon={<Trash2 className="h-4 w-4" />} onClick={() => setHapusOrder(true)}>Hapus order</Tombol>
           </div>
         </div>
         {!batal && aktif.length > 0 && (
@@ -171,7 +175,10 @@ export function DetailOrder() {
                   </dl>
                   {b.notes && <p className="mt-2 text-xs text-ink-soft">Catatan: {b.notes}</p>}
                   {!b.is_active && b.cancelled_at && (
-                    <p className="mt-2 text-xs text-bad-700">Barang dibatalkan {formatTanggalWaktu(b.cancelled_at, zona)}{b.cancel_reason ? ` · ${b.cancel_reason}` : ''}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <p className="text-xs text-bad-700">Barang dibatalkan {formatTanggalWaktu(b.cancelled_at, zona)}{b.cancel_reason ? ` · ${b.cancel_reason}` : ''}</p>
+                      {!batal && <Tombol kecil ragam="hantu" className="ml-auto text-bad-700 hover:bg-bad-50" ikon={<Trash2 className="h-4 w-4" />} onClick={() => setHapusBarang(b)}>Hapus</Tombol>}
+                    </div>
                   )}
                   {b.is_active && (
                     <div className="mt-4 flex flex-wrap gap-2 pt-1">
@@ -181,6 +188,7 @@ export function DetailOrder() {
                         <Tombol kecil ragam="kedua" ikon={<CalendarClock className="h-4 w-4" />} onClick={() => setKoreksi(b)}>Koreksi tanggal</Tombol>
                       )}
                       <Tombol kecil ragam="hantu" className="ml-auto" onClick={() => setBatalBarang(b)}>Batalkan barang</Tombol>
+                      <Tombol kecil ragam="hantu" className="text-bad-700 hover:bg-bad-50" ikon={<Trash2 className="h-4 w-4" />} onClick={() => setHapusBarang(b)}>Hapus</Tombol>
                     </div>
                   )}
                 </Kartu>
@@ -235,6 +243,35 @@ export function DetailOrder() {
           const { error } = await db().rpc('batalkan_barang', { p_item: batalBarang.id, p_alasan: alasan })
           if (error) throw error
           beri(`Barang #${batalBarang.item_no} dibatalkan.`)
+          muatUlang()
+        }}
+      />
+      <Konfirmasi
+        terbuka={hapusOrder}
+        tutup={() => setHapusOrder(false)}
+        judul={`Hapus order ${o.order_number}?`}
+        pesan={<p>Order dan semua barangnya pindah ke <strong className="text-navy-900">Sampah</strong> dan tidak tampil atau dihitung lagi. Selama 7 hari masih bisa dipulihkan dari menu Sampah. Setelah itu hilang permanen.</p>}
+        labelYa="Pindahkan ke Sampah"
+        bahaya
+        jalankan={async () => {
+          const { error } = await db().rpc('hapus_order', { p_order: o.id })
+          if (error) throw error
+          beri(`Order ${o.order_number} dipindah ke Sampah. Bisa dipulihkan selama 7 hari.`)
+          navigasi('/order', { replace: true })
+        }}
+      />
+      <Konfirmasi
+        terbuka={hapusBarang !== null}
+        tutup={() => setHapusBarang(null)}
+        judul={hapusBarang ? `Hapus barang #${hapusBarang.item_no}?` : 'Hapus barang?'}
+        pesan={<p>Barang ini pindah ke <strong className="text-navy-900">Sampah</strong> dan tidak dihitung lagi. Cocok untuk barang yang salah ketik. Selama 7 hari masih bisa dipulihkan dari menu Sampah.</p>}
+        labelYa="Pindahkan ke Sampah"
+        bahaya
+        jalankan={async () => {
+          if (!hapusBarang) return
+          const { error } = await db().rpc('hapus_barang', { p_item: hapusBarang.id })
+          if (error) throw error
+          beri(`Barang #${hapusBarang.item_no} dipindah ke Sampah.`)
           muatUlang()
         }}
       />

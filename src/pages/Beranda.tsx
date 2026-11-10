@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, Boxes, CheckCircle2, Clock, Gem, HandHeart, PackageOpen, Plus, ShoppingBag, Users } from 'lucide-react'
@@ -11,7 +11,7 @@ import { useSinkron, useVersiData } from '../sync/SyncProvider'
 import { Kartu, KotakGalat, Pemuat, cx } from '../components/ui/ui'
 import { PilihPeriode, periodeAwal, type NilaiPeriode } from '../components/PilihPeriode'
 import { GrafikBulanan, GrafikKategori, GrafikProduktivitas, GrafikStatus, type TitikBulan, type TitikKategori } from '../components/Grafik'
-import { KursorPemandu } from '../components/animasi/KursorPemandu'
+import { TeksHuruf } from '../components/animasi/TeksHuruf'
 import { LencanaOrder } from './order/DaftarOrder'
 
 interface Statistik {
@@ -42,7 +42,6 @@ export default function Beranda() {
   const hariIni = tglHariIni(zona)
   const [periode, setPeriode] = useState<NilaiPeriode>(() => periodeAwal('bulan', hariIni))
   const versi = useVersiData(['orders', 'order_items', 'craftsmen', 'jewelry_categories'])
-  const wadah = useRef<HTMLDivElement>(null)
   const { dari, sampai } = periode.rentang
   const grafik = rentangGrafik(periode)
 
@@ -90,12 +89,11 @@ export default function Beranda() {
   const NADA: Record<string, string> = { navy: 'bg-navy-900 text-gold-200', ice: 'bg-ice-100 text-navy-800', emas: 'bg-gold-100 text-gold-700', hijau: 'bg-ok-50 text-ok-700' }
 
   return (
-    <div ref={wadah}>
-      <KursorPemandu wadah={wadah} />
+    <div>
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <p className="text-xs font-semibold tracking-[0.25em] text-gold-600">{(pengaturan?.business_name ?? 'INTAN DUA SAUDARA').toUpperCase()}</p>
-          <h1 className="mt-1 font-display text-4xl font-semibold text-navy-900 sm:text-5xl"><span data-sorot>Ringkasan usaha</span></h1>
+          <h1 className="mt-1 font-display text-4xl font-semibold text-navy-900 sm:text-5xl"><TeksHuruf teks="Ringkasan usaha" /></h1>
           <p className="mt-1 text-sm text-ink-soft">
             {formatTanggalPanjang(dari)}{dari !== sampai && <> sampai {formatTanggalPanjang(sampai)}</>}
           </p>
@@ -117,7 +115,7 @@ export default function Beranda() {
                 <Link to={k.ke} className="group block h-full rounded-xl2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
                   <Kartu className="h-full p-4 transition duration-300 group-hover:-translate-y-1 group-hover:border-gold-300 group-hover:shadow-pop sm:p-5">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-xs font-semibold text-ink-muted sm:text-sm"><span data-sorot>{k.label}</span></p>
+                      <p className="text-xs font-semibold text-ink-muted sm:text-sm">{k.label}</p>
                       <span className={cx('rounded-lg p-1.5', NADA[k.nada])}><k.Ikon className="h-4 w-4" aria-hidden /></span>
                     </div>
                     <p className="mt-2 font-display text-4xl font-semibold tabular-nums text-navy-900">{formatAngka(k.nilai)}</p>
@@ -140,21 +138,21 @@ export default function Beranda() {
           <div className="mt-6 grid gap-4 lg:grid-cols-3">
             <motion.div custom={9} variants={masuk} initial="tersembunyi" animate="tampil" className="lg:col-span-2">
               <Kartu className="h-full p-5">
-                <h2 className="font-display text-2xl font-semibold text-navy-900"><span data-sorot>Statistik order bulanan</span></h2>
+                <h2 className="font-display text-2xl font-semibold text-navy-900">Statistik order bulanan</h2>
                 <p className="mb-3 text-xs text-ink-muted">{formatTanggal(grafik.dari)} sampai {formatTanggal(grafik.sampai)}</p>
                 <GrafikBulanan data={data.data.bulanan} />
               </Kartu>
             </motion.div>
             <motion.div custom={10} variants={masuk} initial="tersembunyi" animate="tampil">
               <Kartu className="h-full p-5">
-                <h2 className="mb-2 font-display text-2xl font-semibold text-navy-900"><span data-sorot>Selesai vs proses</span></h2>
+                <h2 className="mb-2 font-display text-2xl font-semibold text-navy-900">Selesai vs proses</h2>
                 <GrafikStatus dalamProses={s.dalam_proses} selesai={s.selesai_belum_diserahkan} diserahkan={s.sudah_diserahkan} />
               </Kartu>
             </motion.div>
             <motion.div custom={11} variants={masuk} initial="tersembunyi" animate="tampil" className="lg:col-span-2">
               <Kartu className="h-full p-5">
                 <div className="mb-3 flex items-end justify-between gap-2">
-                  <h2 className="font-display text-2xl font-semibold text-navy-900"><span data-sorot>Produktivitas pengrajin</span></h2>
+                  <h2 className="font-display text-2xl font-semibold text-navy-900">Produktivitas pengrajin</h2>
                   <Link to="/laporan" className="text-sm font-semibold text-gold-600 hover:text-gold-700">Laporan lengkap</Link>
                 </div>
                 <GrafikProduktivitas data={data.data.prod.filter((p) => p.is_active || p.ditugaskan > 0 || p.selesai_pada_periode > 0)
@@ -163,7 +161,7 @@ export default function Beranda() {
             </motion.div>
             <motion.div custom={12} variants={masuk} initial="tersembunyi" animate="tampil">
               <Kartu className="h-full p-5">
-                <h2 className="mb-2 font-display text-2xl font-semibold text-navy-900"><span data-sorot>Kategori</span></h2>
+                <h2 className="mb-2 font-display text-2xl font-semibold text-navy-900">Kategori</h2>
                 {kategori.length ? <GrafikKategori data={kategori} /> : <p className="py-10 text-center text-sm text-ink-muted">Belum ada barang pada periode ini.</p>}
               </Kartu>
             </motion.div>
@@ -173,7 +171,7 @@ export default function Beranda() {
           <motion.div custom={13} variants={masuk} initial="tersembunyi" animate="tampil" className="mt-6">
             <Kartu>
               <div className="flex items-center justify-between border-b border-ice-200 px-5 py-4">
-                <h2 className="font-display text-2xl font-semibold text-navy-900"><span data-sorot>Order terbaru</span></h2>
+                <h2 className="font-display text-2xl font-semibold text-navy-900">Order terbaru</h2>
                 <Link to="/order" className="inline-flex items-center gap-1 text-sm font-semibold text-gold-600 hover:text-gold-700">Semua order <ArrowRight className="h-4 w-4" /></Link>
               </div>
               {data.data.terbaru.length === 0 ? (
