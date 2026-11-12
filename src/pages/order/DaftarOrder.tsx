@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Plus, Search, Trash2 } from 'lucide-react'
 import { db } from '../../lib/supabase'
 import type { OrderRingkas, StatusOrder } from '../../lib/types'
-import { LABEL_STATUS_ORDER } from '../../lib/types'
+import { LABEL_STATUS_ORDER, statusOrderTampil } from '../../lib/types'
 import { formatAngka, formatTanggal } from '../../lib/format'
 import { normalisasiWa } from '../../lib/wa'
 import { useMuat } from '../../sync/useMuat'
@@ -14,7 +14,7 @@ import { Isian, Kartu, KepalaHalaman, Kosong, KotakGalat, Pemuat, Tombol, cx } f
 
 const PER_HALAMAN = 20
 type Saring = 'semua' | Exclude<StatusOrder, 'kosong'>
-const SARINGAN: Saring[] = ['semua', 'dalam_proses', 'sebagian', 'selesai', 'diserahkan', 'dibatalkan']
+const SARINGAN: Saring[] = ['semua', 'dalam_proses', 'diserahkan', 'dibatalkan']
 
 const GAYA: Record<StatusOrder, string> = {
   dalam_proses: 'bg-ice-100 text-navy-800 ring-ice-300',
@@ -27,8 +27,8 @@ const GAYA: Record<StatusOrder, string> = {
 
 export function LencanaOrder({ status }: { status: StatusOrder }) {
   return (
-    <span className={cx('inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1', GAYA[status])}>
-      {LABEL_STATUS_ORDER[status]}
+    <span className={cx('inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1', GAYA[statusOrderTampil(status)])}>
+      {LABEL_STATUS_ORDER[statusOrderTampil(status)]}
     </span>
   )
 }
@@ -61,7 +61,8 @@ export function DaftarOrder() {
       .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(halaman * PER_HALAMAN, halaman * PER_HALAMAN + PER_HALAMAN - 1)
-    if (saring !== 'semua') q = q.eq('order_status', saring)
+    if (saring === 'dalam_proses') q = q.in('order_status', ['dalam_proses', 'sebagian', 'selesai'])
+    else if (saring !== 'semua') q = q.eq('order_status', saring)
     if (cariAktif) {
       const s = `"%${cariAktif}%"`
       const wa = normalisasiWa(cariAktif)

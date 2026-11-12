@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Grid3x3, LayoutGrid, Pencil, Plus, Power, Search, Trash2 } from 'lucide-react'
+import { CheckCheck, Grid3x3, LayoutGrid, Pencil, Plus, Power, Search, Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { db } from '../../lib/supabase'
 import type { PengrajinRingkas } from '../../lib/types'
@@ -12,6 +12,7 @@ import {
 } from '../../components/ui/ui'
 import { FormPengrajin } from './FormPengrajin'
 import { KonfirmasiHapusPengrajin, KonfirmasiStatusPengrajin } from './AksiPengrajin'
+import { DialogSelesaiPengerjaan } from './SelesaiPengerjaan'
 import { aturTampilanPengrajin, tampilanPengrajin, type TampilanPengrajin } from '../../components/animasi/pengaturanAnimasi'
 
 type Saring = 'semua' | 'aktif' | 'nonaktif'
@@ -29,6 +30,7 @@ export function DaftarPengrajin() {
   const [form, setForm] = useState<{ buka: boolean; p: PengrajinRingkas | null }>({ buka: false, p: null })
   const [ubahStatus, setUbahStatus] = useState<PengrajinRingkas | null>(null)
   const [hapus, setHapus] = useState<PengrajinRingkas | null>(null)
+  const [selesai, setSelesai] = useState<PengrajinRingkas | null>(null)
   const [tampilan, setTampilan] = useState<TampilanPengrajin>(tampilanPengrajin)
   const pilihTampilan = (t: TampilanPengrajin) => { setTampilan(t); aturTampilanPengrajin(t) }
 
@@ -94,8 +96,8 @@ export function DaftarPengrajin() {
           <ul className="grid grid-cols-3 gap-2 sm:gap-3 md:grid-cols-5 xl:grid-cols-9">
             {tampil.map((p, i) => (
               <motion.li key={p.id} initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 420, damping: 22, delay: i * 0.03 }}>
-                <Link to={`/pengrajin/${p.id}`}
-                  className={cx('kaca flex h-full flex-col rounded-xl border border-ice-200 bg-white p-2.5 shadow-card transition-shadow hover:shadow-pop focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400', !p.is_active && 'opacity-60')}>
+                <div className={cx('kaca kartu-pantul flex h-full flex-col rounded-xl border border-ice-200 bg-white p-2.5 shadow-card', !p.is_active && 'opacity-60')}>
+                <Link to={`/pengrajin/${p.id}`} className="flex flex-1 flex-col rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
                   <span className="flex items-center justify-between gap-1">
                     <span className="text-[11px] font-bold tracking-wider text-gold-700">{p.code}</span>
                     <span className={cx('h-2 w-2 shrink-0 rounded-full', p.is_active ? 'bg-ok-600' : 'bg-ink-muted')} title={p.is_active ? 'Aktif' : 'Nonaktif'} />
@@ -107,6 +109,13 @@ export function DaftarPengrajin() {
                     <span><span className="block text-sm font-bold tabular-nums text-ok-600">{formatAngka(p.qty_diserahkan)}</span><span className="block text-[9px] font-semibold text-ink-muted">Serah</span></span>
                   </span>
                 </Link>
+                {p.qty_dalam_proses > 0 && (
+                  <button type="button" onClick={() => setSelesai(p)}
+                    className="mt-2 inline-flex items-center justify-center gap-1 rounded-lg bg-navy-900 px-1.5 py-1.5 text-[10px] font-bold tracking-wide text-white hover:bg-navy-800">
+                    <CheckCheck className="h-3 w-3" aria-hidden /> SELESAI
+                  </button>
+                )}
+                </div>
               </motion.li>
             ))}
           </ul>
@@ -116,7 +125,7 @@ export function DaftarPengrajin() {
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {tampil.map((p) => (
             <li key={p.id}>
-              <Kartu className={cx('flex h-full flex-col p-5 transition-shadow hover:shadow-pop', !p.is_active && 'opacity-80')}>
+              <Kartu className={cx('kartu-pantul flex h-full flex-col p-5', !p.is_active && 'opacity-80')}>
                 <div className="flex items-center justify-between gap-3">
                   <KodePengrajin kode={p.code} />
                   <LencanaAktif aktif={p.is_active} />
@@ -138,6 +147,11 @@ export function DaftarPengrajin() {
                     <dd className="mt-0.5 text-lg font-bold tabular-nums text-ok-600">{formatAngka(p.qty_diserahkan)}</dd>
                   </div>
                 </dl>
+                {p.qty_dalam_proses > 0 && (
+                  <Tombol className="mt-3 w-full" ikon={<CheckCheck className="h-4 w-4" />} onClick={() => setSelesai(p)}>
+                    SELESAI PENGERJAAN ({formatAngka(p.qty_dalam_proses)})
+                  </Tombol>
+                )}
                 <div className="mt-4 flex flex-wrap items-center gap-2 pt-1">
                   <Link
                     to={`/pengrajin/${p.id}`}
@@ -166,6 +180,7 @@ export function DaftarPengrajin() {
       />
       <KonfirmasiStatusPengrajin pengrajin={ubahStatus} tutup={() => setUbahStatus(null)} berubah={muatUlang} />
       <KonfirmasiHapusPengrajin pengrajin={hapus} tutup={() => setHapus(null)} berubah={muatUlang} />
+      <DialogSelesaiPengerjaan pengrajin={selesai} tutup={() => setSelesai(null)} berubah={muatUlang} />
     </>
   )
 }

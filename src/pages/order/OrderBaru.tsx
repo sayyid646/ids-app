@@ -7,11 +7,11 @@ import { db } from '../../lib/supabase'
 import { pesanGalat } from '../../lib/errors'
 import { hariIni as tglHariIni, formatTanggal } from '../../lib/format'
 import { BERAT_MINIMAL_BAWAAN, barangKosong, muatanOrder, skemaOrder, totalBarang, type DataOrder, type MasukanOrder } from '../../lib/orderSchema'
-import { LABEL_STATUS_ORDER, type StatusOrder } from '../../lib/types'
+import { LABEL_STATUS_ORDER, statusOrderTampil, type StatusOrder } from '../../lib/types'
 import { useSinkron } from '../../sync/SyncProvider'
 import { useMaster } from '../../sync/useMaster'
 import { useNotifikasi } from '../../components/ui/Notifikasi'
-import { Bidang, Isian, IsianPanjang, Kartu, KepalaHalaman, KotakGalat, Pemuat, Tombol } from '../../components/ui/ui'
+import { Bidang, Isian, Kartu, KepalaHalaman, KotakGalat, Pemuat, Tombol } from '../../components/ui/ui'
 import { BidangBarang } from './BidangBarang'
 
 interface OrderSama {
@@ -41,7 +41,7 @@ export function PeringatanGanda({ sama }: { sama: OrderSama[] }) {
         <div key={o.id} className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <span>
             Order <strong>{o.order_number}</strong>{o.customer_name ? ` · ${o.customer_name}` : ''} · {o.quantity} barang · {formatTanggal(o.order_date)} ·{' '}
-            {o.cancelled ? 'Dibatalkan' : LABEL_STATUS_ORDER[o.order_status]}
+            {o.cancelled ? 'Dibatalkan' : LABEL_STATUS_ORDER[statusOrderTampil(o.order_status)]}
           </span>
           <span className="flex gap-2">
             <Link to={`/order/${o.id}`} className="font-semibold text-navy-900 underline">Buka</Link>
@@ -57,6 +57,7 @@ export function PeringatanGanda({ sama }: { sama: OrderSama[] }) {
 export function OrderBaru() {
   const { zona, pengaturan } = useSinkron()
   const minBerat = Number(pengaturan?.min_weight_grams) || BERAT_MINIMAL_BAWAAN
+  const beratStandar = { LADY: Number(pengaturan?.silver_lady_grams) || 6, MAN: Number(pengaturan?.silver_man_grams) || 12 }
   const master = useMaster()
   const navigasi = useNavigate()
   const { beri } = useNotifikasi()
@@ -129,9 +130,6 @@ export function OrderBaru() {
                 <Isian id="order_number" inputMode="text" autoComplete="off" placeholder="Contoh: 2574" salah={!!e.order_number || sama.length > 0}
                   {...register('order_number', { onBlur: (ev) => void periksaNomor(ev.target.value) })} />
               </Bidang>
-              <Bidang label="Catatan order" id="notes" galat={e.notes?.message}>
-                <IsianPanjang id="notes" rows={2} className="min-h-[44px]" {...register('notes')} />
-              </Bidang>
             </div>
           </Kartu>
 
@@ -145,7 +143,7 @@ export function OrderBaru() {
                   <Tombol kecil ragam="hantu" ikon={<Trash2 className="h-4 w-4" />} onClick={() => remove(i)}>Hapus</Tombol>
                 )}
               </div>
-              <BidangBarang awalan={`items.${i}.`} master={m} hariIni={hariIni} minBerat={minBerat} />
+              <BidangBarang awalan={`items.${i}.`} master={m} hariIni={hariIni} minBerat={minBerat} beratStandar={beratStandar} />
             </Kartu>
           ))}
           {e.items?.message && <p role="alert" className="text-sm text-bad-600">{e.items.message}</p>}

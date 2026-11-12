@@ -18,7 +18,7 @@ import { useMaster } from '../sync/useMaster'
 import { useNotifikasi } from '../components/ui/Notifikasi'
 import { Bidang, Isian, IsianPanjang, Kartu, KepalaHalaman, LencanaAktif, Pemuat, Tombol, cx } from '../components/ui/ui'
 import { aturMusik, aturSfx, musikAktif, sfxAktif } from '../lib/suara'
-import { animasiPembukaAktif, aturAnimasiPembuka, aturTema, temaAktif, type Tema } from '../components/animasi/pengaturanAnimasi'
+import { animasiPembukaAktif, aturAnimasiPembuka, aturLampuSorot, lampuSorotAktif, aturTema, temaAktif, type Tema } from '../components/animasi/pengaturanAnimasi'
 
 function Bagian({ judul, sub, children }: { judul: string; sub?: string; children: ReactNode }) {
   return (
@@ -38,6 +38,16 @@ const skemaUsaha = z.object({
   timezone: z.string(),
   date_format: z.enum(['dd MMMM yyyy', 'dd/MM/yyyy']),
   receipt_paper: z.enum(['A4', 'A5', '80mm', '58mm']),
+  silver_lady_grams: z.preprocess(
+    (v) => (typeof v === 'string' ? (v.trim() === '' ? undefined : Number(v.replace(',', '.'))) : v),
+    z.number({ required_error: 'Isi perak standar Lady', invalid_type_error: 'Harus angka, contoh 6' })
+      .gt(0, 'Harus lebih dari 0').max(1000, 'Maksimal 1000 gram'),
+  ),
+  silver_man_grams: z.preprocess(
+    (v) => (typeof v === 'string' ? (v.trim() === '' ? undefined : Number(v.replace(',', '.'))) : v),
+    z.number({ required_error: 'Isi perak standar Man', invalid_type_error: 'Harus angka, contoh 6' })
+      .gt(0, 'Harus lebih dari 0').max(1000, 'Maksimal 1000 gram'),
+  ),
   min_weight_grams: z.preprocess(
     (v) => (typeof v === 'string' ? (v.trim() === '' ? undefined : Number(v.replace(',', '.'))) : v),
     z.number({ required_error: 'Isi berat minimal', invalid_type_error: 'Berat harus angka, contoh 6' })
@@ -60,6 +70,8 @@ function FormUsaha({ p }: { p: TPengaturan }) {
     business_whatsapp: p.business_whatsapp ? tampilkanWa(p.business_whatsapp) : '', timezone: p.timezone,
     date_format: p.date_format === 'dd/MM/yyyy' ? 'dd/MM/yyyy' : 'dd MMMM yyyy', receipt_paper: p.receipt_paper,
     min_weight_grams: String(Number(p.min_weight_grams ?? 6)).replace('.', ','),
+    silver_lady_grams: String(Number(p.silver_lady_grams ?? 6)).replace('.', ','),
+    silver_man_grams: String(Number(p.silver_man_grams ?? 12)).replace('.', ','),
     receipt_show_signature: p.receipt_show_signature, receipt_footer: p.receipt_footer,
     wa_template_proses: p.wa_template_proses, wa_template_selesai: p.wa_template_selesai, wa_template_diserahkan: p.wa_template_diserahkan,
   })
@@ -80,7 +92,7 @@ function FormUsaha({ p }: { p: TPengaturan }) {
         business_whatsapp: d.business_whatsapp?.trim() ? normalisasiWa(d.business_whatsapp) : null,
       }).eq('id', 1)
       if (error) throw error
-      reset({ ...d, min_weight_grams: String(d.min_weight_grams).replace('.', ',') })
+      reset({ ...d, min_weight_grams: String(d.min_weight_grams).replace('.', ','), silver_lady_grams: String(d.silver_lady_grams).replace('.', ','), silver_man_grams: String(d.silver_man_grams).replace('.', ',') })
       beri('Pengaturan disimpan.')
     } catch (e) {
       setGalat(pesanGalat(e))
@@ -113,9 +125,15 @@ function FormUsaha({ p }: { p: TPengaturan }) {
         </div>
       </Bagian>
 
-      <Bagian judul="Order" sub="Aturan saat memasukkan order baru.">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Bidang label="Berat minimal per barang (gram)" id="s-berat" galat={e.min_weight_grams?.message}
+      <Bagian judul="Order dan perak" sub="Aturan saat memasukkan order baru.">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Bidang label="Perak standar Lady (gram)" id="s-lady" galat={e.silver_lady_grams?.message} bantuan="Terisi otomatis saat gender LADY dipilih.">
+            <Isian id="s-lady" inputMode="decimal" {...register('silver_lady_grams')} />
+          </Bidang>
+          <Bidang label="Perak standar Man (gram)" id="s-man" galat={e.silver_man_grams?.message} bantuan="Terisi otomatis saat gender MAN dipilih.">
+            <Isian id="s-man" inputMode="decimal" {...register('silver_man_grams')} />
+          </Bidang>
+          <Bidang label="Pemakaian minimal per barang (gram)" id="s-berat" galat={e.min_weight_grams?.message}
             bantuan="Otomatis terisi di setiap barang baru. Berat di bawah angka ini ditolak.">
             <Isian id="s-berat" inputMode="decimal" {...register('min_weight_grams')} />
           </Bidang>
@@ -343,6 +361,7 @@ const PILIHAN_TEMA: { nilai: Tema; judul: string; isi: string; contoh: string }[
 
 function Tampilan() {
   const [pembuka, setPembuka] = useState(animasiPembukaAktif)
+  const [sorot, setSorot] = useState(lampuSorotAktif)
   const [tema, setTema] = useState<Tema>(temaAktif)
   const [musik, setMusik] = useState(musikAktif)
   const [sfx, setSfx] = useState(sfxAktif)
@@ -369,6 +388,10 @@ function Tampilan() {
         <label className="flex items-center justify-between gap-3 rounded-xl bg-ice-50 px-4 py-3">
           <span><span className="block font-semibold text-navy-900">Animasi pembuka</span><span className="text-sm text-ink-soft">Logo IDS di atas kaca, huruf muncul satu per satu saat aplikasi dibuka, sekali per sesi.</span></span>
           <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={pembuka} onChange={(e) => { setPembuka(e.target.checked); aturAnimasiPembuka(e.target.checked) }} />
+        </label>
+        <label className="flex items-center justify-between gap-3 rounded-xl bg-ice-50 px-4 py-3">
+          <span><span className="block font-semibold text-navy-900">Lampu sorot</span><span className="text-sm text-ink-soft">Cahaya kuning hangat yang mengikuti kursor di komputer. Di HP tidak tampil.</span></span>
+          <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={sorot} onChange={(e) => { setSorot(e.target.checked); aturLampuSorot(e.target.checked) }} />
         </label>
         <label className="flex items-center justify-between gap-3 rounded-xl bg-ice-50 px-4 py-3">
           <span><span className="block font-semibold text-navy-900">Efek suara pembuka</span><span className="text-sm text-ink-soft">Denting dan kilau yang mengikuti animasi pembuka. Bila menyala, pembuka menunggu satu ketukan karena HP baru mengizinkan suara setelah layar disentuh.</span></span>

@@ -156,7 +156,7 @@ function LogoMenggaris() {
           </defs>
           {/* 1. isian emas muncul setelah garis selesai */}
           {JALUR_LOGO.map((d, i) => (
-            <motion.path key={`isi${i}`} d={d} fill="url(#pembuka-emas)" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            <motion.path key={`isi${i}`} d={d} fill="#8E6C27" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               transition={{ delay: 1.35 + i * 0.05, duration: 0.35 }} />
           ))}
           {/* 2. garis tepi yang menggambar bentuk logo */}

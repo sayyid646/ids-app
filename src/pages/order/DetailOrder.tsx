@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { DialogSelesaiPengerjaan } from '../pengrajin/SelesaiPengerjaan'
+import { kelompokPengrajin } from '../../lib/nota'
 import { formatBerat } from '../../lib/orderSchema'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Ban, CalendarClock, CheckCheck, MessageCircle, Pencil, Phone, Plus, Printer, RotateCcw, Trash2 } from 'lucide-react'
@@ -36,6 +38,7 @@ export function DetailOrder() {
   const [koreksi, setKoreksi] = useState<Barang | null>(null)
   const [wa, setWa] = useState(false)
   const [hapusOrder, setHapusOrder] = useState(false)
+  const [selesaiPengrajin, setSelesaiPengrajin] = useState<{ id: string; code: string; name: string | null } | null>(null)
   const [hapusBarang, setHapusBarang] = useState<Barang | null>(null)
   const navigasi = useNavigate()
 
@@ -78,6 +81,7 @@ export function DetailOrder() {
   }
   const semua = data.data!.barang
   const aktif = semua.filter((b) => b.is_active)
+  const pengerjaan = kelompokPengrajin(aktif).map((g) => ({ ...g, proses: g.barang.filter((b) => b.status === 'dalam_proses').length }))
   const tampil = tampilBatal ? semua : aktif
   const jumlahBatal = semua.length - aktif.length
   const batal = o.cancelled_at !== null
@@ -130,11 +134,32 @@ export function DetailOrder() {
           <div className="relative mt-5 flex flex-wrap gap-2 border-t border-ice-200 pt-4">
             <Tombol kecil ragam="kedua" ikon={<MessageCircle className="h-4 w-4 text-[#1E8E4E]" />} onClick={() => setWa(true)}>Kirim via WhatsApp</Tombol>
             <Link to={`/cetak/pengrajin/${o.id}`} className="inline-flex h-9 items-center gap-2 rounded-xl border border-gold-300 bg-white px-3 text-sm font-semibold text-navy-900 hover:bg-gold-50">
-              <Printer className="h-4 w-4" /> Nota pengrajin
+              <Printer className="h-4 w-4" /> Nota pembayaran
             </Link>
-            <Link to={`/cetak/serah/${o.id}`} className="inline-flex h-9 items-center gap-2 rounded-xl border border-gold-300 bg-white px-3 text-sm font-semibold text-navy-900 hover:bg-gold-50">
-              <Printer className="h-4 w-4" /> Nota serah terima
-            </Link>
+          </div>
+        )}
+        {!batal && pengerjaan.length > 0 && (
+          <div className="mt-4 border-t border-ice-200 pt-4">
+            <p className="mb-2 text-xs font-semibold tracking-[0.15em] text-ink-muted">PENGERJAAN PER PENGRAJIN</p>
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {pengerjaan.map((g) => (
+                <li key={g.id} className="flex items-center gap-3 rounded-xl border border-ice-200 bg-white/70 px-3 py-2">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-semibold text-navy-900">{g.kode}{g.nama ? ` · ${g.nama}` : ''}</span>
+                    <span className="block text-xs text-ink-soft">
+                      {g.proses > 0 ? `${g.proses} dari ${g.barang.length} barang masih dikerjakan` : `${g.barang.length} barang selesai`}
+                    </span>
+                  </span>
+                  {g.proses > 0 ? (
+                    <Tombol kecil ikon={<CheckCheck className="h-4 w-4" />} onClick={() => setSelesaiPengrajin({ id: g.id, code: g.kode, name: g.nama })}>Selesai pengerjaan</Tombol>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-ok-700"><CheckCheck className="h-4 w-4" /> Selesai</span>
+                  )}
+                  <Link to={`/cetak/pengrajin/${o.id}?pengrajin=${g.id}`} title="Nota pembayaran pengrajin ini"
+                    className="rounded-lg p-1.5 text-navy-800 hover:bg-gold-50"><Printer className="h-4 w-4" /><span className="sr-only">Nota pembayaran {g.kode}</span></Link>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </Kartu>
@@ -247,6 +272,7 @@ export function DetailOrder() {
           muatUlang()
         }}
       />
+      <DialogSelesaiPengerjaan pengrajin={selesaiPengrajin} idOrder={o.id} tutup={() => setSelesaiPengrajin(null)} berubah={muatUlang} />
       <Konfirmasi
         terbuka={hapusOrder}
         tutup={() => setHapusOrder(false)}

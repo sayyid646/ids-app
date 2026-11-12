@@ -1,8 +1,8 @@
 import { Suspense, useEffect, useState, type FormEvent } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import {
-  BarChart3, Gem, History, LayoutDashboard, LogOut, MoreHorizontal, Search, Settings, Trash2, Users, Volume2, VolumeX, WifiOff, X,
+  BarChart3, Coins, Gem, History, LayoutDashboard, LogOut, MoreHorizontal, Receipt, Search, Settings, Trash2, Users, Volume2, VolumeX, WifiOff, X,
 } from 'lucide-react'
 import { useAuth } from '../../auth/AuthProvider'
 import { useSinkron, type StatusSinkron } from '../../sync/SyncProvider'
@@ -11,14 +11,17 @@ import { Logo } from './Logo'
 import { Konfirmasi } from '../ui/Dialog'
 import { Pemuat, cx } from '../ui/ui'
 import { Pembuka } from '../animasi/Pembuka'
+import { LampuSorot } from '../animasi/LampuSorot'
 import { perluPembuka } from '../animasi/pengaturanAnimasi'
 import { aturMusik, hentikanMusik, mainMusik, musikAktif } from '../../lib/suara'
 
 const MENU = [
   { ke: '/beranda', label: 'Beranda', Ikon: LayoutDashboard },
   { ke: '/order', label: 'Order', Ikon: Gem },
-  { ke: '/barang', label: 'Cari barang', Ikon: Search },
+  { ke: '/nota', label: 'Nota', Ikon: Receipt },
   { ke: '/pengrajin', label: 'Pengrajin', Ikon: Users },
+  { ke: '/barang', label: 'Cari barang', Ikon: Search },
+  { ke: '/perak', label: 'Stok perak', Ikon: Coins },
   { ke: '/laporan', label: 'Laporan', Ikon: BarChart3 },
   { ke: '/riwayat', label: 'Riwayat', Ikon: History },
   { ke: '/sampah', label: 'Sampah', Ikon: Trash2 },
@@ -85,6 +88,7 @@ export function AppLayout() {
   const lokasi = useLocation()
   const [tanyaKeluar, setTanyaKeluar] = useState(false)
   const [lainnya, setLainnya] = useState(false)
+  const gerakHalus = useReducedMotion() ?? false
   const [pembuka, setPembuka] = useState(perluPembuka)
   const kunciHalaman = lokasi.pathname.split('/').slice(0, 2).join('/')
 
@@ -99,7 +103,8 @@ export function AppLayout() {
   const ubahMusik = (v: boolean) => { aturMusik(v); setMusik(v) }
 
   return (
-    <div className="latar-app min-h-dvh bg-ice-50 lg:pl-64">
+    <div className="latar-app min-h-dvh bg-ice-50 lg:pl-64 print:pl-0">
+      <LampuSorot />
       {pembuka && <Pembuka selesai={() => setPembuka(false)} />}
 
       {/* Sidebar komputer */}
@@ -161,8 +166,17 @@ export function AppLayout() {
         </div>
       )}
 
-      <main className="mx-auto w-full max-w-7xl px-4 pb-28 pt-6 sm:px-6 lg:px-10 lg:pb-12 lg:pt-8 print:p-0">
-        <motion.div key={kunciHalaman} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
+      <main className="mx-auto w-full max-w-7xl overflow-x-clip px-4 pb-28 pt-6 sm:px-6 lg:px-10 lg:pb-12 lg:pt-8 print:overflow-visible print:p-0">
+        {/* Transisi halaman sinematik: halaman baru masuk dari sedikit lebih besar dan buram, lalu tajam. */}
+        <motion.div
+          key={kunciHalaman}
+          style={{ transformOrigin: '50% 0%' }}
+          initial={gerakHalus ? { opacity: 0 } : { opacity: 0, scale: 1.08, filter: 'blur(10px)' }}
+          animate={gerakHalus
+            ? { opacity: 1 }
+            : { opacity: 1, scale: 1, filter: 'blur(0px)', transitionEnd: { filter: 'none' } }}
+          transition={{ duration: gerakHalus ? 0.2 : 0.8, ease: [0.645, 0.045, 0.355, 1], opacity: { duration: gerakHalus ? 0.2 : 0.5, ease: 'easeOut' } }}
+        >
           <Suspense fallback={<Pemuat />}>
             <Outlet />
           </Suspense>
@@ -203,7 +217,7 @@ export function AppLayout() {
                 <p className="truncate text-sm text-ink-soft">{email}</p>
                 <button type="button" aria-label="Tutup" onClick={() => setLainnya(false)} className="rounded-full p-2 hover:bg-ice-100"><X className="h-5 w-5" /></button>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {MENU_LAIN.map(({ ke, label, Ikon }) => (
                   <NavLink key={ke} to={ke} onClick={() => setLainnya(false)}
                     className={({ isActive }) => cx('flex flex-col items-center gap-2 rounded-2xl border p-4 text-sm font-semibold', isActive ? 'border-gold-400 bg-gold-50 text-navy-900' : 'border-ice-200 text-navy-800')}>

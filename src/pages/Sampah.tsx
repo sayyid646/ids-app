@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Gem, Package, RotateCcw, Trash2, UserRound } from 'lucide-react'
+import { Coins, FileText, Gem, Package, RotateCcw, Trash2, UserRound } from 'lucide-react'
 import { db } from '../lib/supabase'
 import { formatTanggalWaktu } from '../lib/format'
 import { useMuat } from '../sync/useMuat'
@@ -11,7 +11,7 @@ import { pesanGalat } from '../lib/errors'
 import { Kartu, KepalaHalaman, KodePengrajin, Kosong, KotakGalat, Pemuat, Tombol } from '../components/ui/ui'
 
 interface IsiSampah {
-  jenis: 'order' | 'barang' | 'pengrajin'
+  jenis: 'order' | 'barang' | 'pengrajin' | 'pembelian' | 'nota'
   id: string
   order_id: string | null
   order_number: string | null
@@ -23,6 +23,9 @@ interface IsiSampah {
   deleted_at: string
   hilang_pada: string
 }
+
+const IKON = { order: Gem, barang: Package, pengrajin: UserRound, pembelian: Coins, nota: FileText }
+const LABEL_JENIS = { order: 'ORDER', barang: 'BARANG', pengrajin: 'PENGRAJIN', pembelian: 'PERAK', nota: 'NOTA' }
 
 /** Sisa waktu sebelum data hilang permanen, dalam kata-kata. */
 function sisaWaktu(hilang: string): string {
@@ -36,7 +39,7 @@ function sisaWaktu(hilang: string): string {
 export default function Sampah() {
   const { zona } = useSinkron()
   const { beri } = useNotifikasi()
-  const versi = useVersiData(['orders', 'order_items', 'craftsmen'])
+  const versi = useVersiData(['orders', 'order_items', 'craftsmen', 'silver_purchases', 'manual_notes'])
   const [proses, setProses] = useState<string | null>(null)
 
   const data = useMuat(async () => {
@@ -50,7 +53,13 @@ export default function Sampah() {
     try {
       const { error } = await db().rpc('pulihkan_sampah', { p_jenis: s.jenis, p_id: s.id })
       if (error) throw error
-      beri(s.jenis === 'order' ? `Order ${s.order_number} dipulihkan.` : s.jenis === 'pengrajin' ? `Pengrajin ${s.craftsman_code} dipulihkan (masih nonaktif, aktifkan bila perlu).` : `Barang #${s.item_no} order ${s.order_number} dipulihkan.`)
+      beri({
+        order: `Order ${s.order_number} dipulihkan.`,
+        pengrajin: `Pengrajin ${s.craftsman_code} dipulihkan (masih nonaktif, aktifkan bila perlu).`,
+        barang: `Barang #${s.item_no} order ${s.order_number} dipulihkan.`,
+        pembelian: `Pembelian perak ${s.craftsman_code} dipulihkan.`,
+        nota: `Nota No. ${s.order_number} dipulihkan.`,
+      }[s.jenis])
       data.muatUlang()
     } catch (e) {
       beri(pesanGalat(e), 'galat')
@@ -63,12 +72,12 @@ export default function Sampah() {
     <>
       <KepalaHalaman
         judul="Sampah"
-        sub="Order, barang, dan pengrajin yang dihapus disimpan di sini selama 7 hari. Setelah 7 hari hilang permanen dan tidak bisa dipulihkan."
+        sub="Order, barang, pengrajin, pembelian perak, dan nota yang dihapus disimpan di sini selama 7 hari. Setelah 7 hari hilang permanen dan tidak bisa dipulihkan."
       />
       {data.memuat && !data.data && <Pemuat />}
       {data.galat && !data.data && <KotakGalat pesan={data.galat} ulangi={data.muatUlang} />}
       {data.data && data.data.length === 0 && (
-        <Kosong judul="Sampah kosong" isi="Belum ada order, barang, atau pengrajin yang dihapus dalam 7 hari terakhir." />
+        <Kosong judul="Sampah kosong" isi="Belum ada data yang dihapus dalam 7 hari terakhir." />
       )}
       {data.data && data.data.length > 0 && (
         <ul className="grid gap-3 lg:grid-cols-2">
@@ -77,19 +86,23 @@ export default function Sampah() {
               <motion.li key={s.jenis + s.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }}>
                 <Kartu className="flex h-full items-start gap-4 p-4">
                   <span className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ice-100 text-navy-800" aria-hidden>
-                    {s.jenis === 'order' ? <Gem className="h-5 w-5" /> : s.jenis === 'pengrajin' ? <UserRound className="h-5 w-5" /> : <Package className="h-5 w-5" />}
+                    {(() => { const Ikon = IKON[s.jenis]; return <Ikon className="h-5 w-5" /> })()}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold tracking-[0.15em] text-ink-muted">{s.jenis === 'order' ? 'ORDER' : s.jenis === 'pengrajin' ? 'PENGRAJIN' : `BARANG #${s.item_no}`}</p>
+                    <p className="text-xs font-semibold tracking-[0.15em] text-ink-muted">{s.jenis === 'barang' ? `BARANG #${s.item_no}` : LABEL_JENIS[s.jenis]}</p>
                     <p className="mt-0.5 font-semibold text-navy-900">
-                      {s.jenis === 'order'
-                        ? <>No. {s.order_number}{s.customer_name ? ` · ${s.customer_name}` : ''}</>
-                        : s.jenis === 'pengrajin'
-                        ? <>{s.craftsman_code} · {s.customer_name ?? 'Nama belum diisi'}</>
-                        : <>{s.category_name} · <Link to={`/order/${s.order_id}`} className="underline-offset-2 hover:underline">order {s.order_number}</Link></>}
+                      {s.jenis === 'order' && <>No. {s.order_number}{s.customer_name ? ` · ${s.customer_name}` : ''}</>}
+                      {s.jenis === 'pengrajin' && <>{s.craftsman_code} · {s.customer_name ?? 'Nama belum diisi'}</>}
+                      {s.jenis === 'barang' && <>{s.category_name} · <Link to={`/order/${s.order_id}`} className="underline-offset-2 hover:underline">order {s.order_number}</Link></>}
+                      {s.jenis === 'pembelian' && <>Pembelian perak {s.jumlah_barang} g · {s.craftsman_code}</>}
+                      {s.jenis === 'nota' && <>Nota No. {String(s.order_number ?? '').padStart(4, '0')}{s.customer_name ? ` · ${s.customer_name}` : ''}</>}
                     </p>
                     <p className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-soft">
-                      {s.jenis === 'order' ? `${s.jumlah_barang} barang` : s.jenis === 'pengrajin' ? `${s.jumlah_barang} barang tercatat, tetap tersimpan` : <>{s.customer_name} {s.craftsman_code && <KodePengrajin kode={s.craftsman_code} />}</>}
+                      {s.jenis === 'order' && `${s.jumlah_barang} barang`}
+                      {s.jenis === 'pengrajin' && `${s.jumlah_barang} barang tercatat, tetap tersimpan`}
+                      {s.jenis === 'barang' && <>{s.customer_name} {s.craftsman_code && <KodePengrajin kode={s.craftsman_code} />}</>}
+                      {s.jenis === 'pembelian' && `Tanggal beli ${s.customer_name ?? '-'}`}
+                      {s.jenis === 'nota' && `${s.jumlah_barang} baris`}
                     </p>
                     <p className="mt-2 text-xs text-ink-muted">
                       Dihapus {formatTanggalWaktu(s.deleted_at, zona)} · <span className="font-semibold text-bad-700">hilang {sisaWaktu(s.hilang_pada)}</span>

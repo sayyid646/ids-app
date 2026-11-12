@@ -61,3 +61,11 @@ export function aturTema(t: Tema): void {
 export type TampilanPengrajin = 'kartu' | 'ringkas'
 export const tampilanPengrajin = (): TampilanPengrajin => (baca(KUNCI_TAMPILAN_PENGRAJIN) === 'ringkas' ? 'ringkas' : 'kartu')
 export const aturTampilanPengrajin = (t: TampilanPengrajin) => tulis(KUNCI_TAMPILAN_PENGRAJIN, t)
+
+/** Lampu sorot kuning hangat yang mengikuti kursor (hanya di perangkat bertetikus). */
+const KUNCI_LAMPU = 'ids-lampu-sorot'
+export const lampuSorotAktif = () => baca(KUNCI_LAMPU) !== 'mati'
+export const aturLampuSorot = (aktif: boolean) => {
+  tulis(KUNCI_LAMPU, aktif ? 'hidup' : 'mati')
+  window.dispatchEvent(new Event('ids-lampu-sorot'))
+}

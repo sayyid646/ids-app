@@ -120,3 +120,22 @@ describe('formulir order', () => {
     expect(totalBarang([{ quantity: 2 }, { quantity: '3' }, { quantity: '' }])).toBe(5)
   })
 })
+
+import { akhirBulan, bacaRupiah, formatTanggalHari, ketikRupiah } from './format'
+describe('format nota dan perak', () => {
+  it('nama hari benar', () => {
+    expect(formatTanggalHari('2026-11-13')).toBe('Jumat, 13 November 2026')
+    expect(formatTanggalHari('2026-05-02')).toBe('Sabtu, 02 Mei 2026')
+  })
+  it('akhir bulan termasuk kabisat', () => {
+    expect(akhirBulan('2026-02-10')).toBe('2026-02-28')
+    expect(akhirBulan('2028-02-01')).toBe('2028-02-29')
+    expect(akhirBulan('2026-12-05')).toBe('2026-12-31')
+  })
+  it('membaca dan menulis rupiah', () => {
+    expect(bacaRupiah('Rp 150.000')).toBe(150000)
+    expect(bacaRupiah('')).toBe(null)
+    expect(ketikRupiah('0150000')).toBe('150.000')
+    expect(ketikRupiah('abc')).toBe('')
+  })
+})

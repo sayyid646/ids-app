@@ -4,7 +4,7 @@ import { Minus, Plus } from 'lucide-react'
 import type { DataMaster } from '../../sync/useMaster'
 import { labelPengrajin } from '../../sync/useMaster'
 import { formatBulan } from '../../lib/format'
-import { Bidang, Isian, IsianPanjang, cx } from '../../components/ui/ui'
+import { Bidang, Isian, cx } from '../../components/ui/ui'
 
 interface Props {
   /** Awalan nama isian, mis. 'items.0.' untuk barang di dalam order, atau '' untuk satu barang. */
@@ -14,15 +14,17 @@ interface Props {
   tampilJumlah?: boolean
   /** Berat minimal per barang (gram) dari Pengaturan. */
   minBerat: number
+  /** Pemakaian perak standar per gender (gram). Terisi otomatis saat gender dipilih, selama berat belum diubah manual. */
+  beratStandar?: { LADY: number; MAN: number }
 }
 
 const KELAS_PILIH =
   'h-11 w-full rounded-xl border bg-white px-3 text-[15px] text-ink focus:outline-none focus:ring-2 focus:ring-gold-300 focus:border-gold-400'
 
 /** Isian satu barang: pengrajin, kategori, gender, jumlah, tanggal, deskripsi. Dipakai di semua formulir barang. */
-export function BidangBarang({ awalan, master, hariIni, tampilJumlah = true, minBerat }: Props) {
+export function BidangBarang({ awalan, master, hariIni, tampilJumlah = true, minBerat, beratStandar }: Props) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { register, control, setValue, formState } = useFormContext<any>()
+  const { register, control, setValue, formState, getFieldState } = useFormContext<any>()
   const n = (k: string) => `${awalan}${k}`
   const id = (k: string) => `${awalan.replace(/\./g, '-')}${k}`
   const galat = (k: string): string | undefined => get(formState.errors, n(k))?.message
@@ -31,6 +33,14 @@ export function BidangBarang({ awalan, master, hariIni, tampilJumlah = true, min
   const kategoriTerpilih = useWatch({ control, name: n('category_id') }) as string
   const tanggal = useWatch({ control, name: n('assigned_date') }) as string
   const bulanManual = useWatch({ control, name: n('production_month') }) as string | undefined
+  const gender = useWatch({ control, name: n('gender') }) as 'LADY' | 'MAN' | undefined
+  // Gender dipilih: isi pemakaian perak standar (Lady 6 g, Man 12 g), kecuali beratnya sudah diketik sendiri.
+  useEffect(() => {
+    if (!beratStandar || (gender !== 'LADY' && gender !== 'MAN')) return
+    if (getFieldState(n('weight_grams'), formState).isDirty) return
+    setValue(n('weight_grams'), String(beratStandar[gender]).replace('.', ','), { shouldValidate: formState.isSubmitted })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gender])
   const [koreksiBulan, setKoreksiBulan] = useState(Boolean(bulanManual))
   useEffect(() => {
     if (bulanManual) setKoreksiBulan(true)
@@ -157,8 +167,10 @@ export function BidangBarang({ awalan, master, hariIni, tampilJumlah = true, min
           }
           const label = minBerat.toLocaleString('id-ID', { maximumFractionDigits: 2 })
           return (
-            <Bidang label={tampilJumlah ? 'Berat per barang (gram)' : 'Berat barang (gram)'} id={id('weight_grams')} wajib galat={galat('weight_grams')}
-              bantuan={`Minimal ${label} gram (bisa diubah di Pengaturan). Sudah terisi otomatis, tinggal disesuaikan bila perlu.`}>
+            <Bidang label={tampilJumlah ? 'Pemakaian perak per barang (gram)' : 'Pemakaian perak (gram)'} id={id('weight_grams')} wajib galat={galat('weight_grams')}
+              bantuan={beratStandar
+                ? `Terisi otomatis: Lady ${beratStandar.LADY.toLocaleString('id-ID')} g, Man ${beratStandar.MAN.toLocaleString('id-ID')} g. Bisa diubah. Minimal ${label} g. Tercatat sebagai pemakaian perak pengrajin.`
+                : `Minimal ${label} gram (bisa diubah di Pengaturan). Tercatat sebagai pemakaian perak pengrajin.`}>
               <div className={cx('flex h-11 max-w-xs items-stretch overflow-hidden rounded-xl border bg-white', galat('weight_grams') ? 'border-bad-600' : 'border-ice-300')}>
                 <button type="button" aria-label="Kurangi 0,5 gram" className="px-4 text-navy-900 hover:bg-ice-100 disabled:opacity-40"
                   disabled={sah && angka <= minBerat} onClick={() => geser(-0.5)}>
@@ -220,12 +232,6 @@ export function BidangBarang({ awalan, master, hariIni, tampilJumlah = true, min
         )}
       </div>
 
-      <Bidang label="Deskripsi barang" id={id('description')} galat={galat('description')}>
-        <IsianPanjang id={id('description')} rows={2} placeholder="Contoh: cincin batu safir, ukuran 16" {...register(n('description'))} />
-      </Bidang>
-      <Bidang label="Catatan untuk pengrajin" id={id('notes')} galat={galat('notes')}>
-        <IsianPanjang id={id('notes')} rows={2} {...register(n('notes'))} />
-      </Bidang>
     </div>
   )
 }

@@ -541,9 +541,9 @@ reset role;
 \echo
 \echo '== T23 Sinkronisasi, penyimpanan foto, riwayat'
 do $$ begin
-  perform tes.sama('6 tabel ikut Realtime',
+  perform tes.sama('8 tabel ikut Realtime',
     (select string_agg(tablename, ',' order by tablename) from pg_publication_tables where pubname = 'supabase_realtime'),
-    'activity_logs,app_settings,craftsmen,jewelry_categories,order_items,orders');
+    'activity_logs,app_settings,craftsmen,jewelry_categories,manual_notes,order_items,orders,silver_purchases');
   perform tes.sama('bucket foto privat', (select string_agg(id || ':' || public, ',' order by id) from storage.buckets), 'foto-barang:false,identitas:false');
   perform tes.sama('semua riwayat punya pelaku', (select count(*) from public.activity_logs where actor_email is null)::text, '0');
   perform tes.sama('riwayat admin tercatat atas nama admin',
@@ -706,6 +706,102 @@ begin
   perform public.hapus_pengrajin(p);
   insert into public.craftsmen (code, name) values ('IDS 009', 'Pengganti');
   perform tes.gagal('pulihkan pengrajin ber-ID kembar ditolak', format($q$select public.pulihkan_sampah('pengrajin', %L)$q$, p), 'sudah dipakai');
+end $$;
+reset role;
+
+\echo
+\echo '== T26 Stok perak per pengrajin dan nota manual'
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false);
+do $$
+declare v uuid; p uuid; i1 uuid; i2 uuid; b1 uuid; n uuid; no1 int; r record;
+begin
+  perform tes.sama('perak standar lady 6 dan man 12',
+    (select trim_scale(silver_lady_grams) || '/' || trim_scale(silver_man_grams) from public.app_settings), '6/12');
+  insert into public.craftsmen (code, name) values ('IDS 020', 'Uji Perak') returning id into p;
+  perform set_config('tes.pengrajin_perak', p::text, false);
+
+  -- pembelian
+  insert into public.silver_purchases (craftsman_id, purchase_date, grams) values (p, '2026-10-20', 50);
+  insert into public.silver_purchases (craftsman_id, purchase_date, grams) values (p, '2026-11-02', 100) returning id into b1;
+  insert into public.silver_purchases (craftsman_id, purchase_date, grams) values (p, '2026-11-03', 50);
+  perform tes.gagal('pembelian 30 gram ditolak', format('insert into public.silver_purchases (craftsman_id, grams) values (%L, 30)', p), 'check');
+  perform tes.gagal('pembelian 75 gram ditolak (bukan kelipatan 50)', format('insert into public.silver_purchases (craftsman_id, grams) values (%L, 75)', p), 'check');
+  perform tes.gagal('tanggal pembelian masa depan ditolak',
+    format($q$insert into public.silver_purchases (craftsman_id, purchase_date, grams) values (%L, public.hari_ini() + 1, 50)$q$, p), 'melewati hari ini');
+  perform tes.gagal('pembelian untuk pengrajin tak dikenal ditolak',
+    $q$insert into public.silver_purchases (craftsman_id, grams) values ('00000000-0000-0000-0000-000000000999', 50)$q$, 'tidak ditemukan|foreign key');
+
+  -- pemakaian dari order: Lady 6 + Man 12 pada 2 November
+  v := public.buat_order(jsonb_build_object('order_number', '9900', 'items', jsonb_build_array(
+        jsonb_build_object('craftsman_id', p, 'category_id', tes.k('HIGH'), 'gender', 'LADY', 'assigned_date', '2026-11-02', 'weight_grams', 6),
+        jsonb_build_object('craftsman_id', p, 'category_id', tes.k('HIGH'), 'gender', 'MAN',  'assigned_date', '2026-11-02', 'weight_grams', 12))));
+  i1 := tes.barang(v, 1); i2 := tes.barang(v, 2);
+  perform tes.sama('pemakaian tercatat per tanggal dan order',
+    (select string_agg(tanggal || ' ' || order_number || '#' || item_no || ' ' || gender || ' ' || trim_scale(gram), ', ' order by item_no)
+       from public.v_pemakaian_perak where craftsman_id = p), '2026-11-02 9900#1 LADY 6, 2026-11-02 9900#2 MAN 12');
+
+  select * into r from public.laporan_perak('2026-11-15') where craftsman_id = p;
+  perform tes.sama('laporan November: stok awal 50', trim_scale(r.stok_awal)::text, '50');
+  perform tes.sama('laporan November: beli 150', trim_scale(r.beli_bulan)::text, '150');
+  perform tes.sama('laporan November: pakai 18', trim_scale(r.pakai_bulan)::text, '18');
+  perform tes.sama('laporan November: sisa akhir bulan 182', trim_scale(r.stok_akhir)::text, '182');
+  perform tes.sama('stok sekarang = 200 - 18', trim_scale(r.stok_sekarang)::text, '182');
+  select * into r from public.laporan_perak('2026-10-01') where craftsman_id = p;
+  perform tes.sama('laporan Oktober: beli 50, pakai 0, sisa 50',
+    trim_scale(r.beli_bulan) || '/' || trim_scale(r.pakai_bulan) || '/' || trim_scale(r.stok_akhir), '50/0/50');
+  perform tes.sama('stok pengrajin lain tidak tercampur',
+    (select count(*) from public.v_pembelian_perak where craftsman_id <> p and gram in (100))::text, '0');
+
+  -- perubahan berat, batal, hapus ikut mengubah pemakaian (tanpa pencatatan ganda)
+  update public.order_items set weight_grams = 7.5 where id = i1;
+  perform tes.sama('ubah berat mengubah pemakaian', (select trim_scale(pakai_bulan)::text from public.laporan_perak('2026-11-01') where craftsman_id = p), '19.5');
+  perform public.batalkan_barang(i2, 'uji batal');
+  perform tes.sama('barang batal tidak dihitung', (select trim_scale(pakai_bulan)::text from public.laporan_perak('2026-11-01') where craftsman_id = p), '7.5');
+  perform public.hapus_barang(i1);
+  perform tes.sama('barang di Sampah tidak dihitung', (select trim_scale(pakai_bulan)::text from public.laporan_perak('2026-11-01') where craftsman_id = p), '0');
+  perform public.pulihkan_sampah('barang', i1);
+
+  -- selesai pengerjaan tidak mengubah pemakaian
+  perform public.ubah_status(array[i1], 'selesai');
+  perform tes.sama('selesai pengerjaan: status selesai', (select status::text from public.order_items where id = i1), 'selesai');
+  perform tes.sama('selesai pengerjaan tidak mengubah pemakaian', (select trim_scale(pakai_bulan)::text from public.laporan_perak('2026-11-01') where craftsman_id = p), '7.5');
+
+  -- hapus dan pulihkan pembelian
+  perform public.hapus_pembelian_perak(b1);
+  perform tes.sama('pembelian terhapus tidak dihitung', (select trim_scale(beli_bulan)::text from public.laporan_perak('2026-11-01') where craftsman_id = p), '50');
+  perform tes.sama('pembelian ada di Sampah', (select jenis || ':' || jumlah_barang || ':' || craftsman_code from public.v_sampah where id = b1), 'pembelian:100:IDS 020');
+  perform public.pulihkan_sampah('pembelian', b1);
+  perform tes.sama('pembelian dipulihkan', (select trim_scale(beli_bulan)::text from public.laporan_perak('2026-11-01') where craftsman_id = p), '150');
+  perform tes.sama('riwayat pembelian perak', (select string_agg(action, ',' order by created_at) from public.activity_logs where entity_id = b1),
+    'perak_dibeli,perak_dihapus,perak_dipulihkan');
+
+  -- nota manual
+  insert into public.manual_notes (recipient, lines, total) values ('  Toko Uji ',
+    '[{"banyak": 2, "nama": "Cincin perak", "harga": 150000, "jumlah": 1}, {"banyak": 1, "nama": "Liontin", "harga": 50000}]', 999)
+    returning id, note_no into n, no1;
+  perform tes.sama('total nota dihitung otomatis (total palsu diabaikan)', (select trim_scale(total)::text from public.manual_notes where id = n), '350000');
+  perform tes.sama('jumlah per baris dihitung otomatis', (select trim_scale((lines -> 0 ->> 'jumlah')::numeric)::text from public.manual_notes where id = n), '300000');
+  perform tes.sama('nama penerima dirapikan', (select recipient from public.manual_notes where id = n), 'Toko Uji');
+  perform tes.gagal('harga minus ditolak', $q$insert into public.manual_notes (lines) values ('[{"banyak": 1, "nama": "x", "harga": -5}]')$q$, 'minus');
+  perform tes.gagal('harga bukan angka ditolak', $q$insert into public.manual_notes (lines) values ('[{"banyak": 1, "nama": "x", "harga": "abc"}]')$q$, 'angka');
+  update public.manual_notes set lines = '[{"banyak": 3, "nama": "Gelang", "harga": 100000}]', note_no = 999 where id = n;
+  perform tes.sama('ubah nota: total baru, nomor tetap', (select trim_scale(total) || '/' || (note_no = no1) from public.manual_notes where id = n), '300000/true');
+  perform public.hapus_nota(n);
+  perform tes.sama('nota ada di Sampah', (select jenis from public.v_sampah where id = n), 'nota');
+  perform public.pulihkan_sampah('nota', n);
+  perform tes.gagal('hapus permanen nota ditolak', format('delete from public.manual_notes where id = %L', n), 'permission denied|tidak boleh');
+end $$;
+reset role;
+
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', false);
+do $$ begin
+  perform tes.sama('bukan admin: pembelian perak tidak terlihat', (select count(*) from public.silver_purchases)::text, '0');
+  perform tes.sama('bukan admin: nota tidak terlihat', (select count(*) from public.manual_notes)::text, '0');
+  perform tes.gagal('bukan admin: tidak bisa membeli perak',
+    $q$insert into public.silver_purchases (craftsman_id, grams) values (current_setting('tes.pengrajin_perak')::uuid, 50)$q$, 'row-level security|bukan administrator|violates|tidak ditemukan');
+  perform tes.sama('bukan admin: laporan perak kosong', (select count(*) from public.laporan_perak('2026-11-01'))::text, '0');
 end $$;
 reset role;
 

@@ -10,6 +10,7 @@ migrasi: 20261110000700_realtime_storage.sql
 migrasi: 20261110000800_hak_akses.sql
 migrasi: 20261110000900_sampah_a5.sql
 migrasi: 20261112001000_berat_pengrajin.sql
+migrasi: 20261113001100_perak_nota.sql
 
 == Persiapan akun
                     jadikan_admin                     
@@ -293,7 +294,7 @@ psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:538: NOTICE:  ok  baris pengaturan kedua ditolak (ditolak: permission denied for table app_settings)
 
 == T23 Sinkronisasi, penyimpanan foto, riwayat
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  6 tabel ikut Realtime
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  8 tabel ikut Realtime
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  bucket foto privat
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  semua riwayat punya pelaku
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  riwayat admin tercatat atas nama admin
@@ -385,7 +386,53 @@ psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  riwayat pengrajin_dipulihkan
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  pulihkan pengrajin ber-ID kembar ditolak (ditolak: ID IDS 009 sudah dipakai pengrajin lain. Ubah dulu ID pengrajin yang lain itu.)
 
+== T26 Stok perak per pengrajin dan nota manual
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-00000000000a
+(1 row)
+
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  perak standar lady 6 dan man 12
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  pembelian 30 gram ditolak (ditolak: new row for relation "silver_purchases" violates check constraint "silver_purcha)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  pembelian 75 gram ditolak (bukan kelipatan 50) (ditolak: new row for relation "silver_purchases" violates check constraint "silver_purcha)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  tanggal pembelian masa depan ditolak (ditolak: Tanggal pembelian tidak boleh melewati hari ini.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  pembelian untuk pengrajin tak dikenal ditolak (ditolak: Pengrajin tidak ditemukan atau sudah dihapus.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  pemakaian tercatat per tanggal dan order
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  laporan November: stok awal 50
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  laporan November: beli 150
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  laporan November: pakai 18
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  laporan November: sisa akhir bulan 182
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  stok sekarang = 200 - 18
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  laporan Oktober: beli 50, pakai 0, sisa 50
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  stok pengrajin lain tidak tercampur
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  ubah berat mengubah pemakaian
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  barang batal tidak dihitung
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  barang di Sampah tidak dihitung
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  selesai pengerjaan: status selesai
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  selesai pengerjaan tidak mengubah pemakaian
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  pembelian terhapus tidak dihitung
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  pembelian ada di Sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  pembelian dipulihkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  riwayat pembelian perak
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  total nota dihitung otomatis (total palsu diabaikan)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  jumlah per baris dihitung otomatis
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  nama penerima dirapikan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  harga minus ditolak (ditolak: Banyaknya dan harga tidak boleh minus.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  harga bukan angka ditolak (ditolak: Banyaknya dan harga pada nota harus berupa angka.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  ubah nota: total baru, nomor tetap
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  nota ada di Sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:794: NOTICE:  ok  hapus permanen nota ditolak (ditolak: permission denied for table manual_notes)
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-00000000000b
+(1 row)
+
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:805: NOTICE:  ok  bukan admin: pembelian perak tidak terlihat
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:805: NOTICE:  ok  bukan admin: nota tidak terlihat
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:805: NOTICE:  ok  bukan admin: tidak bisa membeli perak (ditolak: Pengrajin tidak ditemukan atau sudah dihapus.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:805: NOTICE:  ok  bukan admin: laporan perak kosong
+
 == SEMUA TES LULUS
 menjalankan ulang semua migrasi (harus aman diulang)...
- ulang: pengrajin=11 kategori=8
+ ulang: pengrajin=12 kategori=8
 

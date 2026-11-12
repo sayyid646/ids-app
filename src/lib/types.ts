@@ -85,6 +85,8 @@ export interface Pengaturan {
   date_format: string
   receipt_paper: 'A4' | 'A5' | '80mm' | '58mm'
   min_weight_grams: number
+  silver_lady_grams: number
+  silver_man_grams: number
   receipt_show_signature: boolean
   receipt_footer: string
   wa_template_proses: string
@@ -122,6 +124,14 @@ export const LABEL_AKSI: Record<string, string> = {
   pengrajin_diaktifkan: 'Pengrajin diaktifkan',
   pengrajin_dinonaktifkan: 'Pengrajin dinonaktifkan',
   pengrajin_dihapus: 'Pengrajin dipindah ke Sampah',
+  perak_dibeli: 'Pembelian perak dicatat',
+  perak_diubah: 'Pembelian perak diubah',
+  perak_dihapus: 'Pembelian perak dipindah ke Sampah',
+  perak_dipulihkan: 'Pembelian perak dipulihkan',
+  nota_dibuat: 'Nota dibuat',
+  nota_diubah: 'Nota diubah',
+  nota_dihapus: 'Nota dipindah ke Sampah',
+  nota_dipulihkan: 'Nota dipulihkan',
   pengrajin_dipulihkan: 'Pengrajin dipulihkan dari Sampah',
   pengrajin_diarsipkan: 'Pengrajin diarsipkan',
   kategori_ditambahkan: 'Kategori ditambahkan',
@@ -160,6 +170,15 @@ export interface OrderRingkas {
   craftsman_codes: string | null
   craftsman_names: string | null
   category_names: string | null
+}
+
+/**
+ * Status order yang ditampilkan. "Sebagian Selesai" dan "Selesai Dikerjakan" tidak ditampilkan lagi
+ * di kolom order: order tetap "Dalam Proses" sampai semua barangnya diserahkan.
+ * (Status selesai per barang dan per pengrajin tetap ada.)
+ */
+export function statusOrderTampil(s: StatusOrder): StatusOrder {
+  return s === 'sebagian' || s === 'selesai' ? 'dalam_proses' : s
 }
 
 export const LABEL_STATUS_ORDER: Record<StatusOrder, string> = {

@@ -24,6 +24,10 @@ const Riwayat = lazy(() => import('./pages/Riwayat'))
 const Pengaturan = lazy(() => import('./pages/Pengaturan'))
 const Nota = lazy(() => import('./pages/Nota'))
 const Sampah = lazy(() => import('./pages/Sampah'))
+const DaftarNota = lazy(() => import('./pages/nota/DaftarNota'))
+const EditorNota = lazy(() => import('./pages/nota/EditorNota'))
+const StokPerak = lazy(() => import('./pages/perak/StokPerak'))
+const CetakPerak = lazy(() => import('./pages/perak/CetakPerak'))
 
 /** Rute terlindungi: hanya administrator yang bisa masuk. */
 function KhususAdmin() {
@@ -47,6 +51,7 @@ const router = createHashRouter([
     element: <KhususAdmin />,
     children: [
       { path: 'cetak/:jenis/:id', element: <Suspense fallback={<Pemuat />}><Nota /></Suspense> },
+      { path: 'cetak-perak', element: <Suspense fallback={<Pemuat />}><CetakPerak /></Suspense> },
       {
         element: <AppLayout />,
         children: [
@@ -55,6 +60,10 @@ const router = createHashRouter([
           { path: 'order', element: <DaftarOrder /> },
           { path: 'order/baru', element: <OrderBaru /> },
           { path: 'order/:id', element: <DetailOrder /> },
+          { path: 'nota', element: <DaftarNota /> },
+          { path: 'nota/baru', element: <EditorNota /> },
+          { path: 'nota/:id', element: <EditorNota /> },
+          { path: 'perak', element: <StokPerak /> },
           { path: 'barang', element: <Barang /> },
           { path: 'pengrajin', element: <DaftarPengrajin /> },
           { path: 'pengrajin/:id', element: <DetailPengrajin /> },

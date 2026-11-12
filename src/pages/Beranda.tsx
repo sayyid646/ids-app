@@ -113,7 +113,7 @@ export default function Beranda() {
             {kartu.map((k, i) => (
               <motion.div key={k.label} custom={i} variants={masuk} initial="tersembunyi" animate="tampil">
                 <Link to={k.ke} className="group block h-full rounded-xl2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
-                  <Kartu className="h-full p-4 transition duration-300 group-hover:-translate-y-1 group-hover:border-gold-300 group-hover:shadow-pop sm:p-5">
+                  <Kartu className="kartu-pantul h-full p-4 group-hover:border-gold-300 sm:p-5">
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-xs font-semibold text-ink-muted sm:text-sm">{k.label}</p>
                       <span className={cx('rounded-lg p-1.5', NADA[k.nada])}><k.Ikon className="h-4 w-4" aria-hidden /></span>
@@ -137,20 +137,20 @@ export default function Beranda() {
           {/* Grafik */}
           <div className="mt-6 grid gap-4 lg:grid-cols-3">
             <motion.div custom={9} variants={masuk} initial="tersembunyi" animate="tampil" className="lg:col-span-2">
-              <Kartu className="h-full p-5">
+              <Kartu className="kartu-pantul h-full p-5">
                 <h2 className="font-display text-2xl font-semibold text-navy-900">Statistik order bulanan</h2>
                 <p className="mb-3 text-xs text-ink-muted">{formatTanggal(grafik.dari)} sampai {formatTanggal(grafik.sampai)}</p>
                 <GrafikBulanan data={data.data.bulanan} />
               </Kartu>
             </motion.div>
             <motion.div custom={10} variants={masuk} initial="tersembunyi" animate="tampil">
-              <Kartu className="h-full p-5">
+              <Kartu className="kartu-pantul h-full p-5">
                 <h2 className="mb-2 font-display text-2xl font-semibold text-navy-900">Selesai vs proses</h2>
                 <GrafikStatus dalamProses={s.dalam_proses} selesai={s.selesai_belum_diserahkan} diserahkan={s.sudah_diserahkan} />
               </Kartu>
             </motion.div>
             <motion.div custom={11} variants={masuk} initial="tersembunyi" animate="tampil" className="lg:col-span-2">
-              <Kartu className="h-full p-5">
+              <Kartu className="kartu-pantul h-full p-5">
                 <div className="mb-3 flex items-end justify-between gap-2">
                   <h2 className="font-display text-2xl font-semibold text-navy-900">Produktivitas pengrajin</h2>
                   <Link to="/laporan" className="text-sm font-semibold text-gold-600 hover:text-gold-700">Laporan lengkap</Link>
@@ -160,7 +160,7 @@ export default function Beranda() {
               </Kartu>
             </motion.div>
             <motion.div custom={12} variants={masuk} initial="tersembunyi" animate="tampil">
-              <Kartu className="h-full p-5">
+              <Kartu className="kartu-pantul h-full p-5">
                 <h2 className="mb-2 font-display text-2xl font-semibold text-navy-900">Kategori</h2>
                 {kategori.length ? <GrafikKategori data={kategori} /> : <p className="py-10 text-center text-sm text-ink-muted">Belum ada barang pada periode ini.</p>}
               </Kartu>

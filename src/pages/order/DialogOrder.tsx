@@ -55,7 +55,7 @@ export function DialogUbahOrder({ order, terbuka, tutup, berubah }: { order: Ord
       if (r.length > 0) return
       const { error } = await db()
         .from('orders')
-        .update({ order_number: d.order_number, notes: d.notes })
+        .update({ order_number: d.order_number })
         .eq('id', order.id)
       if (error) throw error
       beri('Data order disimpan.')
@@ -73,9 +73,6 @@ export function DialogUbahOrder({ order, terbuka, tutup, berubah }: { order: Ord
         {sama.length > 0 && <PeringatanGanda sama={sama} />}
         <Bidang label="Nomor order" id="uo-nomor" wajib galat={e.order_number?.message}>
           <Isian id="uo-nomor" salah={!!e.order_number} {...register('order_number')} />
-        </Bidang>
-        <Bidang label="Catatan order" id="uo-catatan">
-          <IsianPanjang id="uo-catatan" rows={2} {...register('notes')} />
         </Bidang>
         {galat && <p role="alert" className="rounded-xl bg-bad-50 p-3 text-sm text-bad-700">{galat}</p>}
       </form>
@@ -155,7 +152,8 @@ export function DialogBarang({
       kaki={<><Tombol ragam="hantu" onClick={tutup} disabled={form.formState.isSubmitting}>Batal</Tombol><Tombol type="submit" form="form-barang" memuat={form.formState.isSubmitting}>Simpan</Tombol></>}>
       <FormProvider {...form}>
         <form id="form-barang" onSubmit={simpan} noValidate className="space-y-4">
-          <BidangBarang awalan="" master={master} hariIni={hariIni} tampilJumlah={!ubah} minBerat={minSkema} />
+          <BidangBarang awalan="" master={master} hariIni={hariIni} tampilJumlah={!ubah} minBerat={minSkema}
+            beratStandar={ubah ? undefined : { LADY: Number(pengaturan?.silver_lady_grams) || 6, MAN: Number(pengaturan?.silver_man_grams) || 12 }} />
           {ubah && <p className="text-xs text-ink-muted">Status dan tanggal selesai/serah diubah lewat tombol status.</p>}
           {galat && <p role="alert" className="rounded-xl bg-bad-50 p-3 text-sm text-bad-700">{galat}</p>}
         </form>

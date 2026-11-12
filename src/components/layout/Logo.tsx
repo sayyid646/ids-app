@@ -1,20 +1,12 @@
-import { useId } from 'react'
 import { cx } from '../ui/ui'
 import { JALUR_LOGO, KOTAK_LOGO } from './jalurLogo'
 
-/** Tanda logo resmi IDS (berlian bergaris) dengan isian gradasi emas. */
-export function TandaIDS({ className, terang = true }: { className?: string; terang?: boolean }) {
-  const id = useId().replace(/:/g, '')
+/** Tanda logo resmi IDS (berlian bergaris) dalam warna emas resminya. */
+export function TandaIDS({ className }: { className?: string; terang?: boolean }) {
+  // Warna resmi logo IDS (emas #8E6C27), tanpa diubah.
   return (
     <svg viewBox={KOTAK_LOGO} className={cx('h-9 w-11', className)} aria-hidden>
-      <defs>
-        <linearGradient id={`emas-${id}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor={terang ? '#F1DEB4' : '#B8924A'} />
-          <stop offset="0.55" stopColor={terang ? '#C9A96E' : '#8E6C27'} />
-          <stop offset="1" stopColor={terang ? '#A9853F' : '#6E521B'} />
-        </linearGradient>
-      </defs>
-      {JALUR_LOGO.map((d, i) => <path key={i} d={d} fill={`url(#emas-${id})`} />)}
+      {JALUR_LOGO.map((d, i) => <path key={i} d={d} fill="#8E6C27" />)}
     </svg>
   )
 }

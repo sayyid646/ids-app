@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { formatBerat } from '../../lib/orderSchema'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, ChevronLeft, ChevronRight, MapPin, Pencil, Phone, Power, Search, Trash2 } from 'lucide-react'
+import { ArrowLeft, CheckCheck, ChevronLeft, ChevronRight, MapPin, Pencil, Phone, Power, Printer, Search, Trash2 } from 'lucide-react'
 import { db } from '../../lib/supabase'
 import type { Barang, PengrajinRingkas, Riwayat, StatusBarang } from '../../lib/types'
 import { LABEL_STATUS } from '../../lib/types'
@@ -15,6 +15,8 @@ import {
 import { FormPengrajin } from './FormPengrajin'
 import { DaftarRiwayat } from '../../components/DaftarRiwayat'
 import { KonfirmasiHapusPengrajin, KonfirmasiStatusPengrajin } from './AksiPengrajin'
+import { DialogSelesaiPengerjaan } from './SelesaiPengerjaan'
+import { PerakPengrajin } from '../perak/PerakPengrajin'
 
 const PER_HALAMAN = 25
 type SaringStatus = 'semua' | StatusBarang
@@ -34,6 +36,7 @@ export function DetailPengrajin() {
   const [ubah, setUbah] = useState(false)
   const [ubahStatus, setUbahStatus] = useState<PengrajinRingkas | null>(null)
   const [tanyaArsip, setTanyaArsip] = useState(false)
+  const [selesai, setSelesai] = useState(false)
   const [cari, setCari] = useState('')
   const [cariAktif, setCariAktif] = useState('')
   const [status, setStatus] = useState<SaringStatus>('semua')
@@ -144,6 +147,12 @@ export function DetailPengrajin() {
             {p.notes && <p className="mt-3 max-w-2xl whitespace-pre-line text-sm text-ink-soft">{p.notes}</p>}
           </div>
           <div className="flex flex-wrap gap-2">
+            {p.qty_dalam_proses > 0 && (
+              <Tombol ikon={<CheckCheck className="h-4 w-4" />} onClick={() => setSelesai(true)}>SELESAI PENGERJAAN ({p.qty_dalam_proses})</Tombol>
+            )}
+            <Link to={`/cetak/pembayaran/${p.id}`} className="inline-flex h-11 items-center gap-2 rounded-xl border border-gold-300 bg-white px-4 text-sm font-semibold text-navy-900 hover:bg-gold-50">
+              <Printer className="h-4 w-4" /> Nota pembayaran
+            </Link>
             <Tombol ragam="kedua" ikon={<Pencil className="h-4 w-4" />} onClick={() => setUbah(true)}>Ubah data</Tombol>
             <Tombol ragam={p.is_active ? 'hantu' : 'utama'} ikon={<Power className="h-4 w-4" />} onClick={() => setUbahStatus(p)}>
               {p.is_active ? 'Nonaktifkan' : 'Aktifkan'}
@@ -283,6 +292,8 @@ export function DetailPengrajin() {
       </section>
 
       {/* Riwayat aktivitas */}
+      <PerakPengrajin pengrajin={p} />
+
       <section className="mt-10" aria-labelledby="judul-aktivitas">
         <h2 id="judul-aktivitas" className="font-display text-2xl font-semibold text-navy-900">Aktivitas terakhir</h2>
         <div className="mt-3">
@@ -293,6 +304,7 @@ export function DetailPengrajin() {
 
       <FormPengrajin terbuka={ubah} tutup={() => setUbah(false)} pengrajin={p} semua={pengrajin.data?.semua ?? []} tersimpan={pengrajin.muatUlang} />
       <KonfirmasiStatusPengrajin pengrajin={ubahStatus} tutup={() => setUbahStatus(null)} berubah={pengrajin.muatUlang} />
+      <DialogSelesaiPengerjaan pengrajin={selesai ? p : null} tutup={() => setSelesai(false)} berubah={pengrajin.muatUlang} />
       <KonfirmasiHapusPengrajin pengrajin={tanyaArsip ? p : null} tutup={() => setTanyaArsip(false)} berubah={() => navigasi('/pengrajin', { replace: true })} />
     </>
   )

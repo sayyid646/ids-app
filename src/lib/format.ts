@@ -110,3 +110,47 @@ export const ZONA_WAKTU: { nilai: string; label: string }[] = [
   { nilai: 'Asia/Makassar', label: 'WITA (Bali, NTB, NTT, Sulawesi, Kalimantan Selatan dan Timur)' },
   { nilai: 'Asia/Jayapura', label: 'WIT (Maluku, Papua)' },
 ]
+
+export const NAMA_HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+
+/** '2026-11-02' -> 'Senin, 02 November 2026' (hari dihitung dari tanggalnya, tanpa zona waktu). */
+export function formatTanggalHari(tanggal: string | null | undefined): string {
+  if (!tanggal) return '-'
+  const m = POLA_TANGGAL.exec(tanggal)
+  if (!m) return '-'
+  const hari = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))).getUTCDay()
+  return `${NAMA_HARI[hari]}, ${m[3]} ${NAMA_BULAN[Number(m[2]) - 1]} ${m[1]}`
+}
+
+/** Hari terakhir bulan: '2026-02-10' -> '2026-02-28'. */
+export function akhirBulan(tanggal: string): string {
+  const m = POLA_TANGGAL.exec(tanggal)
+  if (!m) return tanggal
+  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]), 0))
+  return `${m[1]}-${m[2]}-${String(d.getUTCDate()).padStart(2, '0')}`
+}
+
+/** Angka gram: 182 -> '182 g', 7.5 -> '7,5 g', -4 -> '-4 g'. */
+export function formatGram(n: number | string | null | undefined): string {
+  const v = Number(n ?? 0)
+  return `${v.toLocaleString('id-ID', { maximumFractionDigits: 2 })} g`
+}
+
+/** Rupiah: 150000 -> 'Rp 150.000'. */
+export function formatRupiah(n: number | null | undefined): string {
+  return `Rp ${Math.round(Number(n ?? 0)).toLocaleString('id-ID')}`
+}
+
+/** Ketikan uang ke angka: 'Rp 150.000' / '150000' / '150.000,50' -> 150000 / 150000 / 150000.5. Kosong -> null. */
+export function bacaRupiah(teks: string): number | null {
+  const bersih = teks.replace(/[^\d,]/g, '').replace(',', '.')
+  if (bersih === '' || bersih === '.') return null
+  const n = Number(bersih)
+  return Number.isFinite(n) ? n : null
+}
+
+/** Tampilan saat mengetik uang: '150000' -> '150.000'. */
+export function ketikRupiah(teks: string): string {
+  const angka = teks.replace(/\D/g, '').replace(/^0+(?=\d)/, '')
+  return angka ? Number(angka).toLocaleString('id-ID') : ''
+}
