@@ -30,7 +30,7 @@ export interface Barang {
   id: string
   order_id: string
   order_number: string
-  customer_name: string
+  customer_name: string | null
   customer_whatsapp: string | null
   item_no: number
   craftsman_id: string
@@ -58,6 +58,7 @@ export interface Barang {
   is_active: boolean
   created_at: string
   updated_at: string
+  weight_grams: number | null
 }
 
 export interface Riwayat {
@@ -83,6 +84,7 @@ export interface Pengaturan {
   timezone: string
   date_format: string
   receipt_paper: 'A4' | 'A5' | '80mm' | '58mm'
+  min_weight_grams: number
   receipt_show_signature: boolean
   receipt_footer: string
   wa_template_proses: string
@@ -119,6 +121,8 @@ export const LABEL_AKSI: Record<string, string> = {
   pengrajin_diubah: 'Data pengrajin diubah',
   pengrajin_diaktifkan: 'Pengrajin diaktifkan',
   pengrajin_dinonaktifkan: 'Pengrajin dinonaktifkan',
+  pengrajin_dihapus: 'Pengrajin dipindah ke Sampah',
+  pengrajin_dipulihkan: 'Pengrajin dipulihkan dari Sampah',
   pengrajin_diarsipkan: 'Pengrajin diarsipkan',
   kategori_ditambahkan: 'Kategori ditambahkan',
   kategori_diubah: 'Kategori diubah',
@@ -138,7 +142,7 @@ export type StatusOrder = 'dalam_proses' | 'sebagian' | 'selesai' | 'diserahkan'
 export interface OrderRingkas {
   id: string
   order_number: string
-  customer_name: string
+  customer_name: string | null
   customer_whatsapp: string | null
   notes: string | null
   cancelled_at: string | null

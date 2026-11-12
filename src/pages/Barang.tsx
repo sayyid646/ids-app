@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { formatBerat } from '../lib/orderSchema'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Download, Search, X } from 'lucide-react'
 import { db } from '../lib/supabase'
@@ -205,7 +206,7 @@ export default function Barang() {
               <table className="w-full text-left text-sm">
                 <thead className="border-b border-ice-200 bg-ice-50 text-xs font-semibold text-ink-muted">
                   <tr>
-                    <th className="px-4 py-3">Order</th><th className="px-4 py-3">Pelanggan</th><th className="px-4 py-3">Pengrajin</th>
+                    <th className="px-4 py-3">Order</th><th className="px-4 py-3 text-right">Berat</th><th className="px-4 py-3">Pengrajin</th>
                     <th className="px-4 py-3">Kategori</th><th className="px-4 py-3">Diterima</th><th className="px-4 py-3">Status</th>
                     <th className="px-4 py-3">Selesai</th><th className="px-4 py-3">Diserahkan</th>
                   </tr>
@@ -214,7 +215,7 @@ export default function Barang() {
                   {data.data.baris.map((b) => (
                     <tr key={b.id} className={cx('hover:bg-ice-50/70', !b.is_active && 'text-ink-muted')}>
                       <td className="px-4 py-3"><Link to={`/order/${b.order_id}`} className="font-semibold text-navy-900 hover:underline">{b.order_number}</Link> <span className="text-xs text-ink-muted">#{b.item_no}</span></td>
-                      <td className="max-w-[180px] truncate px-4 py-3">{b.customer_name}</td>
+                      <td className="px-4 py-3 text-right tabular-nums">{formatBerat(b.weight_grams)}</td>
                       <td className="px-4 py-3"><span className="inline-flex items-center gap-2"><KodePengrajin kode={b.craftsman_code} /><span className="truncate">{b.craftsman_name ?? ''}</span></span></td>
                       <td className="px-4 py-3">{b.category_name} <span className="text-xs text-ink-muted">· {b.gender}</span></td>
                       <td className="px-4 py-3 tabular-nums" title={formatTanggal(b.assigned_date)}>{formatTanggalPendek(b.assigned_date)}</td>
@@ -234,7 +235,7 @@ export default function Barang() {
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="font-semibold text-navy-900">Order {b.order_number} <span className="text-xs font-normal text-ink-muted">#{b.item_no}</span></p>
-                          <p className="truncate text-sm text-ink-soft">{b.customer_name}</p>
+                          <p className="truncate text-sm text-ink-soft">{b.weight_grams != null ? formatBerat(b.weight_grams) : b.customer_name}</p>
                         </div>
                         <LencanaStatus status={b.status} batal={!b.is_active} />
                       </div>

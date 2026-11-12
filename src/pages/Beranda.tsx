@@ -182,7 +182,7 @@ export default function Beranda() {
                     <li key={o.id}>
                       <Link to={`/order/${o.id}`} className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-ice-50">
                         <span className="w-20 shrink-0 font-semibold text-navy-900">{o.order_number}</span>
-                        <span className="min-w-0 flex-1 truncate text-sm text-ink-soft">{o.customer_name} · {o.quantity} barang · {o.category_names ?? '-'}</span>
+                        <span className="min-w-0 flex-1 truncate text-sm text-ink-soft">{o.customer_name ? `${o.customer_name} · ` : ''}{o.quantity} barang · {o.category_names ?? '-'}</span>
                         <span className="hidden text-xs text-ink-muted sm:block">{formatTanggal(o.order_date)}</span>
                         <LencanaOrder status={o.order_status} />
                       </Link>

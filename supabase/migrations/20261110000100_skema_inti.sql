@@ -183,6 +183,8 @@ create table if not exists public.order_items (
     delivered_at is null or completed_at is null or delivered_at >= completed_at
   )
 );
+-- Berat barang (gram). Aturan minimalnya ada di migrasi 10.
+alter table public.order_items add column if not exists weight_grams numeric(8,2);
 create index if not exists order_items_order_ix      on public.order_items (order_id);
 create index if not exists order_items_craftsman_ix  on public.order_items (craftsman_id, status);
 create index if not exists order_items_category_ix   on public.order_items (category_id);

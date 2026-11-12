@@ -4,14 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { db } from '../../lib/supabase'
 import { pesanGalat } from '../../lib/errors'
-import { muatanBarang, skemaBarang, type DataBarang, type MasukanBarang } from '../../lib/orderSchema'
+import { BERAT_MINIMAL_BAWAAN, muatanBarang, skemaBarang, type DataBarang, type MasukanBarang } from '../../lib/orderSchema'
 import type { Barang, OrderRingkas, Pengaturan, StatusBarang } from '../../lib/types'
 import { LABEL_STATUS } from '../../lib/types'
-import { normalisasiWa, tampilkanWa, tautanWa, waValid } from '../../lib/wa'
+import { tampilkanWa, tautanWa } from '../../lib/wa'
 import { isiTemplate, jenisPesanUntuk, templateDari, type JenisPesan } from '../../lib/waTemplate'
 import { formatTanggalPanjang, formatTanggalWaktu, isoKeLokal, lokalKeIso, tglLokal } from '../../lib/format'
 import type { DataMaster } from '../../sync/useMaster'
 import { Jendela } from '../../components/ui/Dialog'
+import { useSinkron } from '../../sync/SyncProvider'
 import { useNotifikasi } from '../../components/ui/Notifikasi'
 import { Bidang, Isian, IsianPanjang, Tombol, cx } from '../../components/ui/ui'
 import { BidangBarang } from './BidangBarang'
@@ -20,12 +21,6 @@ import { cekNomor, PeringatanGanda } from './OrderBaru'
 // ------------------------------------------------------------ ubah order
 const skemaUbahOrder = z.object({
   order_number: z.string().trim().min(1, 'Nomor order wajib diisi').max(30, 'Maksimal 30 karakter'),
-  customer_name: z.string().trim().min(1, 'Nama pelanggan wajib diisi').max(100, 'Maksimal 100 karakter'),
-  customer_whatsapp: z
-    .string()
-    .optional()
-    .refine((v) => !v || v.trim() === '' || waValid(v), 'Nomor WhatsApp tidak valid. Contoh: 0812 3456 7890')
-    .transform((v) => (v && v.trim() !== '' ? normalisasiWa(v) : null)),
   notes: z.string().max(1000).optional().transform((v) => (v && v.trim() !== '' ? v.trim() : null)),
 })
 type MasukanUbahOrder = z.input<typeof skemaUbahOrder>
@@ -37,8 +32,6 @@ export function DialogUbahOrder({ order, terbuka, tutup, berubah }: { order: Ord
   const [sama, setSama] = useState<Awaited<ReturnType<typeof cekNomor>>>([])
   const awal = (): MasukanUbahOrder => ({
     order_number: order.order_number,
-    customer_name: order.customer_name,
-    customer_whatsapp: order.customer_whatsapp ? tampilkanWa(order.customer_whatsapp) : '',
     notes: order.notes ?? '',
   })
   const { register, handleSubmit, formState, reset } = useForm<MasukanUbahOrder, unknown, DataUbahOrder>({
@@ -62,7 +55,7 @@ export function DialogUbahOrder({ order, terbuka, tutup, berubah }: { order: Ord
       if (r.length > 0) return
       const { error } = await db()
         .from('orders')
-        .update({ order_number: d.order_number, customer_name: d.customer_name.replace(/\s+/g, ' '), customer_whatsapp: d.customer_whatsapp, notes: d.notes })
+        .update({ order_number: d.order_number, notes: d.notes })
         .eq('id', order.id)
       if (error) throw error
       beri('Data order disimpan.')
@@ -80,12 +73,6 @@ export function DialogUbahOrder({ order, terbuka, tutup, berubah }: { order: Ord
         {sama.length > 0 && <PeringatanGanda sama={sama} />}
         <Bidang label="Nomor order" id="uo-nomor" wajib galat={e.order_number?.message}>
           <Isian id="uo-nomor" salah={!!e.order_number} {...register('order_number')} />
-        </Bidang>
-        <Bidang label="Nama pelanggan" id="uo-nama" wajib galat={e.customer_name?.message}>
-          <Isian id="uo-nama" salah={!!e.customer_name} {...register('customer_name')} />
-        </Bidang>
-        <Bidang label="WhatsApp pelanggan" id="uo-wa" galat={e.customer_whatsapp?.message}>
-          <Isian id="uo-wa" type="tel" inputMode="tel" salah={!!e.customer_whatsapp} {...register('customer_whatsapp')} />
         </Bidang>
         <Bidang label="Catatan order" id="uo-catatan">
           <IsianPanjang id="uo-catatan" rows={2} {...register('notes')} />
@@ -111,17 +98,22 @@ export function DialogBarang({
 }) {
   const { beri } = useNotifikasi()
   const [galat, setGalat] = useState<string | null>(null)
-  const skema = useMemo(() => skemaBarang(hariIni), [hariIni])
+  const { pengaturan } = useSinkron()
+  const minBerat = Number(pengaturan?.min_weight_grams) || BERAT_MINIMAL_BAWAAN
+  // Barang lama yang beratnya di bawah minimal baru tetap boleh disimpan selama beratnya tidak diubah.
+  const minSkema = barang?.weight_grams != null ? Math.min(minBerat, Number(barang.weight_grams)) : minBerat
+  const skema = useMemo(() => skemaBarang(hariIni, minSkema), [hariIni, minSkema])
   const ubah = barang !== null
   const awal = (): MasukanBarang =>
     barang
       ? {
           craftsman_id: barang.craftsman_id, category_id: barang.category_id, gender: barang.gender, quantity: 1,
+          weight_grams: barang.weight_grams ?? minBerat,
           assigned_date: barang.assigned_date,
           production_month: barang.production_month_manual ? barang.production_month.slice(0, 7) : '',
           production_start_date: barang.production_start_date ?? '', description: barang.description ?? '', notes: barang.notes ?? '',
         }
-      : { craftsman_id: '', category_id: '', gender: undefined as unknown as 'LADY', quantity: 1, assigned_date: hariIni, production_month: '', production_start_date: '', description: '', notes: '' }
+      : { craftsman_id: '', category_id: '', gender: undefined as unknown as 'LADY', weight_grams: minBerat, quantity: 1, assigned_date: hariIni, production_month: '', production_start_date: '', description: '', notes: '' }
   const form = useForm<MasukanBarang, unknown, DataBarang>({ resolver: zodResolver(skema), defaultValues: awal() })
   useEffect(() => {
     if (terbuka) {
@@ -140,7 +132,7 @@ export function DialogBarang({
         beri(`${data as number} barang ditambahkan.`)
       } else {
         const ubahan: Record<string, unknown> = {
-          craftsman_id: d.craftsman_id, category_id: d.category_id, gender: d.gender,
+          craftsman_id: d.craftsman_id, category_id: d.category_id, gender: d.gender, weight_grams: d.weight_grams,
           assigned_date: d.assigned_date, production_start_date: d.production_start_date || null,
           description: d.description, notes: d.notes,
         }
@@ -163,7 +155,7 @@ export function DialogBarang({
       kaki={<><Tombol ragam="hantu" onClick={tutup} disabled={form.formState.isSubmitting}>Batal</Tombol><Tombol type="submit" form="form-barang" memuat={form.formState.isSubmitting}>Simpan</Tombol></>}>
       <FormProvider {...form}>
         <form id="form-barang" onSubmit={simpan} noValidate className="space-y-4">
-          <BidangBarang awalan="" master={master} hariIni={hariIni} tampilJumlah={!ubah} />
+          <BidangBarang awalan="" master={master} hariIni={hariIni} tampilJumlah={!ubah} minBerat={minSkema} />
           {ubah && <p className="text-xs text-ink-muted">Status dan tanggal selesai/serah diubah lewat tombol status.</p>}
           {galat && <p role="alert" className="rounded-xl bg-bad-50 p-3 text-sm text-bad-700">{galat}</p>}
         </form>
@@ -395,7 +387,7 @@ export function DialogWhatsApp({ order, barang, terbuka, tutup, zona, pengaturan
     const tSelesai = barang.reduce<string | null>((m, b) => (b.completed_at && (!m || b.completed_at > m) ? b.completed_at : m), null)
     const tSerah = barang.reduce<string | null>((m, b) => (b.delivered_at && (!m || b.delivered_at > m) ? b.delivered_at : m), null)
     return {
-      nama: order.customer_name, nomor_order: order.order_number, kategori, jumlah: String(barang.length),
+      nama: order.customer_name ?? 'Bapak/Ibu', nomor_order: order.order_number, kategori, jumlah: String(barang.length),
       tanggal_selesai: tSelesai ? formatTanggalPanjang(tglLokal(tSelesai, zona)) : '-',
       tanggal_serah: tSerah ? formatTanggalPanjang(tglLokal(tSerah, zona)) : '-',
       nama_usaha: pengaturan?.business_name ?? 'Intan Dua Saudara',
@@ -413,18 +405,18 @@ export function DialogWhatsApp({ order, barang, terbuka, tutup, zona, pengaturan
     <Jendela terbuka={terbuka} tutup={tutup} judul="Kirim via WhatsApp"
       kaki={<>
         <Tombol ragam="hantu" onClick={tutup}>Batal</Tombol>
-        {nomor && pesan.trim() ? (
-          <a href={tautanWa(nomor, pesan)} target="_blank" rel="noopener noreferrer" onClick={tutup}
+        {pesan.trim() ? (
+          <a href={nomor ? tautanWa(nomor, pesan) : `https://wa.me/?text=${encodeURIComponent(pesan)}`} target="_blank" rel="noopener noreferrer" onClick={tutup}
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1E8E4E] px-5 text-[15px] font-semibold text-white hover:bg-[#177540]">
             Buka WhatsApp
           </a>
         ) : null}
       </>}>
-      {!nomor ? (
-        <p className="rounded-xl bg-gold-50 p-3 text-sm text-gold-700">Order ini belum punya nomor WhatsApp pelanggan. Tambahkan lewat tombol Ubah order.</p>
-      ) : (
+      {(
         <div className="space-y-4">
-          <p className="text-sm text-ink-soft">Ke <strong className="text-navy-900">{order.customer_name}</strong> · {tampilkanWa(nomor)}</p>
+          {nomor
+            ? <p className="text-sm text-ink-soft">Ke <strong className="text-navy-900">{order.customer_name ?? 'pelanggan'}</strong> · {tampilkanWa(nomor)}</p>
+            : <p className="text-sm text-ink-soft">Setelah WhatsApp terbuka, pilih kontak tujuan pesan ini.</p>}
           <div className="flex flex-wrap gap-1.5" role="group" aria-label="Jenis pesan">
             {(['proses', 'selesai', 'diserahkan'] as JenisPesan[]).map((j) => (
               <button key={j} type="button" aria-pressed={jenis === j} onClick={() => setJenis(j)}

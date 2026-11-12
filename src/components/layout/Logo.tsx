@@ -1,11 +1,20 @@
+import { useId } from 'react'
 import { cx } from '../ui/ui'
+import { JALUR_LOGO, KOTAK_LOGO } from './jalurLogo'
 
-/** Logo IDS: berlian bergaris emas dan tulisan IDS. */
-export function TandaIDS({ className }: { className?: string }) {
+/** Tanda logo resmi IDS (berlian bergaris) dengan isian gradasi emas. */
+export function TandaIDS({ className, terang = true }: { className?: string; terang?: boolean }) {
+  const id = useId().replace(/:/g, '')
   return (
-    <svg viewBox="0 0 48 48" className={cx('h-9 w-9', className)} aria-hidden>
-      <path d="M13 15h22l7 9-18 18L6 24z" fill="none" stroke="#C9A96E" strokeWidth="2.2" strokeLinejoin="round" />
-      <path d="M6 24h36M19 15l-3.5 9L24 42l8.5-18L29 15M15.5 24 24 15l8.5 9" fill="none" stroke="#C9A96E" strokeWidth="1.4" strokeLinejoin="round" />
+    <svg viewBox={KOTAK_LOGO} className={cx('h-9 w-11', className)} aria-hidden>
+      <defs>
+        <linearGradient id={`emas-${id}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor={terang ? '#F1DEB4' : '#B8924A'} />
+          <stop offset="0.55" stopColor={terang ? '#C9A96E' : '#8E6C27'} />
+          <stop offset="1" stopColor={terang ? '#A9853F' : '#6E521B'} />
+        </linearGradient>
+      </defs>
+      {JALUR_LOGO.map((d, i) => <path key={i} d={d} fill={`url(#emas-${id})`} />)}
     </svg>
   )
 }
@@ -13,7 +22,7 @@ export function TandaIDS({ className }: { className?: string }) {
 export function Logo({ terang = true, kecil }: { terang?: boolean; kecil?: boolean }) {
   return (
     <div className="flex items-center gap-3">
-      <TandaIDS className={kecil ? 'h-8 w-8' : 'h-10 w-10'} />
+      <TandaIDS terang={terang} className={kecil ? 'h-8 w-10' : 'h-10 w-12'} />
       <div className="leading-none">
         <p className={cx('font-display font-bold tracking-[0.18em]', kecil ? 'text-2xl' : 'text-3xl', terang ? 'text-white' : 'text-navy-900')}>
           IDS

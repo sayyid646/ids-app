@@ -133,7 +133,6 @@ export function DaftarOrder() {
               <thead className="border-b border-ice-200 bg-ice-50 text-xs font-semibold text-ink-muted">
                 <tr>
                   <th scope="col" className="px-4 py-3">Order</th>
-                  <th scope="col" className="px-4 py-3">Pelanggan</th>
                   <th scope="col" className="px-4 py-3">Pengrajin</th>
                   <th scope="col" className="px-4 py-3">Kategori</th>
                   <th scope="col" className="px-4 py-3 text-right">Barang</th>
@@ -147,7 +146,6 @@ export function DaftarOrder() {
                     <td className="px-4 py-3">
                       <Link to={`/order/${o.id}`} className="font-semibold text-navy-900 hover:underline" onClick={(ev) => ev.stopPropagation()}>{o.order_number}</Link>
                     </td>
-                    <td className="max-w-[200px] truncate px-4 py-3">{o.customer_name}</td>
                     <td className="max-w-[160px] truncate px-4 py-3 text-ink-soft" title={o.craftsman_names ?? ''}>{o.craftsman_codes ?? '-'}</td>
                     <td className="max-w-[160px] truncate px-4 py-3 text-ink-soft">{o.category_names ?? '-'}</td>
                     <td className="px-4 py-3 text-right tabular-nums">{o.quantity}</td>
@@ -167,7 +165,7 @@ export function DaftarOrder() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="font-semibold text-navy-900">Order {o.order_number}</p>
-                        <p className="truncate text-sm text-ink-soft">{o.customer_name}</p>
+                        {o.customer_name && <p className="truncate text-sm text-ink-soft">{o.customer_name}</p>}
                       </div>
                       <LencanaOrder status={o.order_status} />
                     </div>

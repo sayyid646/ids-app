@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { formatBerat } from '../../lib/orderSchema'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Archive, ArrowLeft, ChevronLeft, ChevronRight, MapPin, Pencil, Phone, Power, Search } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, MapPin, Pencil, Phone, Power, Search, Trash2 } from 'lucide-react'
 import { db } from '../../lib/supabase'
 import type { Barang, PengrajinRingkas, Riwayat, StatusBarang } from '../../lib/types'
 import { LABEL_STATUS } from '../../lib/types'
@@ -11,11 +12,9 @@ import { useSinkron, useVersiData } from '../../sync/SyncProvider'
 import {
   Isian, Kartu, KodePengrajin, Kosong, KotakGalat, LencanaAktif, LencanaStatus, NamaPengrajin, Pemuat, Tombol, cx,
 } from '../../components/ui/ui'
-import { Konfirmasi } from '../../components/ui/Dialog'
-import { useNotifikasi } from '../../components/ui/Notifikasi'
 import { FormPengrajin } from './FormPengrajin'
 import { DaftarRiwayat } from '../../components/DaftarRiwayat'
-import { KonfirmasiStatusPengrajin } from './AksiPengrajin'
+import { KonfirmasiHapusPengrajin, KonfirmasiStatusPengrajin } from './AksiPengrajin'
 
 const PER_HALAMAN = 25
 type SaringStatus = 'semua' | StatusBarang
@@ -29,7 +28,6 @@ export function DetailPengrajin() {
   const { id = '' } = useParams()
   const navigasi = useNavigate()
   const { zona } = useSinkron()
-  const { beri } = useNotifikasi()
   const versi = useVersiData(['craftsmen', 'order_items', 'orders', 'jewelry_categories'])
   const versiLog = useVersiData(['activity_logs'])
 
@@ -150,6 +148,7 @@ export function DetailPengrajin() {
             <Tombol ragam={p.is_active ? 'hantu' : 'utama'} ikon={<Power className="h-4 w-4" />} onClick={() => setUbahStatus(p)}>
               {p.is_active ? 'Nonaktifkan' : 'Aktifkan'}
             </Tombol>
+            <Tombol ragam="hantu" className="text-bad-700 hover:bg-bad-50" ikon={<Trash2 className="h-4 w-4" />} onClick={() => setTanyaArsip(true)}>Hapus</Tombol>
           </div>
         </div>
       </Kartu>
@@ -212,7 +211,7 @@ export function DetailPengrajin() {
                   <thead className="border-b border-ice-200 bg-ice-50 text-xs font-semibold text-ink-muted">
                     <tr>
                       <th scope="col" className="px-4 py-3">Order</th>
-                      <th scope="col" className="px-4 py-3">Pelanggan</th>
+                      <th scope="col" className="px-4 py-3 text-right">Berat</th>
                       <th scope="col" className="px-4 py-3">Kategori</th>
                       <th scope="col" className="px-4 py-3">Diterima</th>
                       <th scope="col" className="px-4 py-3">Status</th>
@@ -226,7 +225,7 @@ export function DetailPengrajin() {
                         <td className="px-4 py-3 font-semibold text-navy-900">
                           {b.order_number}<span className="ml-1 text-xs font-normal text-ink-muted">#{b.item_no}</span>
                         </td>
-                        <td className="max-w-[180px] truncate px-4 py-3">{b.customer_name}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{formatBerat(b.weight_grams)}</td>
                         <td className="px-4 py-3">{b.category_name} <span className="text-xs text-ink-muted">· {b.gender}</span></td>
                         <td className="px-4 py-3 tabular-nums" title={formatTanggal(b.assigned_date)}>{formatTanggalPendek(b.assigned_date)}</td>
                         <td className="px-4 py-3"><LencanaStatus status={b.status} batal={!b.is_active} /></td>
@@ -250,7 +249,7 @@ export function DetailPengrajin() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="font-semibold text-navy-900">Order {b.order_number} <span className="text-xs font-normal text-ink-muted">#{b.item_no}</span></p>
-                          <p className="text-sm text-ink-soft">{b.customer_name}</p>
+                          <p className="text-sm text-ink-soft">{b.weight_grams != null ? formatBerat(b.weight_grams) : b.customer_name}</p>
                         </div>
                         <LencanaStatus status={b.status} batal={!b.is_active} />
                       </div>
@@ -292,37 +291,9 @@ export function DetailPengrajin() {
         </div>
       </section>
 
-      {/* Arsip: hanya untuk pengrajin tanpa riwayat sama sekali */}
-      <section className="mt-10 rounded-xl2 border border-ice-200 bg-white/60 p-5">
-        <h2 className="font-semibold text-navy-900">Hapus dari daftar</h2>
-        {pengrajin.data?.adaRiwayat ? (
-          <p className="mt-1 text-sm text-ink-soft">
-            Pengrajin yang sudah punya riwayat order tidak bisa dihapus, supaya data lama tetap utuh. Gunakan <strong>Nonaktifkan</strong>.
-          </p>
-        ) : (
-          <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-ink-soft">Pengrajin ini belum pernah menerima barang, jadi boleh diarsipkan bila salah dibuat.</p>
-            <Tombol ragam="kedua" kecil ikon={<Archive className="h-4 w-4" />} onClick={() => setTanyaArsip(true)}>Arsipkan</Tombol>
-          </div>
-        )}
-      </section>
-
       <FormPengrajin terbuka={ubah} tutup={() => setUbah(false)} pengrajin={p} semua={pengrajin.data?.semua ?? []} tersimpan={pengrajin.muatUlang} />
       <KonfirmasiStatusPengrajin pengrajin={ubahStatus} tutup={() => setUbahStatus(null)} berubah={pengrajin.muatUlang} />
-      <Konfirmasi
-        terbuka={tanyaArsip}
-        tutup={() => setTanyaArsip(false)}
-        judul={`Arsipkan ${p.code}?`}
-        bahaya
-        labelYa="Arsipkan"
-        pesan={<p>Pengrajin ini tidak akan tampil lagi di daftar. Catatan penambahannya tetap ada di riwayat aktivitas.</p>}
-        jalankan={async () => {
-          const { error } = await db().from('craftsmen').update({ deleted_at: new Date().toISOString() }).eq('id', p.id)
-          if (error) throw error
-          beri(`${p.code} diarsipkan.`)
-          navigasi('/pengrajin', { replace: true })
-        }}
-      />
+      <KonfirmasiHapusPengrajin pengrajin={tanyaArsip ? p : null} tutup={() => setTanyaArsip(false)} berubah={() => navigasi('/pengrajin', { replace: true })} />
     </>
   )
 }

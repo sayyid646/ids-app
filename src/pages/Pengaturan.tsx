@@ -17,6 +17,7 @@ import { useSinkron } from '../sync/SyncProvider'
 import { useMaster } from '../sync/useMaster'
 import { useNotifikasi } from '../components/ui/Notifikasi'
 import { Bidang, Isian, IsianPanjang, Kartu, KepalaHalaman, LencanaAktif, Pemuat, Tombol, cx } from '../components/ui/ui'
+import { aturMusik, aturSfx, musikAktif, sfxAktif } from '../lib/suara'
 import { animasiPembukaAktif, aturAnimasiPembuka, aturTema, temaAktif, type Tema } from '../components/animasi/pengaturanAnimasi'
 
 function Bagian({ judul, sub, children }: { judul: string; sub?: string; children: ReactNode }) {
@@ -37,25 +38,32 @@ const skemaUsaha = z.object({
   timezone: z.string(),
   date_format: z.enum(['dd MMMM yyyy', 'dd/MM/yyyy']),
   receipt_paper: z.enum(['A4', 'A5', '80mm', '58mm']),
+  min_weight_grams: z.preprocess(
+    (v) => (typeof v === 'string' ? (v.trim() === '' ? undefined : Number(v.replace(',', '.'))) : v),
+    z.number({ required_error: 'Isi berat minimal', invalid_type_error: 'Berat harus angka, contoh 6' })
+      .gt(0, 'Harus lebih dari 0').max(1000, 'Maksimal 1000 gram'),
+  ),
   receipt_show_signature: z.boolean(),
   receipt_footer: z.string().max(300),
   wa_template_proses: z.string().trim().min(1, 'Template tidak boleh kosong').max(2000),
   wa_template_selesai: z.string().trim().min(1, 'Template tidak boleh kosong').max(2000),
   wa_template_diserahkan: z.string().trim().min(1, 'Template tidak boleh kosong').max(2000),
 })
-type DataUsaha = z.infer<typeof skemaUsaha>
+type DataUsaha = z.output<typeof skemaUsaha>
+type MasukanUsaha = z.input<typeof skemaUsaha>
 
 function FormUsaha({ p }: { p: TPengaturan }) {
   const { beri } = useNotifikasi()
   const [galat, setGalat] = useState<string | null>(null)
-  const awal = (): DataUsaha => ({
+  const awal = (): MasukanUsaha => ({
     business_name: p.business_name, tagline: p.tagline, business_address: p.business_address ?? '',
     business_whatsapp: p.business_whatsapp ? tampilkanWa(p.business_whatsapp) : '', timezone: p.timezone,
     date_format: p.date_format === 'dd/MM/yyyy' ? 'dd/MM/yyyy' : 'dd MMMM yyyy', receipt_paper: p.receipt_paper,
+    min_weight_grams: String(Number(p.min_weight_grams ?? 6)).replace('.', ','),
     receipt_show_signature: p.receipt_show_signature, receipt_footer: p.receipt_footer,
     wa_template_proses: p.wa_template_proses, wa_template_selesai: p.wa_template_selesai, wa_template_diserahkan: p.wa_template_diserahkan,
   })
-  const { register, handleSubmit, formState, reset, setValue } = useForm<DataUsaha>({ resolver: zodResolver(skemaUsaha), defaultValues: awal() })
+  const { register, handleSubmit, formState, reset, setValue } = useForm<MasukanUsaha, unknown, DataUsaha>({ resolver: zodResolver(skemaUsaha), defaultValues: awal() })
   const sudahDiisi = useRef(false)
   useEffect(() => {
     // Isi ulang dari database hanya bila formulir belum diubah (supaya ketikan tidak tertimpa sinkronisasi).
@@ -72,7 +80,7 @@ function FormUsaha({ p }: { p: TPengaturan }) {
         business_whatsapp: d.business_whatsapp?.trim() ? normalisasiWa(d.business_whatsapp) : null,
       }).eq('id', 1)
       if (error) throw error
-      reset(d)
+      reset({ ...d, min_weight_grams: String(d.min_weight_grams).replace('.', ',') })
       beri('Pengaturan disimpan.')
     } catch (e) {
       setGalat(pesanGalat(e))
@@ -101,6 +109,15 @@ function FormUsaha({ p }: { p: TPengaturan }) {
               <option value="dd MMMM yyyy">03 September 2026</option>
               <option value="dd/MM/yyyy">03/09/2026</option>
             </select>
+          </Bidang>
+        </div>
+      </Bagian>
+
+      <Bagian judul="Order" sub="Aturan saat memasukkan order baru.">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Bidang label="Berat minimal per barang (gram)" id="s-berat" galat={e.min_weight_grams?.message}
+            bantuan="Otomatis terisi di setiap barang baru. Berat di bawah angka ini ditolak.">
+            <Isian id="s-berat" inputMode="decimal" {...register('min_weight_grams')} />
           </Bidang>
         </div>
       </Bagian>
@@ -177,11 +194,11 @@ function Logo({ p }: { p: TPengaturan }) {
       const { error } = await db().from('app_settings').update({ logo_path: null }).eq('id', 1)
       if (error) throw error
       if (p.logo_path) await db().storage.from('identitas').remove([p.logo_path])
-      beri('Logo dihapus. Nota memakai logo berlian IDS.')
+      beri('Logo dihapus. Nota memakai logo resmi IDS.')
     } catch (e) { beri(pesanGalat(e), 'galat') } finally { setProses(false) }
   }
   return (
-    <Bagian judul="Logo" sub="Dipakai di nota. Bila kosong, nota memakai logo berlian IDS.">
+    <Bagian judul="Logo" sub="Dipakai di nota. Bila kosong, nota memakai logo resmi IDS.">
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-ice-300 bg-ice-50">
           {url ? <img src={url} alt="Logo usaha" className="h-full w-full object-contain" /> : <span className="text-xs text-ink-muted">Belum ada</span>}
@@ -327,6 +344,8 @@ const PILIHAN_TEMA: { nilai: Tema; judul: string; isi: string; contoh: string }[
 function Tampilan() {
   const [pembuka, setPembuka] = useState(animasiPembukaAktif)
   const [tema, setTema] = useState<Tema>(temaAktif)
+  const [musik, setMusik] = useState(musikAktif)
+  const [sfx, setSfx] = useState(sfxAktif)
   return (
     <Bagian judul="Tampilan dan animasi" sub="Berlaku untuk perangkat ini saja. Animasi otomatis mati bila perangkat diatur untuk mengurangi gerakan.">
       <div className="space-y-4">
@@ -350,6 +369,14 @@ function Tampilan() {
         <label className="flex items-center justify-between gap-3 rounded-xl bg-ice-50 px-4 py-3">
           <span><span className="block font-semibold text-navy-900">Animasi pembuka</span><span className="text-sm text-ink-soft">Logo IDS di atas kaca, huruf muncul satu per satu saat aplikasi dibuka, sekali per sesi.</span></span>
           <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={pembuka} onChange={(e) => { setPembuka(e.target.checked); aturAnimasiPembuka(e.target.checked) }} />
+        </label>
+        <label className="flex items-center justify-between gap-3 rounded-xl bg-ice-50 px-4 py-3">
+          <span><span className="block font-semibold text-navy-900">Efek suara pembuka</span><span className="text-sm text-ink-soft">Denting dan kilau yang mengikuti animasi pembuka. Bila menyala, pembuka menunggu satu ketukan karena HP baru mengizinkan suara setelah layar disentuh.</span></span>
+          <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={sfx} onChange={(e) => { setSfx(e.target.checked); aturSfx(e.target.checked) }} />
+        </label>
+        <label className="flex items-center justify-between gap-3 rounded-xl bg-ice-50 px-4 py-3">
+          <span><span className="block font-semibold text-navy-900">Musik latar halaman depan</span><span className="text-sm text-ink-soft">Diputar berulang selama Anda di Beranda, berhenti saat pindah halaman. Bisa juga dimatikan lewat ikon pengeras suara di Beranda.</span></span>
+          <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={musik} onChange={(e) => { setMusik(e.target.checked); aturMusik(e.target.checked) }} />
         </label>
       </div>
     </Bagian>

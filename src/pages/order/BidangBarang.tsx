@@ -12,13 +12,15 @@ interface Props {
   master: DataMaster
   hariIni: string
   tampilJumlah?: boolean
+  /** Berat minimal per barang (gram) dari Pengaturan. */
+  minBerat: number
 }
 
 const KELAS_PILIH =
   'h-11 w-full rounded-xl border bg-white px-3 text-[15px] text-ink focus:outline-none focus:ring-2 focus:ring-gold-300 focus:border-gold-400'
 
 /** Isian satu barang: pengrajin, kategori, gender, jumlah, tanggal, deskripsi. Dipakai di semua formulir barang. */
-export function BidangBarang({ awalan, master, hariIni, tampilJumlah = true }: Props) {
+export function BidangBarang({ awalan, master, hariIni, tampilJumlah = true, minBerat }: Props) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { register, control, setValue, formState } = useFormContext<any>()
   const n = (k: string) => `${awalan}${k}`
@@ -142,6 +144,43 @@ export function BidangBarang({ awalan, master, hariIni, tampilJumlah = true }: P
           />
         )}
       </div>
+
+      <Controller
+        control={control}
+        name={n('weight_grams')}
+        render={({ field }) => {
+          const angka = Number(String(field.value ?? '').replace(',', '.'))
+          const sah = Number.isFinite(angka) && String(field.value ?? '').trim() !== ''
+          const geser = (d: number) => {
+            const dasar = sah ? angka : minBerat
+            field.onChange(String(Math.max(minBerat, Math.round((dasar + d) * 10) / 10)).replace('.', ','))
+          }
+          const label = minBerat.toLocaleString('id-ID', { maximumFractionDigits: 2 })
+          return (
+            <Bidang label={tampilJumlah ? 'Berat per barang (gram)' : 'Berat barang (gram)'} id={id('weight_grams')} wajib galat={galat('weight_grams')}
+              bantuan={`Minimal ${label} gram (bisa diubah di Pengaturan). Sudah terisi otomatis, tinggal disesuaikan bila perlu.`}>
+              <div className={cx('flex h-11 max-w-xs items-stretch overflow-hidden rounded-xl border bg-white', galat('weight_grams') ? 'border-bad-600' : 'border-ice-300')}>
+                <button type="button" aria-label="Kurangi 0,5 gram" className="px-4 text-navy-900 hover:bg-ice-100 disabled:opacity-40"
+                  disabled={sah && angka <= minBerat} onClick={() => geser(-0.5)}>
+                  <Minus className="h-4 w-4" />
+                </button>
+                <input
+                  id={id('weight_grams')}
+                  inputMode="decimal"
+                  className="w-full border-x border-ice-200 text-center text-lg font-bold tabular-nums text-navy-900 focus:outline-none"
+                  value={field.value === undefined || field.value === null ? '' : String(field.value).replace('.', ',')}
+                  onChange={(e) => field.onChange(e.target.value.replace(/[^\d.,]/g, ''))}
+                  onBlur={field.onBlur}
+                />
+                <span className="grid place-items-center border-r border-ice-200 px-2 text-sm font-semibold text-ink-muted">g</span>
+                <button type="button" aria-label="Tambah 0,5 gram" className="px-4 text-navy-900 hover:bg-ice-100" onClick={() => geser(0.5)}>
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+            </Bidang>
+          )
+        }}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Bidang label="Tanggal diberikan ke pengrajin" id={id('assigned_date')} wajib galat={galat('assigned_date')}>

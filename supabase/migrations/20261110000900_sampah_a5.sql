@@ -215,7 +215,8 @@ select
   i.completed_at, i.delivered_at, i.notes, i.photo_path, i.cancelled_at, i.cancel_reason,
   o.cancelled_at as order_cancelled_at,
   (i.cancelled_at is null and o.cancelled_at is null and o.deleted_at is null) as is_active,
-  i.created_at, i.updated_at
+  i.created_at, i.updated_at,
+  i.weight_grams
 from public.order_items i
 join public.orders o              on o.id = i.order_id
 join public.craftsmen c           on c.id = i.craftsman_id

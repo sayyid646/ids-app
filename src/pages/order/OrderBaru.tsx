@@ -6,7 +6,7 @@ import { AlertTriangle, ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import { db } from '../../lib/supabase'
 import { pesanGalat } from '../../lib/errors'
 import { hariIni as tglHariIni, formatTanggal } from '../../lib/format'
-import { barangKosong, muatanOrder, skemaOrder, totalBarang, type DataOrder, type MasukanOrder } from '../../lib/orderSchema'
+import { BERAT_MINIMAL_BAWAAN, barangKosong, muatanOrder, skemaOrder, totalBarang, type DataOrder, type MasukanOrder } from '../../lib/orderSchema'
 import { LABEL_STATUS_ORDER, type StatusOrder } from '../../lib/types'
 import { useSinkron } from '../../sync/SyncProvider'
 import { useMaster } from '../../sync/useMaster'
@@ -17,7 +17,7 @@ import { BidangBarang } from './BidangBarang'
 interface OrderSama {
   id: string
   order_number: string
-  customer_name: string
+  customer_name: string | null
   quantity: number
   order_date: string | null
   order_status: StatusOrder
@@ -40,7 +40,7 @@ export function PeringatanGanda({ sama }: { sama: OrderSama[] }) {
       {sama.map((o) => (
         <div key={o.id} className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <span>
-            Order <strong>{o.order_number}</strong> · {o.customer_name} · {o.quantity} barang · {formatTanggal(o.order_date)} ·{' '}
+            Order <strong>{o.order_number}</strong>{o.customer_name ? ` · ${o.customer_name}` : ''} · {o.quantity} barang · {formatTanggal(o.order_date)} ·{' '}
             {o.cancelled ? 'Dibatalkan' : LABEL_STATUS_ORDER[o.order_status]}
           </span>
           <span className="flex gap-2">
@@ -55,18 +55,19 @@ export function PeringatanGanda({ sama }: { sama: OrderSama[] }) {
 }
 
 export function OrderBaru() {
-  const { zona } = useSinkron()
+  const { zona, pengaturan } = useSinkron()
+  const minBerat = Number(pengaturan?.min_weight_grams) || BERAT_MINIMAL_BAWAAN
   const master = useMaster()
   const navigasi = useNavigate()
   const { beri } = useNotifikasi()
   const hariIni = tglHariIni(zona)
-  const skema = useMemo(() => skemaOrder(hariIni), [hariIni])
+  const skema = useMemo(() => skemaOrder(hariIni, minBerat), [hariIni, minBerat])
   const [sama, setSama] = useState<OrderSama[]>([])
   const [galat, setGalat] = useState<string | null>(null)
 
   const form = useForm<MasukanOrder, unknown, DataOrder>({
     resolver: zodResolver(skema),
-    defaultValues: { order_number: '', customer_name: '', customer_whatsapp: '', notes: '', items: [barangKosong(hariIni)] },
+    defaultValues: { order_number: '', notes: '', items: [barangKosong(hariIni, minBerat)] },
   })
   const { register, handleSubmit, control, formState } = form
   const { fields, append, remove } = useFieldArray({ control, name: 'items' })
@@ -128,12 +129,6 @@ export function OrderBaru() {
                 <Isian id="order_number" inputMode="text" autoComplete="off" placeholder="Contoh: 2574" salah={!!e.order_number || sama.length > 0}
                   {...register('order_number', { onBlur: (ev) => void periksaNomor(ev.target.value) })} />
               </Bidang>
-              <Bidang label="Nama pelanggan" id="customer_name" wajib galat={e.customer_name?.message}>
-                <Isian id="customer_name" autoComplete="off" salah={!!e.customer_name} {...register('customer_name')} />
-              </Bidang>
-              <Bidang label="WhatsApp pelanggan" id="customer_whatsapp" galat={e.customer_whatsapp?.message} bantuan="Opsional. Untuk mengirim kabar lewat WhatsApp.">
-                <Isian id="customer_whatsapp" type="tel" inputMode="tel" placeholder="0812 3456 7890" salah={!!e.customer_whatsapp} {...register('customer_whatsapp')} />
-              </Bidang>
               <Bidang label="Catatan order" id="notes" galat={e.notes?.message}>
                 <IsianPanjang id="notes" rows={2} className="min-h-[44px]" {...register('notes')} />
               </Bidang>
@@ -150,13 +145,13 @@ export function OrderBaru() {
                   <Tombol kecil ragam="hantu" ikon={<Trash2 className="h-4 w-4" />} onClick={() => remove(i)}>Hapus</Tombol>
                 )}
               </div>
-              <BidangBarang awalan={`items.${i}.`} master={m} hariIni={hariIni} />
+              <BidangBarang awalan={`items.${i}.`} master={m} hariIni={hariIni} minBerat={minBerat} />
             </Kartu>
           ))}
           {e.items?.message && <p role="alert" className="text-sm text-bad-600">{e.items.message}</p>}
 
           <Tombol ragam="kedua" ikon={<Plus className="h-4 w-4" />} className="w-full sm:w-auto"
-            onClick={() => append(barangKosong(items[items.length - 1]?.assigned_date || hariIni))}>
+            onClick={() => append(barangKosong(items[items.length - 1]?.assigned_date || hariIni, minBerat))}>
             Tambah barang dengan pengrajin atau kategori lain
           </Tombol>
 

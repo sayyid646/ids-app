@@ -88,30 +88,33 @@ import { muatanOrder, skemaOrder, totalBarang } from './orderSchema'
 describe('formulir order', () => {
   const HARI_INI = '2026-11-10'
   const skema = skemaOrder(HARI_INI)
-  const barang = { craftsman_id: 'p1', category_id: 'k1', gender: 'LADY', quantity: '3', assigned_date: '2026-11-10', production_month: '', production_start_date: '', description: ' Cincin ', notes: '' }
+  const barang = { craftsman_id: 'p1', category_id: 'k1', gender: 'LADY', weight_grams: '6', quantity: '3', assigned_date: '2026-11-10', production_month: '', production_start_date: '', description: ' Cincin ', notes: '' }
 
   it('order satu jenis barang dengan jumlah 3', () => {
-    const d = skema.parse({ order_number: ' 2574 ', customer_name: 'Ibu Siti', customer_whatsapp: '0812 3456 7890', items: [barang] })
-    const m = muatanOrder(d) as { order_number: string; customer_whatsapp: string; items: Record<string, unknown>[] }
+    const d = skema.parse({ order_number: ' 2574 ', items: [barang] })
+    const m = muatanOrder(d) as { order_number: string; items: Record<string, unknown>[] }
     expect(m.order_number).toBe('2574')
-    expect(m.customer_whatsapp).toBe('6281234567890')
+    expect(m.items[0].weight_grams).toBe(6)
+    expect('customer_name' in m).toBe(false)
     expect(m.items[0].quantity).toBe(3)
     expect(m.items[0].production_month).toBeNull()
     expect(m.items[0].description).toBe('Cincin')
   })
   it('bulan produksi manual dikirim sebagai tanggal 1', () => {
-    const d = skema.parse({ order_number: '1', customer_name: 'X', items: [{ ...barang, production_month: '2026-10' }] })
+    const d = skema.parse({ order_number: '1', items: [{ ...barang, production_month: '2026-10' }] })
     expect((muatanOrder(d).items as Record<string, unknown>[])[0].production_month).toBe('2026-10-01')
   })
   it('menolak data yang tidak lengkap atau salah', () => {
-    expect(skema.safeParse({ order_number: '', customer_name: 'X', items: [barang] }).success).toBe(false)
-    expect(skema.safeParse({ order_number: '1', customer_name: 'X', items: [] }).success).toBe(false)
-    expect(skema.safeParse({ order_number: '1', customer_name: 'X', items: [{ ...barang, gender: 'ANAK' }] }).success).toBe(false)
-    expect(skema.safeParse({ order_number: '1', customer_name: 'X', items: [{ ...barang, quantity: '0' }] }).success).toBe(false)
-    expect(skema.safeParse({ order_number: '1', customer_name: 'X', items: [{ ...barang, craftsman_id: '' }] }).success).toBe(false)
-    expect(skema.safeParse({ order_number: '1', customer_name: 'X', items: [{ ...barang, assigned_date: '2026-11-11' }] }).success).toBe(false)
-    expect(skema.safeParse({ order_number: '1', customer_name: 'X', items: [{ ...barang, production_start_date: '2026-11-01' }] }).success).toBe(false)
-    expect(skema.safeParse({ order_number: '1', customer_name: 'X', customer_whatsapp: '123', items: [barang] }).success).toBe(false)
+    expect(skema.safeParse({ order_number: '', items: [barang] }).success).toBe(false)
+    expect(skema.safeParse({ order_number: '1', items: [] }).success).toBe(false)
+    expect(skema.safeParse({ order_number: '1', items: [{ ...barang, gender: 'ANAK' }] }).success).toBe(false)
+    expect(skema.safeParse({ order_number: '1', items: [{ ...barang, quantity: '0' }] }).success).toBe(false)
+    expect(skema.safeParse({ order_number: '1', items: [{ ...barang, craftsman_id: '' }] }).success).toBe(false)
+    expect(skema.safeParse({ order_number: '1', items: [{ ...barang, assigned_date: '2026-11-11' }] }).success).toBe(false)
+    expect(skema.safeParse({ order_number: '1', items: [{ ...barang, production_start_date: '2026-11-01' }] }).success).toBe(false)
+    expect(skema.safeParse({ order_number: '1', items: [{ ...barang, weight_grams: '5,9' }] }).success).toBe(false)
+    expect(skema.safeParse({ order_number: '1', items: [{ ...barang, weight_grams: '' }] }).success).toBe(false)
+    expect(skemaOrder(HARI_INI, 10).safeParse({ order_number: '1', items: [{ ...barang, weight_grams: 8 }] }).success).toBe(false)
   })
   it('menjumlahkan barang dari beberapa baris', () => {
     expect(totalBarang([{ quantity: 2 }, { quantity: '3' }, { quantity: '' }])).toBe(5)

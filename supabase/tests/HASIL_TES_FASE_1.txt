@@ -9,6 +9,7 @@ migrasi: 20261110000600_data_awal.sql
 migrasi: 20261110000700_realtime_storage.sql
 migrasi: 20261110000800_hak_akses.sql
 migrasi: 20261110000900_sampah_a5.sql
+migrasi: 20261112001000_berat_pengrajin.sql
 
 == Persiapan akun
                     jadikan_admin                     
@@ -153,62 +154,62 @@ psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:238: NOTICE:  ok  semua barang 2574 selesai (satu sudah diserahkan): order selesai
 
 == T11 Data tidak masuk akal ditolak
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:271: NOTICE:  ok  selesai sebelum tanggal diberikan (ditolak: Tanggal selesai dikerjakan tidak boleh sebelum tanggal diberikan ke pengrajin.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:271: NOTICE:  ok  selesai di masa depan (ditolak: Tanggal selesai dikerjakan tidak boleh di masa depan.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:271: NOTICE:  ok  diserahkan sebelum selesai (ditolak: Tanggal diserahkan ke pembeli tidak boleh sebelum tanggal selesai dikerjakan.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:271: NOTICE:  ok  tanggal diberikan di masa depan (ditolak: Tanggal diberikan ke pengrajin tidak boleh di masa depan.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:271: NOTICE:  ok  nomor WA huruf ditolak (ditolak: Nomor WhatsApp "abc" tidak valid. Contoh yang benar: 0812 3456 7890.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:271: NOTICE:  ok  nomor WA terlalu pendek ditolak (ditolak: Nomor WhatsApp "12345" tidak valid. Contoh yang benar: 0812 3456 7890.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:271: NOTICE:  ok  order tanpa barang ditolak (ditolak: Order harus berisi minimal satu barang.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:271: NOTICE:  ok  jumlah 0 ditolak (ditolak: Jumlah barang harus 1 sampai 100.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:271: NOTICE:  ok  nama pelanggan kosong ditolak (ditolak: new row for relation "orders" violates check constraint "orders_customer_name_ch)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:271: NOTICE:  ok  gender selain LADY/MAN ditolak (ditolak: invalid input value for enum public.gender_category: "ANAK")
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:271: NOTICE:  ok  order 3001 tidak tersimpan sebagian
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:272: NOTICE:  ok  selesai sebelum tanggal diberikan (ditolak: Tanggal selesai dikerjakan tidak boleh sebelum tanggal diberikan ke pengrajin.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:272: NOTICE:  ok  selesai di masa depan (ditolak: Tanggal selesai dikerjakan tidak boleh di masa depan.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:272: NOTICE:  ok  diserahkan sebelum selesai (ditolak: Tanggal diserahkan ke pembeli tidak boleh sebelum tanggal selesai dikerjakan.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:272: NOTICE:  ok  tanggal diberikan di masa depan (ditolak: Tanggal diberikan ke pengrajin tidak boleh di masa depan.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:272: NOTICE:  ok  nomor WA huruf ditolak (ditolak: Nomor WhatsApp "abc" tidak valid. Contoh yang benar: 0812 3456 7890.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:272: NOTICE:  ok  nomor WA terlalu pendek ditolak (ditolak: Nomor WhatsApp "12345" tidak valid. Contoh yang benar: 0812 3456 7890.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:272: NOTICE:  ok  order tanpa barang ditolak (ditolak: Order harus berisi minimal satu barang.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:272: NOTICE:  ok  jumlah 0 ditolak (ditolak: Jumlah barang harus 1 sampai 100.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:272: NOTICE:  ok  nama pelanggan kosong boleh (tidak lagi diisi)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:272: NOTICE:  ok  gender selain LADY/MAN ditolak (ditolak: invalid input value for enum public.gender_category: "ANAK")
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:272: NOTICE:  ok  order 3001 tidak tersimpan sebagian
 
 == T12 Koreksi tanggal selesai tercatat di riwayat
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:289: NOTICE:  ok  riwayat tanggal_selesai_diubah ada
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:289: NOTICE:  ok  nilai baru di riwayat
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:289: NOTICE:  ok  nilai lama di riwayat tidak kosong
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:289: NOTICE:  ok  riwayat tanggal_serah_diubah ada
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:290: NOTICE:  ok  riwayat tanggal_selesai_diubah ada
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:290: NOTICE:  ok  nilai baru di riwayat
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:290: NOTICE:  ok  nilai lama di riwayat tidak kosong
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:290: NOTICE:  ok  riwayat tanggal_serah_diubah ada
 
 == T13 Kembali ke Dalam Proses menghapus tanggal dan tercatat
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:309: NOTICE:  ok  tanggal selesai dikosongkan
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:309: NOTICE:  ok  riwayat status lama selesai
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:309: NOTICE:  ok  tanggal selesai tanpa status selesai ditolak (ditolak: new row for relation "order_items" violates check constraint "order_items_status)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:309: NOTICE:  ok  dari diserahkan ke selesai: tanggal selesai tetap
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:309: NOTICE:  ok  dari diserahkan ke selesai: tanggal serah dikosongkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:310: NOTICE:  ok  tanggal selesai dikosongkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:310: NOTICE:  ok  riwayat status lama selesai
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:310: NOTICE:  ok  tanggal selesai tanpa status selesai ditolak (ditolak: new row for relation "order_items" violates check constraint "order_items_status)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:310: NOTICE:  ok  dari diserahkan ke selesai: tanggal selesai tetap
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:310: NOTICE:  ok  dari diserahkan ke selesai: tanggal serah dikosongkan
 
 == T14 Ganti pengrajin tercatat
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:321: NOTICE:  ok  riwayat pengrajin lama IDS 002
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:321: NOTICE:  ok  riwayat pengrajin baru IDS 003
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:322: NOTICE:  ok  riwayat pengrajin lama IDS 002
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:322: NOTICE:  ok  riwayat pengrajin baru IDS 003
 
 == T15 Kelola pengrajin: nonaktif, ganti nama dan ID, tambah, arsip
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  riwayat pengrajin_dinonaktifkan
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  barang baru ke pengrajin nonaktif ditolak (ditolak: Pengrajin IDS 003 sedang nonaktif. Aktifkan dulu atau pilih pengrajin lain.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  barang lama pengrajin nonaktif tetap bisa diperbarui
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  pengrajin nonaktif tetap tampil di daftar
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  riwayat barangnya tetap
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  ID pengrajin bisa diganti dan dirapikan
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  dikembalikan ke IDS 008 tanpa nama
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  perubahan ID dan nama tercatat 2x
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  ID pengrajin ganda ditolak (ditolak: duplicate key value violates unique constraint "craftsmen_code_uq")
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  pengrajin baru bisa ditambah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  nomor HP pengrajin dirapikan
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  pengrajin diarsipkan tidak tampil
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  pengrajin diarsipkan otomatis nonaktif
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:353: NOTICE:  ok  pengrajin arsip tidak bisa diubah (ditolak: Pengrajin ini sudah dihapus (diarsipkan) dan tidak bisa diubah.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  riwayat pengrajin_dinonaktifkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  barang baru ke pengrajin nonaktif ditolak (ditolak: Pengrajin IDS 003 sedang nonaktif. Aktifkan dulu atau pilih pengrajin lain.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  barang lama pengrajin nonaktif tetap bisa diperbarui
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  pengrajin nonaktif tetap tampil di daftar
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  riwayat barangnya tetap
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  ID pengrajin bisa diganti dan dirapikan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  dikembalikan ke IDS 008 tanpa nama
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  perubahan ID dan nama tercatat 2x
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  ID pengrajin ganda ditolak (ditolak: duplicate key value violates unique constraint "craftsmen_code_uq")
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  pengrajin baru bisa ditambah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  nomor HP pengrajin dirapikan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  pengrajin diarsipkan tidak tampil
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  pengrajin diarsipkan otomatis nonaktif
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:354: NOTICE:  ok  pengrajin arsip tidak bisa diubah (ditolak: Pengrajin ini ada di Sampah. Pulihkan dulu bila ingin mengubahnya.)
 
 == T16 Data tidak bisa dihapus permanen
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:363: NOTICE:  ok  admin hapus pengrajin (ditolak: permission denied for table craftsmen)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:363: NOTICE:  ok  admin hapus order (ditolak: permission denied for table orders)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:363: NOTICE:  ok  admin hapus barang (ditolak: permission denied for table order_items)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:363: NOTICE:  ok  admin ubah riwayat (ditolak: permission denied for table activity_logs)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:363: NOTICE:  ok  admin hapus riwayat (ditolak: permission denied for table activity_logs)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:371: NOTICE:  ok  pemilik database hapus pengrajin (ditolak: Data craftsmen tidak boleh dihapus permanen. Gunakan batalkan atau nonaktifkan.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:371: NOTICE:  ok  pemilik database hapus order (ditolak: Data orders tidak boleh dihapus permanen. Gunakan batalkan atau nonaktifkan.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:371: NOTICE:  ok  pemilik database hapus barang (ditolak: Data order_items tidak boleh dihapus permanen. Gunakan batalkan atau nonaktifkan)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:371: NOTICE:  ok  pemilik database ubah riwayat (ditolak: Riwayat aktivitas tidak boleh diubah atau dihapus.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:371: NOTICE:  ok  pemilik database hapus riwayat (ditolak: Riwayat aktivitas tidak boleh diubah atau dihapus.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:364: NOTICE:  ok  admin hapus pengrajin (ditolak: permission denied for table craftsmen)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:364: NOTICE:  ok  admin hapus order (ditolak: permission denied for table orders)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:364: NOTICE:  ok  admin hapus barang (ditolak: permission denied for table order_items)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:364: NOTICE:  ok  admin ubah riwayat (ditolak: permission denied for table activity_logs)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:364: NOTICE:  ok  admin hapus riwayat (ditolak: permission denied for table activity_logs)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:372: NOTICE:  ok  pemilik database hapus pengrajin (ditolak: Data craftsmen tidak boleh dihapus permanen. Gunakan batalkan atau nonaktifkan.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:372: NOTICE:  ok  pemilik database hapus order (ditolak: Data orders tidak boleh dihapus permanen. Gunakan batalkan atau nonaktifkan.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:372: NOTICE:  ok  pemilik database hapus barang (ditolak: Data order_items tidak boleh dihapus permanen. Gunakan batalkan atau nonaktifkan)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:372: NOTICE:  ok  pemilik database ubah riwayat (ditolak: Riwayat aktivitas tidak boleh diubah atau dihapus.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:372: NOTICE:  ok  pemilik database hapus riwayat (ditolak: Riwayat aktivitas tidak boleh diubah atau dihapus.)
               set_config              
 --------------------------------------
  00000000-0000-0000-0000-00000000000a
@@ -216,89 +217,89 @@ psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/
 
 
 == T17 Batalkan dan pulihkan order
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:393: NOTICE:  ok  batal tanpa alasan ditolak (ditolak: Alasan pembatalan wajib diisi.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:393: NOTICE:  ok  order berstatus dibatalkan
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:393: NOTICE:  ok  riwayat order_dibatalkan
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:393: NOTICE:  ok  barang order batal tidak aktif
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:393: NOTICE:  ok  status barang order batal tidak bisa diubah (ditolak: Order ini sudah dibatalkan. Status barang tidak bisa diubah.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:393: NOTICE:  ok  tambah barang ke order batal ditolak (ditolak: Order ini sudah dibatalkan atau diarsipkan, tidak bisa ditambah atau diubah.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:393: NOTICE:  ok  data order batal tidak hilang
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:393: NOTICE:  ok  order dipulihkan kembali selesai
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:393: NOTICE:  ok  riwayat order_dipulihkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:394: NOTICE:  ok  batal tanpa alasan ditolak (ditolak: Alasan pembatalan wajib diisi.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:394: NOTICE:  ok  order berstatus dibatalkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:394: NOTICE:  ok  riwayat order_dibatalkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:394: NOTICE:  ok  barang order batal tidak aktif
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:394: NOTICE:  ok  status barang order batal tidak bisa diubah (ditolak: Order ini sudah dibatalkan. Status barang tidak bisa diubah.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:394: NOTICE:  ok  tambah barang ke order batal ditolak (ditolak: Order ini sudah dibatalkan atau diarsipkan, tidak bisa ditambah atau diubah.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:394: NOTICE:  ok  data order batal tidak hilang
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:394: NOTICE:  ok  order dipulihkan kembali selesai
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:394: NOTICE:  ok  riwayat order_dipulihkan
 
 == T18 Kategori bisa diubah tanpa merusak riwayat
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:409: NOTICE:  ok  nama kategori dirapikan huruf besar
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:409: NOTICE:  ok  order lama ikut nama baru
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:409: NOTICE:  ok  riwayat kategori_diubah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:409: NOTICE:  ok  kategori nonaktif tidak bisa dipakai barang baru (ditolak: Kategori LIONTIN sedang nonaktif.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:409: NOTICE:  ok  nama kategori ganda ditolak (ditolak: duplicate key value violates unique constraint "jewelry_categories_name_uq")
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:409: NOTICE:  ok  kategori tidak bisa dihapus (ditolak: permission denied for table jewelry_categories)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:410: NOTICE:  ok  nama kategori dirapikan huruf besar
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:410: NOTICE:  ok  order lama ikut nama baru
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:410: NOTICE:  ok  riwayat kategori_diubah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:410: NOTICE:  ok  kategori nonaktif tidak bisa dipakai barang baru (ditolak: Kategori LIONTIN sedang nonaktif.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:410: NOTICE:  ok  nama kategori ganda ditolak (ditolak: duplicate key value violates unique constraint "jewelry_categories_name_uq")
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:410: NOTICE:  ok  kategori tidak bisa dihapus (ditolak: permission denied for table jewelry_categories)
 
 == T19 Bulan produksi: otomatis atau koreksi manual
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:434: NOTICE:  ok  bulan manual disimpan sebagai tanggal 1
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:434: NOTICE:  ok  ditandai manual
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:434: NOTICE:  ok  bulan manual tidak berubah saat tanggal diganti
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:434: NOTICE:  ok  bulan otomatis ikut tanggal baru
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:434: NOTICE:  ok  koreksi manual lewat ubah data
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:434: NOTICE:  ok  kembali sama dengan bulan otomatis = bukan manual
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:434: NOTICE:  ok  mulai produksi sebelum tanggal diberikan (ditolak: Tanggal mulai produksi tidak boleh sebelum tanggal diberikan ke pengrajin.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:434: NOTICE:  ok  tanggal mulai produksi tersimpan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:435: NOTICE:  ok  bulan manual disimpan sebagai tanggal 1
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:435: NOTICE:  ok  ditandai manual
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:435: NOTICE:  ok  bulan manual tidak berubah saat tanggal diganti
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:435: NOTICE:  ok  bulan otomatis ikut tanggal baru
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:435: NOTICE:  ok  koreksi manual lewat ubah data
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:435: NOTICE:  ok  kembali sama dengan bulan otomatis = bukan manual
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:435: NOTICE:  ok  mulai produksi sebelum tanggal diberikan (ditolak: Tanggal mulai produksi tidak boleh sebelum tanggal diberikan ke pengrajin.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:435: NOTICE:  ok  tanggal mulai produksi tersimpan
 
 == T20 Perhitungan dashboard tepat (data 2025 khusus tes)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  2025: total order (S4 batal tidak dihitung)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  2025: total barang (barang batal tidak dihitung)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  2025: dalam proses
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  2025: selesai belum diserahkan
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  2025: sudah diserahkan
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  2025: selesai dikerjakan (selesai + diserahkan)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  2025: belum diserahkan
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  2025: selesai pada periode
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  2025: diserahkan pada periode
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  pengrajin aktif = 8 (IDS 003 nonaktif)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  angka saat ini cocok dengan hitungan langsung
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  angka siap diserahkan cocok
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  Jan 2025: 1 order
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  Jan 2025: 2 barang
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  Jan 2025: 2 selesai pada periode
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  Jan 2025: 0 diserahkan pada periode (diserahkan Feb)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  31 Mar: selesai 23:30 WITA terhitung 31 Mar
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  31 Mar: diserahkan 00:30 WITA 1 Apr tidak terhitung
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  1 Apr: diserahkan terhitung 1 Apr
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  grafik bulanan Jan-Apr 2025
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  produktivitas IDS 004 (tugas/selesai/serah/proses/rata hari)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  produktivitas IDS 005 (order batal tidak dihitung)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  jumlah tugas semua pengrajin = total barang
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  semua pengrajin tampil di produktivitas
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  rincian kategori dan gender 2025
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:507: NOTICE:  ok  rentang tanggal terbalik ditolak (ditolak: Rentang tanggal tidak valid.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  2025: total order (S4 batal tidak dihitung)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  2025: total barang (barang batal tidak dihitung)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  2025: dalam proses
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  2025: selesai belum diserahkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  2025: sudah diserahkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  2025: selesai dikerjakan (selesai + diserahkan)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  2025: belum diserahkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  2025: selesai pada periode
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  2025: diserahkan pada periode
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  pengrajin aktif = 8 (IDS 003 nonaktif)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  angka saat ini cocok dengan hitungan langsung
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  angka siap diserahkan cocok
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  Jan 2025: 1 order
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  Jan 2025: 2 barang
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  Jan 2025: 2 selesai pada periode
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  Jan 2025: 0 diserahkan pada periode (diserahkan Feb)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  31 Mar: selesai 23:30 WITA terhitung 31 Mar
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  31 Mar: diserahkan 00:30 WITA 1 Apr tidak terhitung
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  1 Apr: diserahkan terhitung 1 Apr
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  grafik bulanan Jan-Apr 2025
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  produktivitas IDS 004 (tugas/selesai/serah/proses/rata hari)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  produktivitas IDS 005 (order batal tidak dihitung)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  jumlah tugas semua pengrajin = total barang
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  semua pengrajin tampil di produktivitas
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  rincian kategori dan gender 2025
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:508: NOTICE:  ok  rentang tanggal terbalik ditolak (ditolak: Rentang tanggal tidak valid.)
 
 == T21 Pencarian global
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:527: NOTICE:  ok  cari nomor order 2574
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:527: NOTICE:  ok  cari nama pengrajin "iskandar"
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:527: NOTICE:  ok  cari ID pengrajin "ids001" tanpa spasi
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:527: NOTICE:  ok  cari ID pengrajin "IDS 004"
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:527: NOTICE:  ok  cari nama pelanggan "siti"
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:527: NOTICE:  ok  cari WA dengan 0 di depan "0812 3456"
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:527: NOTICE:  ok  cari kategori "sultan"
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:527: NOTICE:  ok  cari status "sudah diserahkan"
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:527: NOTICE:  ok  cari gabungan "iskandar premium"
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:527: NOTICE:  ok  pencarian kosong tidak mengembalikan apa pun
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:527: NOTICE:  ok  hasil aktif di urutan atas
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:528: NOTICE:  ok  cari nomor order 2574
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:528: NOTICE:  ok  cari nama pengrajin "iskandar"
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:528: NOTICE:  ok  cari ID pengrajin "ids001" tanpa spasi
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:528: NOTICE:  ok  cari ID pengrajin "IDS 004"
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:528: NOTICE:  ok  cari nama pelanggan "siti"
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:528: NOTICE:  ok  cari WA dengan 0 di depan "0812 3456"
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:528: NOTICE:  ok  cari kategori "sultan"
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:528: NOTICE:  ok  cari status "sudah diserahkan"
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:528: NOTICE:  ok  cari gabungan "iskandar premium"
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:528: NOTICE:  ok  pencarian kosong tidak mengembalikan apa pun
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:528: NOTICE:  ok  hasil aktif di urutan atas
 
 == T22 Pengaturan
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:537: NOTICE:  ok  WA usaha dirapikan
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:537: NOTICE:  ok  riwayat pengaturan_diubah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:537: NOTICE:  ok  zona waktu salah ditolak (ditolak: Zona waktu "Mars/Olympus" tidak dikenal.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:537: NOTICE:  ok  baris pengaturan kedua ditolak (ditolak: permission denied for table app_settings)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:538: NOTICE:  ok  WA usaha dirapikan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:538: NOTICE:  ok  riwayat pengaturan_diubah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:538: NOTICE:  ok  zona waktu salah ditolak (ditolak: Zona waktu "Mars/Olympus" tidak dikenal.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:538: NOTICE:  ok  baris pengaturan kedua ditolak (ditolak: permission denied for table app_settings)
 
 == T23 Sinkronisasi, penyimpanan foto, riwayat
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:557: NOTICE:  ok  6 tabel ikut Realtime
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:557: NOTICE:  ok  bucket foto privat
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:557: NOTICE:  ok  semua riwayat punya pelaku
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:557: NOTICE:  ok  riwayat admin tercatat atas nama admin
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:557: NOTICE:  ok  RLS aktif di semua tabel
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:557: NOTICE:  ok  anon tidak punya hak tabel apa pun
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:557: NOTICE:  ok  tidak ada hak DELETE untuk akun login
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  6 tabel ikut Realtime
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  bucket foto privat
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  semua riwayat punya pelaku
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  riwayat admin tercatat atas nama admin
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  RLS aktif di semua tabel
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  anon tidak punya hak tabel apa pun
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  tidak ada hak DELETE untuk akun login
 
 == T24 Sampah 7 hari: hapus dan pulihkan order dan barang
               set_config              
@@ -306,59 +307,85 @@ psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/
  00000000-0000-0000-0000-00000000000a
 (1 row)
 
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  order uji 2 barang
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  barang terhapus hilang dari daftar barang
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  jumlah barang order jadi 1
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  barang terhapus tidak dihitung dashboard
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  barang terhapus tidak ikut pencarian
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  barang ada di Sampah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  Sampah menyebut batas 7 hari
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  riwayat barang_dihapus
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  barang di Sampah tidak bisa diubah (ditolak: Barang ini ada di Sampah. Pulihkan dulu bila ingin mengubahnya.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  barang di Sampah tidak bisa diubah statusnya (ditolak: Barang ini ada di Sampah. Pulihkan dulu bila ingin mengubahnya.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  hapus dua kali ditolak (ditolak: Barang tidak ditemukan atau sudah di Sampah.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  barang kembali
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  barang keluar dari Sampah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  riwayat barang_dipulihkan_sampah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  barang dipulihkan tidak tercatat barang_diubah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  order terhapus hilang dari daftar order
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  barang order terhapus hilang
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  order terhapus tidak dihitung dashboard
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  order ada di Sampah dengan 2 barang
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  barangnya tidak tampil terpisah di Sampah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  riwayat order_dihapus
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  order di Sampah tidak bisa diubah (ditolak: Order ini ada di Sampah. Pulihkan dulu bila ingin mengubahnya.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  tambah barang ke order di Sampah ditolak (ditolak: Order ini sudah dibatalkan atau diarsipkan, tidak bisa ditambah atau diubah.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  barang dari order di Sampah tidak bisa dipulihkan sendiri (ditolak: Data tidak ditemukan di Sampah.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:609: NOTICE:  ok  nomor order bisa dipakai lagi selama di Sampah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:631: NOTICE:  ok  pulihkan order bernomor kembar ditolak (ditolak: Nomor order 7700 sudah dipakai order lain. Ubah dulu nomor order yang lain itu.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:631: NOTICE:  ok  order dipulihkan lengkap
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:631: NOTICE:  ok  riwayat order_dipulihkan_sampah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:631: NOTICE:  ok  order lain tetap di Sampah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:631: NOTICE:  ok  order batal masuk Sampah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:631: NOTICE:  ok  order batal dipulihkan tetap batal
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  order uji 2 barang
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  barang terhapus hilang dari daftar barang
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  jumlah barang order jadi 1
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  barang terhapus tidak dihitung dashboard
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  barang terhapus tidak ikut pencarian
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  barang ada di Sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  Sampah menyebut batas 7 hari
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  riwayat barang_dihapus
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  barang di Sampah tidak bisa diubah (ditolak: Barang ini ada di Sampah. Pulihkan dulu bila ingin mengubahnya.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  barang di Sampah tidak bisa diubah statusnya (ditolak: Barang ini ada di Sampah. Pulihkan dulu bila ingin mengubahnya.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  hapus dua kali ditolak (ditolak: Barang tidak ditemukan atau sudah di Sampah.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  barang kembali
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  barang keluar dari Sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  riwayat barang_dipulihkan_sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  barang dipulihkan tidak tercatat barang_diubah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  order terhapus hilang dari daftar order
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  barang order terhapus hilang
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  order terhapus tidak dihitung dashboard
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  order ada di Sampah dengan 2 barang
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  barangnya tidak tampil terpisah di Sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  riwayat order_dihapus
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  order di Sampah tidak bisa diubah (ditolak: Order ini ada di Sampah. Pulihkan dulu bila ingin mengubahnya.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  tambah barang ke order di Sampah ditolak (ditolak: Order ini sudah dibatalkan atau diarsipkan, tidak bisa ditambah atau diubah.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  barang dari order di Sampah tidak bisa dipulihkan sendiri (ditolak: Data tidak ditemukan di Sampah.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:610: NOTICE:  ok  nomor order bisa dipakai lagi selama di Sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:632: NOTICE:  ok  pulihkan order bernomor kembar ditolak (ditolak: Nomor order 7700 sudah dipakai order lain. Ubah dulu nomor order yang lain itu.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:632: NOTICE:  ok  order dipulihkan lengkap
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:632: NOTICE:  ok  riwayat order_dipulihkan_sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:632: NOTICE:  ok  order lain tetap di Sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:632: NOTICE:  ok  order batal masuk Sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:632: NOTICE:  ok  order batal dipulihkan tetap batal
               set_config              
 --------------------------------------
  00000000-0000-0000-0000-00000000000a
 (1 row)
 
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:651: NOTICE:  ok  lewat 7 hari tidak tampil di Sampah
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:651: NOTICE:  ok  order lewat 7 hari tidak bisa dipulihkan (ditolak: Order ini sudah lebih dari 7 hari di Sampah dan tidak bisa dipulihkan.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:651: NOTICE:  ok  barang lewat 7 hari tidak bisa dipulihkan (ditolak: Barang ini sudah lebih dari 7 hari di Sampah dan tidak bisa dipulihkan.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:651: NOTICE:  ok  jenis Sampah tak dikenal (ditolak: Jenis tidak dikenal.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:651: NOTICE:  ok  hapus permanen tetap ditolak (ditolak: permission denied for table orders)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:651: NOTICE:  ok  kertas nota A5 diterima
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:651: NOTICE:  ok  kertas A3 ditolak (ditolak: new row for relation "app_settings" violates check constraint "app_settings_rece)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:652: NOTICE:  ok  lewat 7 hari tidak tampil di Sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:652: NOTICE:  ok  order lewat 7 hari tidak bisa dipulihkan (ditolak: Order ini sudah lebih dari 7 hari di Sampah dan tidak bisa dipulihkan.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:652: NOTICE:  ok  barang lewat 7 hari tidak bisa dipulihkan (ditolak: Barang ini sudah lebih dari 7 hari di Sampah dan tidak bisa dipulihkan.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:652: NOTICE:  ok  jenis Sampah tak dikenal (ditolak: Jenis tidak dikenal.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:652: NOTICE:  ok  hapus permanen tetap ditolak (ditolak: permission denied for table orders)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:652: NOTICE:  ok  kertas nota A5 diterima
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:652: NOTICE:  ok  kertas A3 ditolak (ditolak: new row for relation "app_settings" violates check constraint "app_settings_rece)
               set_config              
 --------------------------------------
  00000000-0000-0000-0000-00000000000b
 (1 row)
 
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:660: NOTICE:  ok  bukan admin: hapus order (ditolak: Akses ditolak. Akun ini bukan administrator IDS.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:660: NOTICE:  ok  bukan admin: pulihkan (ditolak: Akses ditolak. Akun ini bukan administrator IDS.)
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:660: NOTICE:  ok  bukan admin: Sampah kosong
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:661: NOTICE:  ok  bukan admin: hapus order (ditolak: Akses ditolak. Akun ini bukan administrator IDS.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:661: NOTICE:  ok  bukan admin: pulihkan (ditolak: Akses ditolak. Akun ini bukan administrator IDS.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:661: NOTICE:  ok  bukan admin: Sampah kosong
+
+== T25 Berat minimal, order tanpa pelanggan, hapus pengrajin
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-00000000000a
+(1 row)
+
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  berat minimal bawaan 6 gram
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  order tanpa nama pelanggan tersimpan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  berat barang tersimpan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  berat di bawah 6 gram ditolak (ditolak: Berat minimal order 6 gram. Berat yang diisi 5,9 gram.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  ubah berat di bawah minimal ditolak (ditolak: Berat minimal order 6 gram. Berat yang diisi 3 gram.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  ubah berat tercatat di riwayat
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  barang lama tetap sah setelah minimal dinaikkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  minimal baru 10 gram berlaku (ditolak: Berat minimal order 10 gram. Berat yang diisi 8 gram.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  barang tanpa berat tetap bisa (data lama)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  minimal 0 ditolak (ditolak: new row for relation "app_settings" violates check constraint "app_settings_min_)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  nama kosong disimpan sebagai kosong
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  pengrajin terhapus hilang dari daftar
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  pengrajin ada di Sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  riwayat pengrajin_dihapus
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  pengrajin terhapus tidak bisa diberi barang (ditolak: Pengrajin IDS 009 sedang nonaktif. Aktifkan dulu atau pilih pengrajin lain.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  pengrajin di Sampah tidak bisa diubah (ditolak: Pengrajin ini ada di Sampah. Pulihkan dulu bila ingin mengubahnya.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  pengrajin dipulihkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  riwayat pengrajin_dipulihkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:709: NOTICE:  ok  pulihkan pengrajin ber-ID kembar ditolak (ditolak: ID IDS 009 sudah dipakai pengrajin lain. Ubah dulu ID pengrajin yang lain itu.)
 
 == SEMUA TES LULUS
 menjalankan ulang semua migrasi (harus aman diulang)...
- ulang: pengrajin=10 kategori=8
+ ulang: pengrajin=11 kategori=8
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { formatBerat } from '../../lib/orderSchema'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Ban, CalendarClock, CheckCheck, MessageCircle, Pencil, Phone, Plus, Printer, RotateCcw, Trash2 } from 'lucide-react'
 import { db } from '../../lib/supabase'
@@ -97,7 +98,7 @@ export function DetailOrder() {
               <LencanaOrder status={o.order_status} />
             </div>
             <h1 className="mt-1 font-display text-5xl font-semibold leading-none text-navy-900">{o.order_number}</h1>
-            <p className="mt-3 text-lg font-semibold text-navy-900">{o.customer_name}</p>
+            {o.customer_name && <p className="mt-3 text-lg font-semibold text-navy-900">{o.customer_name}</p>}
             <div className="mt-1 flex flex-wrap gap-x-5 gap-y-1 text-sm text-ink-soft">
               {o.customer_whatsapp && <span className="inline-flex items-center gap-1.5"><Phone className="h-4 w-4" aria-hidden />{tampilkanWa(o.customer_whatsapp)}</span>}
               <span>Diterima {formatTanggal(o.order_date)}</span>
@@ -158,7 +159,7 @@ export function DetailOrder() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-semibold tracking-[0.15em] text-ink-muted">BARANG #{b.item_no}</p>
-                      <p className="mt-1 font-display text-2xl font-semibold text-navy-900">{b.category_name} <span className="text-base font-sans font-bold text-gold-600">{b.gender}</span></p>
+                      <p className="mt-1 font-display text-2xl font-semibold text-navy-900">{b.category_name} <span className="text-base font-sans font-bold text-gold-600">{b.gender}</span>{b.weight_grams != null && <span className="ml-2 rounded-full bg-gold-50 px-2 py-0.5 align-middle font-sans text-sm font-bold tabular-nums text-gold-700 ring-1 ring-gold-200">{formatBerat(b.weight_grams)}</span>}</p>
                     </div>
                     <LencanaStatus status={b.status} batal={!b.is_active} />
                   </div>

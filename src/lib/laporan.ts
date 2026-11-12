@@ -10,7 +10,7 @@ export interface BarisBarang {
   id: string
   order_id: string
   order_number: string
-  customer_name: string
+  customer_name: string | null
   customer_whatsapp: string | null
   item_no: number
   craftsman_id: string

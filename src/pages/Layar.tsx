@@ -8,7 +8,7 @@ import { TandaIDS } from '../components/layout/Logo'
 export function LayarMemuat() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-navy-900" role="status">
-      <TandaIDS className="h-14 w-14" />
+      <TandaIDS className="h-14 w-[4.25rem]" />
       <Loader2 className="h-5 w-5 animate-spin text-gold-300" aria-hidden />
       <span className="sr-only">Memuat</span>
     </div>

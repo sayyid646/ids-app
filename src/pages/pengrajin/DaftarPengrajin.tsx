@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Grid3x3, LayoutGrid, Pencil, Plus, Power, Search } from 'lucide-react'
+import { Grid3x3, LayoutGrid, Pencil, Plus, Power, Search, Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { db } from '../../lib/supabase'
 import type { PengrajinRingkas } from '../../lib/types'
@@ -11,7 +11,7 @@ import {
   Isian, Kartu, KepalaHalaman, KodePengrajin, Kosong, KotakGalat, LencanaAktif, NamaPengrajin, Pemuat, Tombol, cx,
 } from '../../components/ui/ui'
 import { FormPengrajin } from './FormPengrajin'
-import { KonfirmasiStatusPengrajin } from './AksiPengrajin'
+import { KonfirmasiHapusPengrajin, KonfirmasiStatusPengrajin } from './AksiPengrajin'
 import { aturTampilanPengrajin, tampilanPengrajin, type TampilanPengrajin } from '../../components/animasi/pengaturanAnimasi'
 
 type Saring = 'semua' | 'aktif' | 'nonaktif'
@@ -28,6 +28,7 @@ export function DaftarPengrajin() {
   const [saring, setSaring] = useState<Saring>('semua')
   const [form, setForm] = useState<{ buka: boolean; p: PengrajinRingkas | null }>({ buka: false, p: null })
   const [ubahStatus, setUbahStatus] = useState<PengrajinRingkas | null>(null)
+  const [hapus, setHapus] = useState<PengrajinRingkas | null>(null)
   const [tampilan, setTampilan] = useState<TampilanPengrajin>(tampilanPengrajin)
   const pilihTampilan = (t: TampilanPengrajin) => { setTampilan(t); aturTampilanPengrajin(t) }
 
@@ -148,6 +149,7 @@ export function DaftarPengrajin() {
                   <Tombol kecil ragam="hantu" ikon={<Power className="h-4 w-4" />} onClick={() => setUbahStatus(p)} className="ml-auto">
                     {p.is_active ? 'Nonaktifkan' : 'Aktifkan'}
                   </Tombol>
+                  <Tombol kecil ragam="hantu" className="text-bad-700 hover:bg-bad-50" ikon={<Trash2 className="h-4 w-4" />} aria-label={`Hapus ${p.code}`} onClick={() => setHapus(p)} />
                 </div>
               </Kartu>
             </li>
@@ -163,6 +165,7 @@ export function DaftarPengrajin() {
         tersimpan={() => muatUlang()}
       />
       <KonfirmasiStatusPengrajin pengrajin={ubahStatus} tutup={() => setUbahStatus(null)} berubah={muatUlang} />
+      <KonfirmasiHapusPengrajin pengrajin={hapus} tutup={() => setHapus(null)} berubah={muatUlang} />
     </>
   )
 }

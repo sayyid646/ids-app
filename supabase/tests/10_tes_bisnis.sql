@@ -261,9 +261,10 @@ begin
   perform tes.gagal('jumlah 0 ditolak',
     format('select public.buat_order(%L)', jsonb_build_object('order_number', '3001', 'customer_name', 'X',
       'items', jsonb_build_array(tes.item('IDS 001', 'HIGH', 'MAN', '2026-09-03', '{"quantity":0}')))), 'Jumlah barang');
-  perform tes.gagal('nama pelanggan kosong ditolak',
-    format('select public.buat_order(%L)', jsonb_build_object('order_number', '3001', 'customer_name', '   ',
-      'items', jsonb_build_array(tes.item('IDS 001', 'HIGH', 'MAN', '2026-09-03')))), 'customer_name');
+  perform public.buat_order(jsonb_build_object('order_number', '3099', 'customer_name', '   ',
+      'items', jsonb_build_array(tes.item('IDS 001', 'HIGH', 'MAN', '2026-09-03'))));
+  perform tes.sama('nama pelanggan kosong boleh (tidak lagi diisi)',
+    (select coalesce(customer_name, 'kosong') from public.orders where order_number = '3099'), 'kosong');
   perform tes.gagal('gender selain LADY/MAN ditolak',
     format('select public.buat_order(%L)', jsonb_build_object('order_number', '3001', 'customer_name', 'X',
       'items', jsonb_build_array(tes.item('IDS 001', 'HIGH', 'ANAK', '2026-09-03')))), 'invalid input value');
@@ -349,7 +350,7 @@ begin
   update public.craftsmen set deleted_at = now() where id = v;
   perform tes.sama('pengrajin diarsipkan tidak tampil', (select count(*) from public.v_craftsmen)::text, '9');
   perform tes.sama('pengrajin diarsipkan otomatis nonaktif', (select is_active::text from public.craftsmen where id = v), 'false');
-  perform tes.gagal('pengrajin arsip tidak bisa diubah', format($q$update public.craftsmen set name = 'X' where id = %L$q$, v), 'diarsipkan');
+  perform tes.gagal('pengrajin arsip tidak bisa diubah', format($q$update public.craftsmen set name = 'X' where id = %L$q$, v), 'ada di Sampah');
 end $$;
 
 \echo
@@ -657,6 +658,54 @@ do $$ begin
   perform tes.gagal('bukan admin: hapus order', format('select public.hapus_order(%L)', tes.id('o7700')), 'bukan administrator');
   perform tes.gagal('bukan admin: pulihkan', format($q$select public.pulihkan_sampah('order', %L)$q$, tes.id('o7700')), 'bukan administrator');
   perform tes.sama('bukan admin: Sampah kosong', (select count(*) from public.v_sampah)::text, '0');
+end $$;
+reset role;
+
+\echo
+\echo '== T25 Berat minimal, order tanpa pelanggan, hapus pengrajin'
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false);
+do $$
+declare v uuid; i uuid; p uuid;
+begin
+  perform tes.sama('berat minimal bawaan 6 gram', (select trim_scale(min_weight_grams)::text from public.app_settings), '6');
+  v := public.buat_order(jsonb_build_object('order_number', '8800',
+    'items', jsonb_build_array(tes.item('IDS 001', 'HIGH', 'MAN', '2026-10-08', '{"weight_grams": 6.5}'))));
+  perform tes.sama('order tanpa nama pelanggan tersimpan', (select coalesce(customer_name, 'kosong') from public.orders where id = v), 'kosong');
+  perform tes.sama('berat barang tersimpan', (select trim_scale(weight_grams)::text from public.v_items where order_id = v), '6.5');
+  perform tes.gagal('berat di bawah 6 gram ditolak', format('select public.tambah_barang(%L, %L)', v,
+    tes.item('IDS 001', 'HIGH', 'MAN', '2026-10-08', '{"weight_grams": 5.9}')), 'Berat minimal order 6 gram');
+  i := tes.barang(v, 1);
+  perform tes.gagal('ubah berat di bawah minimal ditolak', format('update public.order_items set weight_grams = 3 where id = %L', i), 'Berat minimal');
+  update public.order_items set weight_grams = 8 where id = i;
+  perform tes.sama('ubah berat tercatat di riwayat', (select count(*) from public.activity_logs where item_id = i and action = 'barang_diubah')::text, '1');
+  update public.app_settings set min_weight_grams = 10 where id = 1;
+  perform tes.sama('barang lama tetap sah setelah minimal dinaikkan', (select count(*) from public.v_items where id = i)::text, '1');
+  perform tes.gagal('minimal baru 10 gram berlaku', format('select public.tambah_barang(%L, %L)', v,
+    tes.item('IDS 001', 'HIGH', 'MAN', '2026-10-08', '{"weight_grams": 8}')), 'Berat minimal order 10 gram');
+  perform public.tambah_barang(v, tes.item('IDS 001', 'HIGH', 'MAN', '2026-10-08'));
+  perform tes.sama('barang tanpa berat tetap bisa (data lama)', (select count(*) from public.v_items where order_id = v)::text, '2');
+  perform tes.gagal('minimal 0 ditolak', 'update public.app_settings set min_weight_grams = 0 where id = 1', 'check');
+  update public.app_settings set min_weight_grams = 6 where id = 1;
+  update public.orders set customer_name = '  ' where id = v;
+  perform tes.sama('nama kosong disimpan sebagai kosong', (select coalesce(customer_name, 'kosong') from public.orders where id = v), 'kosong');
+
+  -- hapus pengrajin
+  p := tes.p('IDS 009');
+  perform public.hapus_pengrajin(p);
+  perform tes.sama('pengrajin terhapus hilang dari daftar', (select count(*) from public.v_craftsmen where id = p)::text, '0');
+  perform tes.sama('pengrajin ada di Sampah', (select jenis || ':' || craftsman_code from public.v_sampah where id = p), 'pengrajin:IDS 009');
+  perform tes.sama('riwayat pengrajin_dihapus', (select count(*) from public.activity_logs where craftsman_id = p and action = 'pengrajin_dihapus')::text, '1');
+  perform tes.gagal('pengrajin terhapus tidak bisa diberi barang', format('select public.tambah_barang(%L, %L)', v,
+    jsonb_build_object('craftsman_id', p, 'category_id', tes.k('HIGH'), 'gender', 'MAN', 'assigned_date', '2026-10-08', 'weight_grams', 7)), '.');
+  perform tes.gagal('pengrajin di Sampah tidak bisa diubah', format($q$update public.craftsmen set name = 'X' where id = %L$q$, p), 'ada di Sampah');
+  perform public.pulihkan_sampah('pengrajin', p);
+  perform tes.sama('pengrajin dipulihkan', (select count(*) from public.v_craftsmen where id = p)::text, '1');
+  perform tes.sama('riwayat pengrajin_dipulihkan', (select count(*) from public.activity_logs where craftsman_id = p and action = 'pengrajin_dipulihkan')::text, '1');
+  -- ID dipakai pengrajin baru, lalu yang lama dipulihkan: ditolak
+  perform public.hapus_pengrajin(p);
+  insert into public.craftsmen (code, name) values ('IDS 009', 'Pengganti');
+  perform tes.gagal('pulihkan pengrajin ber-ID kembar ditolak', format($q$select public.pulihkan_sampah('pengrajin', %L)$q$, p), 'sudah dipakai');
 end $$;
 reset role;
 

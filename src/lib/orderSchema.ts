@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { normalisasiWa, waValid } from './wa'
 
 const POLA_TGL = /^\d{4}-\d{2}-\d{2}$/
 const POLA_BULAN = /^\d{4}-\d{2}$/
@@ -14,13 +13,33 @@ const teksOpsional = (maks: number, label: string) =>
       return t === '' ? null : t
     })
 
-/** Membuat skema barang. `hariIni` = tanggal hari ini (YYYY-MM-DD) di zona waktu usaha. */
-export function skemaBarang(hariIni: string) {
+/** Berat minimal bawaan (gram) bila pengaturan belum termuat. */
+export const BERAT_MINIMAL_BAWAAN = 6
+
+/** Format berat untuk tampilan: 6,5 g. */
+export function formatBerat(g: number | string | null | undefined): string {
+  if (g === null || g === undefined || g === '') return '-'
+  return `${Number(g).toLocaleString('id-ID', { maximumFractionDigits: 2 })} g`
+}
+
+/**
+ * Membuat skema barang. `hariIni` = tanggal hari ini (YYYY-MM-DD) di zona waktu usaha,
+ * `minBerat` = berat minimal per barang (gram) dari Pengaturan.
+ */
+export function skemaBarang(hariIni: string, minBerat: number = BERAT_MINIMAL_BAWAAN) {
+  const min = minBerat > 0 ? minBerat : BERAT_MINIMAL_BAWAAN
+  const label = min.toLocaleString('id-ID', { maximumFractionDigits: 2 })
   return z
     .object({
       craftsman_id: z.string().min(1, 'Pilih pengrajin'),
       category_id: z.string().min(1, 'Pilih kategori'),
       gender: z.enum(['LADY', 'MAN'], { errorMap: () => ({ message: 'Pilih LADY atau MAN' }) }),
+      weight_grams: z.preprocess(
+        (v) => (typeof v === 'string' ? (v.trim() === '' ? undefined : Number(v.replace(',', '.'))) : v),
+        z.number({ required_error: 'Isi berat barang', invalid_type_error: 'Berat harus angka, contoh 6,5' })
+          .min(min, `Berat minimal ${label} gram`)
+          .max(100000, 'Berat terlalu besar'),
+      ),
       quantity: z.coerce.number({ invalid_type_error: 'Isi jumlah' }).int('Jumlah harus bilangan bulat').min(1, 'Minimal 1').max(100, 'Maksimal 100'),
       assigned_date: z
         .string()
@@ -44,17 +63,11 @@ export function skemaBarang(hariIni: string) {
     })
 }
 
-export function skemaOrder(hariIni: string) {
+export function skemaOrder(hariIni: string, minBerat: number = BERAT_MINIMAL_BAWAAN) {
   return z.object({
     order_number: z.string().trim().min(1, 'Nomor order wajib diisi').max(30, 'Maksimal 30 karakter'),
-    customer_name: z.string().trim().min(1, 'Nama pelanggan wajib diisi').max(100, 'Maksimal 100 karakter'),
-    customer_whatsapp: z
-      .string()
-      .optional()
-      .refine((v) => !v || v.trim() === '' || waValid(v), 'Nomor WhatsApp tidak valid. Contoh: 0812 3456 7890')
-      .transform((v) => (v && v.trim() !== '' ? normalisasiWa(v) : null)),
     notes: teksOpsional(1000, 'Catatan'),
-    items: z.array(skemaBarang(hariIni)).min(1, 'Order harus berisi minimal satu barang'),
+    items: z.array(skemaBarang(hariIni, minBerat)).min(1, 'Order harus berisi minimal satu barang'),
   })
 }
 
@@ -70,6 +83,7 @@ export function muatanBarang(b: DataBarang): Record<string, unknown> {
     craftsman_id: b.craftsman_id,
     category_id: b.category_id,
     gender: b.gender,
+    weight_grams: b.weight_grams,
     assigned_date: b.assigned_date,
     production_month: b.production_month ? `${b.production_month}-01` : null,
     production_start_date: b.production_start_date || null,
@@ -81,8 +95,6 @@ export function muatanBarang(b: DataBarang): Record<string, unknown> {
 export function muatanOrder(d: DataOrder): Record<string, unknown> {
   return {
     order_number: d.order_number,
-    customer_name: d.customer_name.replace(/\s+/g, ' '),
-    customer_whatsapp: d.customer_whatsapp,
     notes: d.notes,
     items: d.items.map(muatanBarang),
   }
@@ -92,6 +104,6 @@ export function totalBarang(items: { quantity?: unknown }[]): number {
   return items.reduce((n, b) => n + (Number(b.quantity) > 0 ? Math.floor(Number(b.quantity)) : 0), 0)
 }
 
-export function barangKosong(hariIni: string): MasukanBarang {
-  return { craftsman_id: '', category_id: '', gender: undefined as unknown as 'LADY', quantity: 1, assigned_date: hariIni, production_month: '', production_start_date: '', description: '', notes: '' }
+export function barangKosong(hariIni: string, minBerat: number = BERAT_MINIMAL_BAWAAN): MasukanBarang {
+  return { craftsman_id: '', category_id: '', gender: undefined as unknown as 'LADY', weight_grams: minBerat, quantity: 1, assigned_date: hariIni, production_month: '', production_start_date: '', description: '', notes: '' }
 }

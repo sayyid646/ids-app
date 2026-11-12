@@ -1,8 +1,8 @@
-import { Suspense, useState, type FormEvent } from 'react'
+import { Suspense, useEffect, useState, type FormEvent } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  BarChart3, Gem, History, LayoutDashboard, LogOut, MoreHorizontal, Search, Settings, Trash2, Users, WifiOff, X,
+  BarChart3, Gem, History, LayoutDashboard, LogOut, MoreHorizontal, Search, Settings, Trash2, Users, Volume2, VolumeX, WifiOff, X,
 } from 'lucide-react'
 import { useAuth } from '../../auth/AuthProvider'
 import { useSinkron, type StatusSinkron } from '../../sync/SyncProvider'
@@ -12,6 +12,7 @@ import { Konfirmasi } from '../ui/Dialog'
 import { Pemuat, cx } from '../ui/ui'
 import { Pembuka } from '../animasi/Pembuka'
 import { perluPembuka } from '../animasi/pengaturanAnimasi'
+import { aturMusik, hentikanMusik, mainMusik, musikAktif } from '../../lib/suara'
 
 const MENU = [
   { ke: '/beranda', label: 'Beranda', Ikon: LayoutDashboard },
@@ -42,6 +43,17 @@ function PenandaSinkron({ terang }: { terang?: boolean }) {
       <span className={cx('h-2 w-2 rounded-full', warna)} aria-hidden />
       {LABEL_SINKRON[status]}
     </span>
+  )
+}
+
+/** Tombol nyalakan/matikan musik latar. Hanya tampil di halaman depan. */
+function TombolMusik({ nyala, ubah }: { nyala: boolean; ubah: (v: boolean) => void }) {
+  return (
+    <button type="button" onClick={() => ubah(!nyala)} aria-pressed={nyala}
+      aria-label={nyala ? 'Matikan musik latar' : 'Nyalakan musik latar'} title={nyala ? 'Matikan musik latar' : 'Nyalakan musik latar'}
+      className="grid h-9 w-9 place-items-center rounded-full text-navy-800 hover:bg-ice-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
+      {nyala ? <Volume2 className="h-5 w-5" aria-hidden /> : <VolumeX className="h-5 w-5 text-ink-muted" aria-hidden />}
+    </button>
   )
 }
 
@@ -76,6 +88,16 @@ export function AppLayout() {
   const [pembuka, setPembuka] = useState(perluPembuka)
   const kunciHalaman = lokasi.pathname.split('/').slice(0, 2).join('/')
 
+  // Musik latar: diputar saat masuk halaman depan (setelah animasi pembuka), dihentikan saat pindah halaman.
+  const diBeranda = lokasi.pathname === '/beranda'
+  const [musik, setMusik] = useState(musikAktif)
+  useEffect(() => {
+    if (!pembuka && diBeranda && musik) mainMusik()
+    else hentikanMusik()
+  }, [pembuka, diBeranda, musik])
+  useEffect(() => () => hentikanMusik(), [])
+  const ubahMusik = (v: boolean) => { aturMusik(v); setMusik(v) }
+
   return (
     <div className="latar-app min-h-dvh bg-ice-50 lg:pl-64">
       {pembuka && <Pembuka selesai={() => setPembuka(false)} />}
@@ -83,7 +105,7 @@ export function AppLayout() {
       {/* Sidebar komputer */}
       <motion.aside
         className="kaca-gelap fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-navy-900 text-white print:hidden lg:flex"
-        initial={{ x: -24, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, delay: pembuka ? 3.2 : 0, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ x: -24, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, delay: pembuka ? 4.2 : 0, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="px-6 pb-6 pt-7">
           <Logo />
@@ -119,13 +141,17 @@ export function AppLayout() {
       <header className="kaca-bilah sticky top-0 z-20 hidden items-center gap-4 border-b border-ice-200 bg-white/85 px-10 py-3 backdrop-blur print:hidden lg:flex">
         <CariAtas />
         <span className="ml-auto text-sm text-ink-soft">{formatTanggalPanjang(hariIni(zona))}</span>
+        {diBeranda && <TombolMusik nyala={musik} ubah={ubahMusik} />}
         <PenandaSinkron />
       </header>
 
       {/* Kepala HP */}
       <header className="kaca-bilah sticky top-0 z-30 flex items-center justify-between border-b border-ice-200 bg-white/90 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur print:hidden lg:hidden">
         <Logo terang={false} kecil />
-        <PenandaSinkron />
+        <span className="flex items-center gap-2">
+          {diBeranda && <TombolMusik nyala={musik} ubah={ubahMusik} />}
+          <PenandaSinkron />
+        </span>
       </header>
 
       {status === 'offline' && (

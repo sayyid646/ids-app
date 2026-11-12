@@ -4,7 +4,7 @@ import { useMuat } from './useMuat'
 import { useVersiData } from './SyncProvider'
 
 const KOLOM =
-  'id, order_id, order_number, customer_name, customer_whatsapp, item_no, craftsman_id, craftsman_code, craftsman_name, ' +
+  'id, order_id, order_number, weight_grams, customer_name, customer_whatsapp, item_no, craftsman_id, craftsman_code, craftsman_name, ' +
   'category_name, gender, description, assigned_date, production_month, status, completed_at, delivered_at, is_active'
 
 /** Semua barang aktif (dibaca bertahap 1.000 baris), untuk laporan yang dihitung di perangkat. */

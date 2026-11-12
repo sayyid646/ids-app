@@ -3,8 +3,10 @@ import { createRoot } from 'react-dom/client'
 import { App } from './App'
 import './index.css'
 import { terapkanTema } from './components/animasi/pengaturanAnimasi'
+import { pasangPembukaSuara } from './lib/suara'
 
 terapkanTema()
+pasangPembukaSuara()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

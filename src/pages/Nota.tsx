@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { JALUR_LOGO, KOTAK_LOGO } from '../components/layout/jalurLogo'
+import { formatBerat } from '../lib/orderSchema'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Printer } from 'lucide-react'
 import { db } from '../lib/supabase'
@@ -19,9 +21,8 @@ function Kop({ nama, alamat, wa, logo, sempit }: { nama: string; alamat: string 
       {logo ? (
         <img src={logo} alt="" className={cx('object-contain', sempit ? 'h-10' : 'h-14 w-14')} />
       ) : (
-        <svg viewBox="0 0 48 48" className={sempit ? 'h-9 w-9' : 'h-12 w-12'} aria-hidden>
-          <path d="M13 15h22l7 9-18 18L6 24z" fill="none" stroke="#000" strokeWidth="2.4" strokeLinejoin="round" />
-          <path d="M6 24h36M19 15l-3.5 9L24 42l8.5-18L29 15M15.5 24 24 15l8.5 9" fill="none" stroke="#000" strokeWidth="1.4" strokeLinejoin="round" />
+        <svg viewBox={KOTAK_LOGO} className={sempit ? 'h-9 w-11' : 'h-12 w-[3.6rem]'} aria-hidden>
+          {JALUR_LOGO.map((d, i) => <path key={i} d={d} fill="#000" />)}
         </svg>
       )}
       <div className="min-w-0">
@@ -130,8 +131,8 @@ export default function Nota() {
               <Baris label="Nomor order" isi={o.order_number} />
               {serah ? (
                 <>
-                  <Baris label="Nama pembeli" isi={o.customer_name} />
-                  <Baris label="WhatsApp" isi={tampilkanWa(o.customer_whatsapp)} />
+                  {o.customer_name && <Baris label="Nama pembeli" isi={o.customer_name} />}
+                  {o.customer_whatsapp && <Baris label="WhatsApp" isi={tampilkanWa(o.customer_whatsapp)} />}
                   <Baris label="Tanggal diserahkan" isi={tglSerah ? formatTanggalPanjang(tglLokal(tglSerah, zona)) : '-'} />
                 </>
               ) : (
@@ -150,6 +151,7 @@ export default function Nota() {
                   <th className="py-1 pr-2">No</th>
                   <th className="py-1 pr-2">Kategori</th>
                   <th className="py-1 pr-2">Gender</th>
+                  <th className="py-1 pr-2 text-right">Berat</th>
                   {!sempit && <th className="py-1 pr-2">Keterangan</th>}
                   {serah && <th className="py-1">Status</th>}
                 </tr>
@@ -160,13 +162,14 @@ export default function Nota() {
                     <td className="py-1 pr-2">{b.item_no}</td>
                     <td className="py-1 pr-2 font-semibold">{b.category_name}{sempit && (b.description || b.notes) && <span className="block font-normal">{[b.description, b.notes].filter(Boolean).join(' · ')}</span>}</td>
                     <td className="py-1 pr-2">{b.gender}</td>
+                    <td className="py-1 pr-2 text-right tabular-nums">{formatBerat(b.weight_grams)}</td>
                     {!sempit && <td className="py-1 pr-2">{[b.description, b.notes && `Catatan: ${b.notes}`].filter(Boolean).join(' · ') || '-'}</td>}
                     {serah && <td className="py-1">{LABEL_STATUS[b.status]}{b.delivered_at ? `, ${formatTanggalWaktu(b.delivered_at, zona)}` : ''}</td>}
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p className="mt-1 font-semibold">Total: {g.barang.length} barang</p>
+            <p className="mt-1 font-semibold">Total: {g.barang.length} barang{g.barang.some((b) => b.weight_grams != null) && ` · ${formatBerat(g.barang.reduce((t, b) => t + (Number(b.weight_grams) || 0), 0))}`}</p>
 
             {o.notes && <p className="mt-2">Catatan order: {o.notes}</p>}
 
