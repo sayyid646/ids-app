@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { formatBerat } from '../lib/orderSchema'
 import { Link } from 'react-router-dom'
 import { FileDown, FileSpreadsheet, Printer } from 'lucide-react'
 import { formatAngka, formatBulan, formatTanggal, formatTanggalPanjang, formatTanggalWaktu, hariIni as tglHariIni, tglLokal } from '../lib/format'
@@ -6,7 +7,6 @@ import { barangDalamRentang, buatCsv, jumlahkan, produktivitas, ringkasBulanan, 
 import { unduh } from '../lib/unduh'
 import { unduhPdf } from '../lib/pdf'
 import { pesanGalat } from '../lib/errors'
-import { tampilkanWa } from '../lib/wa'
 import { useSinkron } from '../sync/SyncProvider'
 import { useSemuaBarang } from '../sync/useSemuaBarang'
 import { useMaster } from '../sync/useMaster'
@@ -74,12 +74,12 @@ export default function Laporan() {
     else daftar = barangDalamRentang(rows, r, 'belum_diserahkan')
     daftar = [...daftar].sort((a, b) => (a.assigned_date + a.order_number).localeCompare(b.assigned_date + b.order_number) || a.item_no - b.item_no)
     return {
-      kepala: ['Order', 'Pelanggan', 'WhatsApp', 'Pengrajin', 'Kategori', 'Gender', 'Diterima', 'Status', 'Selesai', 'Diserahkan'],
-      baris: daftar.map((b) => [`${b.order_number} #${b.item_no}`, b.customer_name, tampilkanWa(b.customer_whatsapp), `${b.craftsman_code}${b.craftsman_name ? ` ${b.craftsman_name}` : ''}`,
+      kepala: ['Order', 'Berat', 'Pengrajin', 'Kategori', 'Gender', 'Diterima', 'Status', 'Selesai', 'Diserahkan'],
+      baris: daftar.map((b) => [`${b.order_number} #${b.item_no}`, formatBerat(b.weight_grams), `${b.craftsman_code}${b.craftsman_name ? ` ${b.craftsman_name}` : ''}`,
         b.category_name, b.gender, formatTanggal(b.assigned_date),
         b.status === 'dalam_proses' ? 'Dalam Proses' : b.status === 'selesai' ? 'Selesai Dikerjakan' : 'Sudah Diserahkan',
         formatTanggalWaktu(b.completed_at, zona), formatTanggalWaktu(b.delivered_at, zona)]),
-      kaki: [`${daftar.length} barang`, '', '', '', '', '', '', '', '', ''],
+      kaki: [`${daftar.length} barang`, '', '', '', '', '', '', '', ''],
       angka: [],
     }
   }, [semua.data, master.data, jenis, r, zona])

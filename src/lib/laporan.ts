@@ -12,6 +12,7 @@ export interface BarisBarang {
   order_number: string
   customer_name: string | null
   customer_whatsapp: string | null
+  weight_grams?: number | null
   item_no: number
   craftsman_id: string
   craftsman_code: string
