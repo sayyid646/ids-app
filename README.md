@@ -2,7 +2,7 @@
 
 **Smart Jewelry Management.** Aplikasi pencatatan order perhiasan yang dibagikan ke 9 pengrajin: dari barang diberikan ke pengrajin, selesai dikerjakan, sampai diserahkan ke pembeli.
 
-Alamat aplikasi: **https://sayyid646.github.io/ids-app/**
+Alamat aplikasi: **https://intanduasaudara.github.io/**
 
 ## Status pengerjaan
 
@@ -48,8 +48,8 @@ ids-app/
 
 1. **Database:** ikuti `supabase/PANDUAN_SETUP_SUPABASE.md`.
 2. **Alamat login:** di Supabase, buka **Authentication**, lalu **URL Configuration**.
-   - **Site URL:** `https://sayyid646.github.io/ids-app/`
-   - **Redirect URLs:** tambahkan `https://sayyid646.github.io/ids-app/**`
+   - **Site URL:** `https://intanduasaudara.github.io/`
+   - **Redirect URLs:** tambahkan `https://intanduasaudara.github.io/**`
 3. **Sambungkan aplikasi:** isi Project URL dan anon/publishable key di file `.env.production`, lalu simpan ke cabang `main`. Kunci ini memang publik. Jangan pernah memasukkan service_role key atau secret key.
 4. GitHub Actions membangun dan menerbitkan otomatis. Setelah hijau, aplikasi siap di alamat di atas.
 

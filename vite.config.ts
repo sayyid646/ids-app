@@ -2,7 +2,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Alamat dasar: GitHub Pages menerbitkan di https://sayyid646.github.io/ids-app/
+// Alamat dasar diatur alur kerja GitHub (VITE_BASE) sesuai nama repo; bawaan /ids-app/.
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/ids-app/',
   plugins: [react()],

@@ -67,8 +67,14 @@ jobs:
       - name: Tes unit
         run: npm test
       - name: Bangun
-        # Alamat dan kunci publik Supabase dibaca dari file .env.production
-        run: npm run build
+        # Alamat dan kunci publik Supabase dibaca dari file .env.production.
+        # Alamat dasar mengikuti nama repo: repo "<pemilik>.github.io" terbit di akar alamat (/),
+        # repo lain terbit di /<nama-repo>/.
+        run: |
+          NAMA_REPO="${GITHUB_REPOSITORY#*/}"
+          if [[ "$NAMA_REPO" == *.github.io ]]; then export VITE_BASE=/; else export VITE_BASE="/$NAMA_REPO/"; fi
+          echo "Alamat dasar: $VITE_BASE"
+          npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
