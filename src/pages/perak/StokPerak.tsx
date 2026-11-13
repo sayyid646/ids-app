@@ -81,7 +81,7 @@ export default function StokPerak() {
                 {baris.map((r) => (
                   <tr key={r.craftsman_id} className={cx('hover:bg-ice-50/60', !r.is_active && 'opacity-60')}>
                     <td className="px-4 py-3">
-                      <Link to={`/pengrajin/${r.craftsman_id}#perak`} className="font-semibold text-navy-900 hover:underline">{r.code}</Link>
+                      <Link to={`/pengrajin/${r.craftsman_id}#perak`} className="kode-ids hover:underline">{r.code}</Link>
                       <span className="ml-2 text-ink-soft">{r.name ?? '(nama belum diisi)'}</span>
                     </td>
                     <td className="px-4 py-3 text-right"><Gram n={r.stok_awal} minusMerah /></td>
@@ -101,7 +101,7 @@ export default function StokPerak() {
                 <Link to={`/pengrajin/${r.craftsman_id}#perak`} className="block">
                   <Kartu className={cx('kartu-pantul p-4', !r.is_active && 'opacity-60')}>
                     <div className="flex items-baseline justify-between gap-2">
-                      <p className="truncate font-semibold text-navy-900">{r.code} <span className="font-normal text-ink-soft">{r.name ?? ''}</span></p>
+                      <p className="truncate font-semibold text-navy-900"><span className="kode-ids">{r.code}</span> <span className="font-normal text-ink-soft">{r.name ?? ''}</span></p>
                       <p className={cx('font-display text-xl font-semibold tabular-nums', r.stok_akhir < 0 ? 'text-bad-700' : 'text-ok-700')}>{formatGram(r.stok_akhir)}</p>
                     </div>
                     <p className="mt-1 text-xs text-ink-soft">

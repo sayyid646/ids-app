@@ -2,12 +2,13 @@ import { Suspense, useEffect, useState, type FormEvent } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import {
-  BarChart3, Coins, Gem, History, LayoutDashboard, LogOut, MoreHorizontal, Receipt, Search, Settings, Trash2, Users, Volume2, VolumeX, WifiOff, X,
+  BarChart3, Boxes, Coins, Gem, History, LayoutDashboard, LogOut, MoreHorizontal, Receipt, Search, Settings, Trash2, Users, Volume2, VolumeX, WifiOff, X,
 } from 'lucide-react'
 import { useAuth } from '../../auth/AuthProvider'
 import { useSinkron, type StatusSinkron } from '../../sync/SyncProvider'
 import { formatTanggalPanjang, hariIni } from '../../lib/format'
 import { Logo } from './Logo'
+import { BingkaiPerak } from './BingkaiPerak'
 import { Konfirmasi } from '../ui/Dialog'
 import { Pemuat, cx } from '../ui/ui'
 import { Pembuka } from '../animasi/Pembuka'
@@ -20,6 +21,7 @@ const MENU = [
   { ke: '/order', label: 'Order', Ikon: Gem },
   { ke: '/nota', label: 'Nota', Ikon: Receipt },
   { ke: '/pengrajin', label: 'Pengrajin', Ikon: Users },
+  { ke: '/stok', label: 'Stok barang', Ikon: Boxes },
   { ke: '/barang', label: 'Cari barang', Ikon: Search },
   { ke: '/perak', label: 'Stok perak', Ikon: Coins },
   { ke: '/laporan', label: 'Laporan', Ikon: BarChart3 },
@@ -92,13 +94,12 @@ export function AppLayout() {
   const [pembuka, setPembuka] = useState(perluPembuka)
   const kunciHalaman = lokasi.pathname.split('/').slice(0, 2).join('/')
 
-  // Musik latar: diputar saat masuk halaman depan (setelah animasi pembuka), dihentikan saat pindah halaman.
-  const diBeranda = lokasi.pathname === '/beranda'
+  // Musik latar: mulai setelah animasi pembuka dan terus berjalan di semua halaman.
   const [musik, setMusik] = useState(musikAktif)
   useEffect(() => {
-    if (!pembuka && diBeranda && musik) mainMusik()
+    if (!pembuka && musik) mainMusik()
     else hentikanMusik()
-  }, [pembuka, diBeranda, musik])
+  }, [pembuka, musik])
   useEffect(() => () => hentikanMusik(), [])
   const ubahMusik = (v: boolean) => { aturMusik(v); setMusik(v) }
 
@@ -109,11 +110,13 @@ export function AppLayout() {
 
       {/* Sidebar komputer */}
       <motion.aside
-        className="kaca-gelap fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-navy-900 text-white print:hidden lg:flex"
+        className="kaca-gelap sidebar-ids fixed inset-y-0 left-0 z-30 hidden w-64 flex-col bg-navy-900 text-white print:hidden lg:flex"
         initial={{ x: -24, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, delay: pembuka ? 4.2 : 0, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="px-6 pb-6 pt-7">
-          <Logo />
+        <div className="px-4 pb-5 pt-6">
+          <BingkaiPerak latar="var(--latar-menu)">
+            <div className="px-3 py-3"><Logo /></div>
+          </BingkaiPerak>
           <p className="mt-3 text-[10px] font-semibold tracking-[0.2em] text-ice-400">SMART JEWELRY MANAGEMENT</p>
         </div>
         <div className="mx-6 h-px bg-gradient-to-r from-gold-400/60 via-gold-400/20 to-transparent" />
@@ -121,8 +124,8 @@ export function AppLayout() {
           {MENU.map(({ ke, label, Ikon }) => (
             <NavLink key={ke} to={ke}
               className={({ isActive }) => cx(
-                'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-all duration-200',
-                isActive ? 'bg-white/10 text-white ring-1 ring-gold-400/40' : 'text-ice-200 hover:translate-x-0.5 hover:bg-white/5 hover:text-white',
+                'menu-cair group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors duration-300',
+                isActive ? 'aktif text-white ring-1 ring-gold-400/40' : 'text-ice-200',
               )}>
               {({ isActive }) => (
                 <>
@@ -146,15 +149,17 @@ export function AppLayout() {
       <header className="kaca-bilah sticky top-0 z-20 hidden items-center gap-4 border-b border-ice-200 bg-white/85 px-10 py-3 backdrop-blur print:hidden lg:flex">
         <CariAtas />
         <span className="ml-auto text-sm text-ink-soft">{formatTanggalPanjang(hariIni(zona))}</span>
-        {diBeranda && <TombolMusik nyala={musik} ubah={ubahMusik} />}
+        <TombolMusik nyala={musik} ubah={ubahMusik} />
         <PenandaSinkron />
       </header>
 
       {/* Kepala HP */}
       <header className="kaca-bilah sticky top-0 z-30 flex items-center justify-between border-b border-ice-200 bg-white/90 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur print:hidden lg:hidden">
-        <Logo terang={false} kecil />
+        <BingkaiPerak latar="var(--latar-kepala)" kecil>
+          <div className="px-2.5 py-1.5"><Logo terang={false} kecil /></div>
+        </BingkaiPerak>
         <span className="flex items-center gap-2">
-          {diBeranda && <TombolMusik nyala={musik} ubah={ubahMusik} />}
+          <TombolMusik nyala={musik} ubah={ubahMusik} />
           <PenandaSinkron />
         </span>
       </header>
@@ -186,7 +191,7 @@ export function AppLayout() {
       {/* Navigasi bawah HP */}
       <nav aria-label="Menu utama" className="kaca-bilah fixed inset-x-0 bottom-0 z-30 flex justify-around border-t border-ice-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur print:hidden lg:hidden">
         {MENU_BAWAH.map(({ ke, label, Ikon }) => (
-          <NavLink key={ke} to={ke} className={({ isActive }) => cx('flex min-w-[64px] flex-col items-center gap-1 px-2 py-2.5 text-[11px] font-semibold', isActive ? 'text-navy-900' : 'text-ink-muted')}>
+          <NavLink key={ke} to={ke} className={({ isActive }) => cx('menu-cair flex min-w-[64px] rounded-2xl flex-col items-center gap-1 px-2 py-2.5 text-[11px] font-semibold', isActive ? 'text-navy-900' : 'text-ink-muted')}>
             {({ isActive }) => (
               <>
                 <span className="relative rounded-full px-4 py-1">
@@ -220,7 +225,7 @@ export function AppLayout() {
               <div className="grid grid-cols-3 gap-2">
                 {MENU_LAIN.map(({ ke, label, Ikon }) => (
                   <NavLink key={ke} to={ke} onClick={() => setLainnya(false)}
-                    className={({ isActive }) => cx('flex flex-col items-center gap-2 rounded-2xl border p-4 text-sm font-semibold', isActive ? 'border-gold-400 bg-gold-50 text-navy-900' : 'border-ice-200 text-navy-800')}>
+                    className={({ isActive }) => cx('menu-cair flex flex-col items-center gap-2 rounded-2xl border p-4 text-sm font-semibold', isActive ? 'aktif border-gold-400' : 'border-ice-200 text-navy-800')}>
                     <Ikon className="h-6 w-6" aria-hidden /> {label}
                   </NavLink>
                 ))}

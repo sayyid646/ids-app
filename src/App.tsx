@@ -27,6 +27,7 @@ const Sampah = lazy(() => import('./pages/Sampah'))
 const DaftarNota = lazy(() => import('./pages/nota/DaftarNota'))
 const EditorNota = lazy(() => import('./pages/nota/EditorNota'))
 const StokPerak = lazy(() => import('./pages/perak/StokPerak'))
+const StokBarang = lazy(() => import('./pages/stok/StokBarang'))
 const CetakPerak = lazy(() => import('./pages/perak/CetakPerak'))
 
 /** Rute terlindungi: hanya administrator yang bisa masuk. */
@@ -64,6 +65,7 @@ const router = createHashRouter([
           { path: 'nota/baru', element: <EditorNota /> },
           { path: 'nota/:id', element: <EditorNota /> },
           { path: 'perak', element: <StokPerak /> },
+          { path: 'stok', element: <StokBarang /> },
           { path: 'barang', element: <Barang /> },
           { path: 'pengrajin', element: <DaftarPengrajin /> },
           { path: 'pengrajin/:id', element: <DetailPengrajin /> },

@@ -541,9 +541,9 @@ reset role;
 \echo
 \echo '== T23 Sinkronisasi, penyimpanan foto, riwayat'
 do $$ begin
-  perform tes.sama('8 tabel ikut Realtime',
+  perform tes.sama('9 tabel ikut Realtime',
     (select string_agg(tablename, ',' order by tablename) from pg_publication_tables where pubname = 'supabase_realtime'),
-    'activity_logs,app_settings,craftsmen,jewelry_categories,manual_notes,order_items,orders,silver_purchases');
+    'activity_logs,app_settings,craftsmen,jewelry_categories,manual_notes,order_items,orders,products,silver_purchases');
   perform tes.sama('bucket foto privat', (select string_agg(id || ':' || public, ',' order by id) from storage.buckets), 'foto-barang:false,identitas:false');
   perform tes.sama('semua riwayat punya pelaku', (select count(*) from public.activity_logs where actor_email is null)::text, '0');
   perform tes.sama('riwayat admin tercatat atas nama admin',
@@ -802,6 +802,48 @@ do $$ begin
   perform tes.gagal('bukan admin: tidak bisa membeli perak',
     $q$insert into public.silver_purchases (craftsman_id, grams) values (current_setting('tes.pengrajin_perak')::uuid, 50)$q$, 'row-level security|bukan administrator|violates|tidak ditemukan');
   perform tes.sama('bukan admin: laporan perak kosong', (select count(*) from public.laporan_perak('2026-11-01'))::text, '0');
+end $$;
+reset role;
+
+\echo
+\echo '== T27 Stok barang jadi (katalog)'
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false);
+do $$
+declare p uuid; b uuid; n int;
+begin
+  perform tes.sama('katalog terisi 49 model', (select count(*) from public.products where deleted_at is null)::text, '49');
+  perform tes.sama('semua stok awal 0', (select sum(stock) from public.products)::text, '0');
+  perform tes.sama('contoh model', (select name || '/' || class || '/' || kind || '/' || coalesce(gender::text, '-') from public.products where code = 'PR-GW01'),
+    'Giwang Premium 01/PREMIUM/Giwang/LADY');
+  select id into p from public.products where code = 'HI-M01';
+  n := public.ubah_stok_produk(p, 5, 'Barang jadi dari pengrajin');
+  perform tes.sama('tambah stok 5', n::text, '5');
+  n := public.ubah_stok_produk(p, -2, 'Terjual');
+  perform tes.sama('kurangi stok 2 -> 3', (select stock from public.products where id = p)::text, '3');
+  perform tes.sama('riwayat stok tercatat', (select string_agg(delta || '>' || stock_after, ',' order by created_at) from public.product_stock_moves where product_id = p), '5>5,-2>3');
+  perform tes.gagal('stok tidak boleh minus', format('select public.ubah_stok_produk(%L, -4)', p), 'tidak bisa dikurangi');
+  perform tes.gagal('perubahan nol ditolak', format('select public.ubah_stok_produk(%L, 0)', p), 'tidak boleh nol');
+  perform tes.gagal('stok tidak bisa diubah langsung', format('update public.products set stock = 99 where id = %L', p), 'tombol tambah');
+  perform tes.gagal('riwayat stok tidak bisa diubah', format('update public.product_stock_moves set delta = 9 where product_id = %L', p), 'permission denied|tidak boleh');
+  perform tes.sama('riwayat aktivitas stok', (select count(*) from public.activity_logs where entity_id = p and action = 'stok_produk_diubah')::text, '2');
+
+  insert into public.products (code, name, class, kind, gender) values (' lx m09 ', 'Luxury  Man 09', 'LUXURY', 'Cincin', 'MAN') returning id into b;
+  perform tes.sama('kode dirapikan', (select code || '|' || name from public.products where id = b), 'LX-M09|Luxury Man 09');
+  perform tes.gagal('kode kembar ditolak', $q$insert into public.products (code, name, class) values ('LX-M09', 'X', 'LUXURY')$q$, 'sudah dipakai');
+  perform tes.gagal('barang baru tidak boleh langsung berisi stok', $q$insert into public.products (code, name, class, stock) values ('ZZ-01', 'X', 'LUXURY', 5)$q$, 'stok 0');
+  perform public.hapus_produk(b);
+  perform tes.sama('barang terhapus masuk Sampah', (select jenis || ':' || order_number from public.v_sampah where id = b), 'produk:LX-M09');
+  perform public.pulihkan_sampah('produk', b);
+  perform tes.sama('barang dipulihkan', (select count(*) from public.products where id = b and deleted_at is null)::text, '1');
+end $$;
+reset role;
+
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', false);
+do $$ begin
+  perform tes.sama('bukan admin: katalog tidak terlihat', (select count(*) from public.products)::text, '0');
+  perform tes.gagal('bukan admin: tidak bisa ubah stok', $q$select public.ubah_stok_produk(gen_random_uuid(), 1)$q$, 'bukan administrator');
 end $$;
 reset role;
 

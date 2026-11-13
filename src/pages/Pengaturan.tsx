@@ -354,9 +354,14 @@ function Profil() {
   )
 }
 
-const PILIHAN_TEMA: { nilai: Tema; judul: string; isi: string; contoh: string }[] = [
-  { nilai: 'glass', judul: 'Glass', isi: 'Kaca bening dengan emas, biru langit, putih, dan hitam.', contoh: 'bg-[radial-gradient(circle_at_20%_20%,#BFE3FA,transparent_55%),radial-gradient(circle_at_85%_30%,#E8D3A9,transparent_50%),linear-gradient(#F7FBFF,#EAF4FC)]' },
-  { nilai: 'klasik', judul: 'Klasik', isi: 'Putih bersih dengan menu navy.', contoh: 'bg-ice-50' },
+// Contoh warna ditulis langsung (bukan warna tema) supaya pratinjaunya benar walau tema lain sedang aktif.
+const PILIHAN_TEMA: { nilai: Tema; judul: string; isi: string; latar: string; menu: string; kartu: string; permata: string }[] = [
+  { nilai: 'glass', judul: 'Glass', isi: 'Kaca bening dengan emas, biru langit, putih, dan hitam.',
+    latar: 'radial-gradient(circle at 20% 20%,#BFE3FA,transparent 55%),radial-gradient(circle at 85% 30%,#E8D3A9,transparent 50%),linear-gradient(#F7FBFF,#EAF4FC)',
+    menu: 'rgba(0,0,0,.8)', kartu: 'rgba(255,255,255,.6)', permata: '#C9A96E' },
+  { nilai: 'klasik', judul: 'Klasik', isi: 'Putih bersih dengan menu navy.', latar: '#F5F9FC', menu: '#0F1E33', kartu: '#FFFFFF', permata: '#C9A96E' },
+  { nilai: 'emas', judul: 'Emas (warna logo)', isi: 'Menu hitam dan logo emas, seperti logo IDS di atas hitam.', latar: '#FBF8F2', menu: '#0B0B0B', kartu: '#FFFFFF', permata: '#8E6C27' },
+  { nilai: 'emas-terbalik', judul: 'Emas terbalik', isi: 'Menu emas dan logo putih, kebalikan dari tema Emas.', latar: '#FCF8EF', menu: '#8E6C27', kartu: '#FFFFFF', permata: '#FFFFFF' },
 ]
 
 function Tampilan() {
@@ -374,11 +379,11 @@ function Tampilan() {
             {PILIHAN_TEMA.map((t) => (
               <label key={t.nilai} className={cx('flex cursor-pointer items-center gap-3 rounded-xl border-2 p-3 transition-colors', tema === t.nilai ? 'border-gold-400 bg-gold-50/60' : 'border-ice-200 hover:border-ice-300')}>
                 <input type="radio" name="tema" className="sr-only" checked={tema === t.nilai} onChange={() => { setTema(t.nilai); aturTema(t.nilai) }} />
-                <span className={cx('relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border border-ice-200', t.contoh)} aria-hidden>
-                  <span className={cx('absolute inset-y-0 left-0 w-5', t.nilai === 'glass' ? 'bg-black/80' : 'bg-navy-900')} />
-                  <span className={cx('absolute left-7 top-2 h-4 w-10 rounded', t.nilai === 'glass' ? 'border border-white/80 bg-white/60' : 'border border-ice-200 bg-white')} />
-                  <span className={cx('absolute left-7 top-8 h-4 w-10 rounded', t.nilai === 'glass' ? 'border border-white/80 bg-white/60' : 'border border-ice-200 bg-white')} />
-                  <span className="absolute left-1.5 top-2 h-2 w-2 rotate-45 bg-gold-400" />
+                <span className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border border-black/10" style={{ background: t.latar }} aria-hidden>
+                  <span className="absolute inset-y-0 left-0 w-5" style={{ background: t.menu }} />
+                  <span className="absolute left-7 top-2 h-4 w-10 rounded border border-black/10" style={{ background: t.kartu }} />
+                  <span className="absolute left-7 top-8 h-4 w-10 rounded border border-black/10" style={{ background: t.kartu }} />
+                  <span className="absolute left-1.5 top-2 h-2 w-2 rotate-45" style={{ background: t.permata }} />
                 </span>
                 <span><span className="block font-semibold text-navy-900">{t.judul}</span><span className="text-sm text-ink-soft">{t.isi}</span></span>
               </label>
@@ -398,7 +403,7 @@ function Tampilan() {
           <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={sfx} onChange={(e) => { setSfx(e.target.checked); aturSfx(e.target.checked) }} />
         </label>
         <label className="flex items-center justify-between gap-3 rounded-xl bg-ice-50 px-4 py-3">
-          <span><span className="block font-semibold text-navy-900">Musik latar halaman depan</span><span className="text-sm text-ink-soft">Diputar berulang selama Anda di Beranda, berhenti saat pindah halaman. Bisa juga dimatikan lewat ikon pengeras suara di Beranda.</span></span>
+          <span><span className="block font-semibold text-navy-900">Musik latar</span><span className="text-sm text-ink-soft">Diputar berulang di semua halaman. Bisa juga dimatikan lewat ikon pengeras suara di bagian atas layar.</span></span>
           <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={musik} onChange={(e) => { setMusik(e.target.checked); aturMusik(e.target.checked) }} />
         </label>
       </div>

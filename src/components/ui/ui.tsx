@@ -178,7 +178,7 @@ export function Kosong({ judul, isi, aksi }: { judul: string; isi?: string; aksi
 }
 
 export function Kartu({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cx('kaca rounded-xl2 border border-ice-200 bg-white shadow-card', className)}>{children}</div>
+  return <div className={cx('kaca kartu-pantul rounded-xl2 border border-ice-200 bg-white shadow-card', className)}>{children}</div>
 }
 
 export function KepalaHalaman({ judul, sub, aksi }: { judul: string; sub?: ReactNode; aksi?: ReactNode }) {

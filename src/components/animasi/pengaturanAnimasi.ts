@@ -44,10 +44,15 @@ export function tandaiPembukaSelesai(): void {
   }
 }
 
-/** Tema tampilan per perangkat: kaca (emas, biru langit, putih, hitam) atau klasik. */
-export type Tema = 'glass' | 'klasik'
+/**
+ * Tema tampilan per perangkat: kaca (emas, biru langit, putih, hitam), klasik,
+ * emas (mengikuti logo: emas di atas hitam), atau emas terbalik (logo putih di atas emas).
+ */
+export type Tema = 'glass' | 'klasik' | 'emas' | 'emas-terbalik'
+const SEMUA_TEMA: Tema[] = ['glass', 'klasik', 'emas', 'emas-terbalik']
 export function temaAktif(): Tema {
-  return baca(KUNCI_TEMA) === 'klasik' ? 'klasik' : 'glass'
+  const t = baca(KUNCI_TEMA) as Tema | null
+  return t && SEMUA_TEMA.includes(t) ? t : 'glass'
 }
 export function terapkanTema(t: Tema = temaAktif()): void {
   document.documentElement.dataset.tema = t

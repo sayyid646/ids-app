@@ -11,6 +11,7 @@ migrasi: 20261110000800_hak_akses.sql
 migrasi: 20261110000900_sampah_a5.sql
 migrasi: 20261112001000_berat_pengrajin.sql
 migrasi: 20261113001100_perak_nota.sql
+migrasi: 20261113001200_stok_barang.sql
 
 == Persiapan akun
                     jadikan_admin                     
@@ -294,7 +295,7 @@ psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:538: NOTICE:  ok  baris pengaturan kedua ditolak (ditolak: permission denied for table app_settings)
 
 == T23 Sinkronisasi, penyimpanan foto, riwayat
-psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  8 tabel ikut Realtime
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  9 tabel ikut Realtime
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  bucket foto privat
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  semua riwayat punya pelaku
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:558: NOTICE:  ok  riwayat admin tercatat atas nama admin
@@ -431,6 +432,36 @@ psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:805: NOTICE:  ok  bukan admin: nota tidak terlihat
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:805: NOTICE:  ok  bukan admin: tidak bisa membeli perak (ditolak: Pengrajin tidak ditemukan atau sudah dihapus.)
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:805: NOTICE:  ok  bukan admin: laporan perak kosong
+
+== T27 Stok barang jadi (katalog)
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-00000000000a
+(1 row)
+
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  katalog terisi 49 model
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  semua stok awal 0
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  contoh model
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  tambah stok 5
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  kurangi stok 2 -> 3
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  riwayat stok tercatat
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  stok tidak boleh minus (ditolak: Stok High Man 01 tinggal 3, tidak bisa dikurangi 4.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  perubahan nol ditolak (ditolak: Jumlah perubahan stok tidak boleh nol.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  stok tidak bisa diubah langsung (ditolak: Stok diubah lewat tombol tambah/kurangi stok supaya tercatat di riwayat.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  riwayat stok tidak bisa diubah (ditolak: permission denied for table product_stock_moves)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  riwayat aktivitas stok
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  kode dirapikan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  kode kembar ditolak (ditolak: Kode LX-M09 sudah dipakai barang lain.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  barang baru tidak boleh langsung berisi stok (ditolak: Barang baru dimulai dengan stok 0, lalu ditambah lewat tombol tambah stok.)
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  barang terhapus masuk Sampah
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:839: NOTICE:  ok  barang dipulihkan
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-00000000000b
+(1 row)
+
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:847: NOTICE:  ok  bukan admin: katalog tidak terlihat
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:847: NOTICE:  ok  bukan admin: tidak bisa ubah stok (ditolak: Akses ditolak. Akun ini bukan administrator IDS.)
 
 == SEMUA TES LULUS
 menjalankan ulang semua migrasi (harus aman diulang)...

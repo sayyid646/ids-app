@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Coins, FileText, Gem, Package, RotateCcw, Trash2, UserRound } from 'lucide-react'
+import { Boxes, Coins, FileText, Gem, Package, RotateCcw, Trash2, UserRound } from 'lucide-react'
 import { db } from '../lib/supabase'
 import { formatTanggalWaktu } from '../lib/format'
 import { useMuat } from '../sync/useMuat'
@@ -11,7 +11,7 @@ import { pesanGalat } from '../lib/errors'
 import { Kartu, KepalaHalaman, KodePengrajin, Kosong, KotakGalat, Pemuat, Tombol } from '../components/ui/ui'
 
 interface IsiSampah {
-  jenis: 'order' | 'barang' | 'pengrajin' | 'pembelian' | 'nota'
+  jenis: 'order' | 'barang' | 'pengrajin' | 'pembelian' | 'nota' | 'produk'
   id: string
   order_id: string | null
   order_number: string | null
@@ -24,8 +24,8 @@ interface IsiSampah {
   hilang_pada: string
 }
 
-const IKON = { order: Gem, barang: Package, pengrajin: UserRound, pembelian: Coins, nota: FileText }
-const LABEL_JENIS = { order: 'ORDER', barang: 'BARANG', pengrajin: 'PENGRAJIN', pembelian: 'PERAK', nota: 'NOTA' }
+const IKON = { order: Gem, barang: Package, pengrajin: UserRound, pembelian: Coins, nota: FileText, produk: Boxes }
+const LABEL_JENIS = { order: 'ORDER', barang: 'BARANG', pengrajin: 'PENGRAJIN', pembelian: 'PERAK', nota: 'NOTA', produk: 'STOK BARANG' }
 
 /** Sisa waktu sebelum data hilang permanen, dalam kata-kata. */
 function sisaWaktu(hilang: string): string {
@@ -39,7 +39,7 @@ function sisaWaktu(hilang: string): string {
 export default function Sampah() {
   const { zona } = useSinkron()
   const { beri } = useNotifikasi()
-  const versi = useVersiData(['orders', 'order_items', 'craftsmen', 'silver_purchases', 'manual_notes'])
+  const versi = useVersiData(['orders', 'order_items', 'craftsmen', 'silver_purchases', 'manual_notes', 'products'])
   const [proses, setProses] = useState<string | null>(null)
 
   const data = useMuat(async () => {
@@ -59,6 +59,7 @@ export default function Sampah() {
         barang: `Barang #${s.item_no} order ${s.order_number} dipulihkan.`,
         pembelian: `Pembelian perak ${s.craftsman_code} dipulihkan.`,
         nota: `Nota No. ${s.order_number} dipulihkan.`,
+        produk: `Model ${s.customer_name} dipulihkan.`,
       }[s.jenis])
       data.muatUlang()
     } catch (e) {
@@ -95,6 +96,7 @@ export default function Sampah() {
                       {s.jenis === 'pengrajin' && <>{s.craftsman_code} · {s.customer_name ?? 'Nama belum diisi'}</>}
                       {s.jenis === 'barang' && <>{s.category_name} · <Link to={`/order/${s.order_id}`} className="underline-offset-2 hover:underline">order {s.order_number}</Link></>}
                       {s.jenis === 'pembelian' && <>Pembelian perak {s.jumlah_barang} g · {s.craftsman_code}</>}
+                      {s.jenis === 'produk' && <>{s.customer_name} · <span className="kode-ids">{s.order_number}</span></>}
                       {s.jenis === 'nota' && <>Nota No. {String(s.order_number ?? '').padStart(4, '0')}{s.customer_name ? ` · ${s.customer_name}` : ''}</>}
                     </p>
                     <p className="mt-0.5 flex flex-wrap items-center gap-2 text-sm text-ink-soft">
@@ -103,6 +105,7 @@ export default function Sampah() {
                       {s.jenis === 'barang' && <>{s.customer_name} {s.craftsman_code && <KodePengrajin kode={s.craftsman_code} />}</>}
                       {s.jenis === 'pembelian' && `Tanggal beli ${s.customer_name ?? '-'}`}
                       {s.jenis === 'nota' && `${s.jumlah_barang} baris`}
+                      {s.jenis === 'produk' && `Stok saat dihapus ${s.jumlah_barang} pcs`}
                     </p>
                     <p className="mt-2 text-xs text-ink-muted">
                       Dihapus {formatTanggalWaktu(s.deleted_at, zona)} · <span className="font-semibold text-bad-700">hilang {sisaWaktu(s.hilang_pada)}</span>

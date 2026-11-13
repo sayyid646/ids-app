@@ -8,7 +8,7 @@ import { aturGayaTanggal } from '../lib/format'
 // dan halaman yang memakai tabel tersebut memuat ulang datanya.
 // Saat koneksi kembali atau aplikasi dibuka lagi, semua data dimuat ulang supaya tidak ada yang tertinggal.
 
-export const TABEL_SINKRON = ['app_settings', 'jewelry_categories', 'craftsmen', 'orders', 'order_items', 'activity_logs', 'silver_purchases', 'manual_notes'] as const
+export const TABEL_SINKRON = ['app_settings', 'jewelry_categories', 'craftsmen', 'orders', 'order_items', 'activity_logs', 'silver_purchases', 'manual_notes', 'products'] as const
 export type TabelSinkron = (typeof TABEL_SINKRON)[number]
 export type StatusSinkron = 'menghubungkan' | 'tersinkron' | 'offline' | 'terputus'
 

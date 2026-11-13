@@ -1,5 +1,6 @@
 // Suara aplikasi IDS:
-//   * Musik latar di halaman depan (file public/audio/latar.mp3).
+//   * Musik latar di seluruh aplikasi (file public/audio/musik-ids.mp3), berulang terus.
+//     Berhenti sementara saat aplikasi ditinggalkan (layar lain dibuka) dan lanjut saat kembali.
 //   * Efek suara animasi pembuka, dibuat langsung oleh browser (tanpa file) supaya pas dengan gerakannya.
 // Catatan penting: browser (terutama iPhone) baru mengizinkan suara setelah layar disentuh sekali.
 // Karena itu semua suara lewat satu AudioContext yang "dibuka" pada sentuhan pertama.
@@ -60,7 +61,7 @@ function siapkanMusik(): HTMLAudioElement | null {
   if (!c) return null
   if (elMusik) return elMusik
   try {
-    const el = new Audio(`${import.meta.env.BASE_URL}audio/latar.mp3`)
+    const el = new Audio(`${import.meta.env.BASE_URL}audio/musik-ids.mp3`)
     el.loop = true
     el.preload = 'auto'
     gainMusik = c.createGain()
@@ -85,7 +86,7 @@ function naikkanMusik(): void {
   gainMusik.gain.linearRampToValueAtTime(KERAS_MUSIK, t + 1.4)
 }
 
-/** Putar musik latar dari awal (dipanggil saat masuk halaman depan). */
+/** Putar musik latar (dipanggil setelah animasi pembuka selesai; terus berjalan di semua halaman). */
 export function mainMusik(): void {
   if (!musikAktif()) return
   const baruDiminta = !musikDiminta
@@ -99,7 +100,7 @@ export function mainMusik(): void {
   naikkanMusik()
 }
 
-/** Pelankan lalu hentikan musik (dipanggil saat meninggalkan halaman depan). */
+/** Pelankan lalu hentikan musik (saat dimatikan atau keluar dari aplikasi). */
 export function hentikanMusik(): void {
   musikDiminta = false
   const c = ctx

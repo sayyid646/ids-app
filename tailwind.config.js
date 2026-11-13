@@ -4,9 +4,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        navy: { 950: '#0A1422', 900: '#0F1E33', 800: '#16304F', 700: '#21416A', 600: '#335780' },
-        ice: { 50: '#F5F9FC', 100: '#EAF2F8', 200: '#D7E6F2', 300: '#B9D2E6', 400: '#8FB4D2' },
-        gold: { 50: '#FBF7EF', 100: '#F3E8D2', 200: '#E8D3A9', 300: '#D9BC85', 400: '#C9A96E', 500: '#AE8C4F', 600: '#8A6C36', 700: '#6B5228' },
+        navy: { 950: 'rgb(var(--navy-950) / <alpha-value>)', 900: 'rgb(var(--navy-900) / <alpha-value>)', 800: 'rgb(var(--navy-800) / <alpha-value>)', 700: 'rgb(var(--navy-700) / <alpha-value>)', 600: 'rgb(var(--navy-600) / <alpha-value>)' },
+        ice: { 50: 'rgb(var(--ice-50) / <alpha-value>)', 100: 'rgb(var(--ice-100) / <alpha-value>)', 200: 'rgb(var(--ice-200) / <alpha-value>)', 300: 'rgb(var(--ice-300) / <alpha-value>)', 400: 'rgb(var(--ice-400) / <alpha-value>)' },
+        gold: { 50: 'rgb(var(--gold-50) / <alpha-value>)', 100: 'rgb(var(--gold-100) / <alpha-value>)', 200: 'rgb(var(--gold-200) / <alpha-value>)', 300: 'rgb(var(--gold-300) / <alpha-value>)', 400: 'rgb(var(--gold-400) / <alpha-value>)', 500: 'rgb(var(--gold-500) / <alpha-value>)', 600: 'rgb(var(--gold-600) / <alpha-value>)', 700: 'rgb(var(--gold-700) / <alpha-value>)' },
         ink: { DEFAULT: '#14171C', soft: '#4A5361', muted: '#7A8494' },
         ok: { 50: '#ECF7F1', 600: '#2F7D55', 700: '#22603F' },
         bad: { 50: '#FBEDEC', 600: '#B03A2E', 700: '#8E2C22' },

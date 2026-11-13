@@ -3,10 +3,10 @@ import { JALUR_LOGO, KOTAK_LOGO } from './jalurLogo'
 
 /** Tanda logo resmi IDS (berlian bergaris) dalam warna emas resminya. */
 export function TandaIDS({ className }: { className?: string; terang?: boolean }) {
-  // Warna resmi logo IDS (emas #8E6C27), tanpa diubah.
+  // Warna resmi logo IDS: emas #8E6C27, atau putih di atas emas (versi resmi kebalikannya).
   return (
     <svg viewBox={KOTAK_LOGO} className={cx('h-9 w-11', className)} aria-hidden>
-      {JALUR_LOGO.map((d, i) => <path key={i} d={d} fill="#8E6C27" />)}
+      {JALUR_LOGO.map((d, i) => <path key={i} d={d} style={{ fill: 'var(--warna-logo, #8E6C27)' }} />)}
     </svg>
   )
 }

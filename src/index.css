@@ -2,6 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Palet warna sebagai variabel supaya tema bisa mengganti seluruh warna aplikasi. */
+:root {
+  --navy-950: 10 20 34;
+  --navy-900: 15 30 51;
+  --navy-800: 22 48 79;
+  --navy-700: 33 65 106;
+  --navy-600: 51 87 128;
+  --ice-50: 245 249 252;
+  --ice-100: 234 242 248;
+  --ice-200: 215 230 242;
+  --ice-300: 185 210 230;
+  --ice-400: 143 180 210;
+  --gold-50: 251 247 239;
+  --gold-100: 243 232 210;
+  --gold-200: 232 211 169;
+  --gold-300: 217 188 133;
+  --gold-400: 201 169 110;
+  --gold-500: 174 140 79;
+  --gold-600: 138 108 54;
+  --gold-700: 107 82 40;
+}
+/* Tema Emas: mengikuti logo emas di atas hitam. */
+html[data-tema='emas'] {
+  --navy-950: 5 5 5;
+  --navy-900: 17 17 17;
+  --navy-800: 42 36 24;
+  --navy-700: 70 59 38;
+  --navy-600: 101 84 53;
+  --ice-50: 251 248 242;
+  --ice-100: 245 238 225;
+  --ice-200: 234 223 201;
+  --ice-300: 217 199 163;
+  --ice-400: 191 166 118;
+  --gold-50: 251 246 234;
+  --gold-100: 243 230 199;
+  --gold-200: 230 206 152;
+  --gold-300: 210 176 107;
+  --gold-400: 184 146 74;
+  --gold-500: 160 126 57;
+  --gold-600: 142 108 39;
+  --gold-700: 110 82 25;
+}
+/* Tema Emas Terbalik: logo putih di atas emas. */
+html[data-tema='emas-terbalik'] {
+  --navy-950: 62 46 12;
+  --navy-900: 110 82 25;
+  --navy-800: 126 95 32;
+  --navy-700: 142 108 39;
+  --navy-600: 165 130 58;
+  --ice-50: 252 248 239;
+  --ice-100: 246 236 214;
+  --ice-200: 236 219 182;
+  --ice-300: 220 194 144;
+  --ice-400: 199 164 100;
+  --gold-50: 252 247 236;
+  --gold-100: 245 232 201;
+  --gold-200: 232 208 158;
+  --gold-300: 201 162 94;
+  --gold-400: 169 133 63;
+  --gold-500: 142 108 39;
+  --gold-600: 110 82 25;
+  --gold-700: 74 55 15;
+}
+
+
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
@@ -93,7 +158,7 @@ html[data-tema='glass'] .kaca-gelap {
    ===================================================================== */
 .kartu-pantul {
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
-  will-change: transform;
+
 }
 @media (hover: hover) and (pointer: fine) {
   .kartu-pantul:hover {
@@ -120,3 +185,147 @@ html[data-tema='glass'] .kaca-gelap {
 @media (prefers-reduced-motion: reduce) {
   .kartu-pantul, .kartu-pantul:hover, .kartu-pantul:active { transition: none; transform: none; }
 }
+
+/* =====================================================================
+   Tema Emas dan Emas Terbalik: warna mengikuti logo resmi.
+   Emas          : menu hitam, logo emas (#8E6C27), isi krem terang.
+   Emas Terbalik : menu emas (#8E6C27), logo putih, isi krem terang.
+   ===================================================================== */
+html[data-tema='emas'] body { background: rgb(var(--ice-50)); }
+html[data-tema='emas'] .sidebar-ids { background: #0B0B0B; border-right: 1px solid rgba(142, 108, 39, 0.35); }
+html[data-tema='emas-terbalik'] body { background: rgb(var(--ice-50)); }
+html[data-tema='emas-terbalik'] .sidebar-ids { background: #8E6C27; --warna-logo: #FFFFFF; }
+html[data-tema='emas-terbalik'] .sidebar-ids :is(.text-gold-300, .text-gold-200, .text-ice-200, .text-ice-400) { color: rgba(255, 255, 255, 0.92); }
+html[data-tema='emas-terbalik'] .sidebar-ids .bg-gold-400 { background: #FFFFFF; }
+html[data-tema='emas-terbalik'] .sidebar-ids :is(.from-gold-400\/60) { --tw-gradient-from: rgba(255, 255, 255, 0.6) var(--tw-gradient-from-position); }
+
+/* =====================================================================
+   Menu cair: saat disentuh/ditekan, cairan coklat keemasan bercahaya
+   naik dari bawah dengan permukaan bergelombang. Menu yang aktif tetap terisi.
+   ===================================================================== */
+.menu-cair {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --cairan-atas: #E2C383;
+  --cairan-tengah: #B8924A;
+  --cairan-bawah: #6E5219;
+}
+html[data-tema='emas-terbalik'] .menu-cair {
+  --cairan-atas: #5E4614;
+  --cairan-tengah: #4A370F;
+  --cairan-bawah: #2E220A;
+}
+.menu-cair::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(100% + 10px);
+  z-index: -1;
+  transform: translateY(100%);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10' preserveAspectRatio='none'%3E%3Cpath d='M0 6 Q7.5 0 15 6 T30 6 T45 6 T60 6 V10 H0Z' fill='%23E2C383'/%3E%3C/svg%3E") 0 0 / 60px 10px repeat-x,
+    linear-gradient(to top, var(--cairan-bawah), var(--cairan-tengah) 55%, var(--cairan-atas)) 0 9px / 100% 100% no-repeat;
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: ombak-cair 1.6s linear infinite;
+  animation-play-state: paused;
+}
+html[data-tema='emas-terbalik'] .menu-cair::before {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 10' preserveAspectRatio='none'%3E%3Cpath d='M0 6 Q7.5 0 15 6 T30 6 T45 6 T60 6 V10 H0Z' fill='%235E4614'/%3E%3C/svg%3E") 0 0 / 60px 10px repeat-x,
+    linear-gradient(to top, var(--cairan-bawah), var(--cairan-tengah) 55%, var(--cairan-atas)) 0 9px / 100% 100% no-repeat;
+}
+/* Terisi hampir penuh: permukaan gelombang tetap terlihat di bagian atas dan bergerak. */
+.menu-cair:active::before,
+.menu-cair.aktif::before,
+.menu-cair:focus-visible::before {
+  transform: translateY(7px);
+  animation-play-state: running;
+  filter: drop-shadow(0 0 8px rgba(226, 195, 131, 0.55));
+}
+.menu-cair:is(:active, .aktif, :focus-visible) { box-shadow: 0 0 18px -2px rgba(201, 169, 110, 0.55); }
+@media (hover: hover) and (pointer: fine) {
+  .menu-cair:hover::before {
+    transform: translateY(7px);
+    animation-play-state: running;
+    filter: drop-shadow(0 0 8px rgba(226, 195, 131, 0.55));
+  }
+  .menu-cair:hover { box-shadow: 0 0 18px -2px rgba(201, 169, 110, 0.55); }
+}
+.menu-cair:is(:active, .aktif, :focus-visible) { color: #fff; }
+@media (hover: hover) and (pointer: fine) { .menu-cair:hover { color: #fff; } }
+@keyframes ombak-cair { from { background-position: 0 0, 0 9px; } to { background-position: 60px 0, 0 9px; } }
+
+/* =====================================================================
+   Bingkai logo: kilau perak berputar (conic-gradient) dengan kilau mikro di tepinya.
+   ===================================================================== */
+.bingkai-perak {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 1rem;
+  padding: 2px;
+}
+.bingkai-perak::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 260%;
+  aspect-ratio: 1;
+  z-index: -2;
+  translate: -50% -50%;
+  background: conic-gradient(from 0deg,
+    rgba(160, 168, 178, 0.25) 0deg, #F8FAFC 40deg, #9AA3AD 80deg, rgba(160, 168, 178, 0.2) 130deg,
+    rgba(160, 168, 178, 0.2) 180deg, #E9EDF1 220deg, #7D8791 260deg, #FFFFFF 300deg, rgba(160, 168, 178, 0.25) 360deg);
+  animation: putar-perak 4.5s linear infinite;
+}
+.bingkai-perak::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  border-radius: calc(1rem - 2px);
+  background: var(--latar-bingkai, #0F1E33);
+}
+.bingkai-perak .kilau {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  z-index: 1;
+  pointer-events: none;
+  background: #fff;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.95));
+  opacity: 0;
+  animation: kilau-mikro 2.6s ease-in-out infinite;
+}
+@keyframes putar-perak { to { transform: rotate(360deg); } }
+@keyframes kilau-mikro {
+  0%, 70%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  80% { opacity: 1; transform: scale(1) rotate(45deg); }
+  90% { opacity: 0.6; transform: scale(0.7) rotate(90deg); }
+}
+
+/* Semua kartu: kartu besar (berisi tabel atau isian) bergerak lebih halus supaya tetap nyaman dibaca. */
+@media (hover: hover) and (pointer: fine) {
+  .kartu-pantul:has(table, form, input, textarea, select):hover { transform: translateY(-3px) scale(1.004); }
+}
+.kartu-pantul:has(table, form, input, textarea, select):active { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-cair::before { transition: none; animation: none; }
+  .bingkai-perak::before, .bingkai-perak .kilau { animation: none; }
+}
+
+/* Warna latar di balik bingkai logo, sesuai tema. */
+:root { --latar-menu: rgb(var(--navy-900)); --latar-kepala: #FFFFFF; }
+html[data-tema='glass'] { --latar-menu: #0A0C10; --latar-kepala: #F4F8FC; }
+html[data-tema='emas'] { --latar-menu: #0B0B0B; --latar-kepala: #FFFDF9; }
+html[data-tema='emas-terbalik'] { --latar-menu: #8E6C27; --latar-kepala: #FFFDF9; }
+
+/* Kode pengrajin (IDS 001 ...) di Stok perak: coklat keemasan; di tema Emas terbalik menjadi putih di atas emas. */
+.kode-ids { color: #8E6C27; font-weight: 800; letter-spacing: 0.04em; }
+html[data-tema='emas-terbalik'] .kode-ids { color: #FFFFFF; background: #8E6C27; border-radius: 0.4rem; padding: 0.05rem 0.4rem; }
