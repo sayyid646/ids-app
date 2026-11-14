@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { ImagePlus, Minus, PackageOpen, Plus, Trash2 } from 'lucide-react'
+import { ImagePlus, Minus, PackageOpen, Plus, Tag, Trash2 } from 'lucide-react'
 import { db } from '../../lib/supabase'
-import { formatAngka, formatTanggalWaktu } from '../../lib/format'
+import { bacaRupiah, formatAngka, formatRupiah, formatTanggalWaktu, ketikRupiah } from '../../lib/format'
 import { pesanGalat } from '../../lib/errors'
 import { useSinkron } from '../../sync/SyncProvider'
 import { Jendela, Konfirmasi } from '../../components/ui/Dialog'
@@ -9,8 +9,8 @@ import { useNotifikasi } from '../../components/ui/Notifikasi'
 import { Bidang, Isian, Tombol, cx } from '../../components/ui/ui'
 import { JENIS, KELAS, LABEL_KELAS, fotoProduk, type GerakStok, type Produk } from './produk'
 
-interface Isi { code: string; name: string; class: Produk['class']; kind: Produk['kind']; gender: '' | 'LADY' | 'MAN'; notes: string }
-const kosong: Isi = { code: '', name: '', class: 'PREMIUM', kind: 'Cincin', gender: '', notes: '' }
+interface Isi { code: string; name: string; class: Produk['class']; kind: Produk['kind']; gender: '' | 'LADY' | 'MAN'; notes: string; harga: string }
+const kosong: Isi = { code: '', name: '', class: 'PREMIUM', kind: 'Cincin', gender: '', notes: '', harga: '' }
 
 /** Detail satu model: tambah/kurangi stok dalam jumlah banyak, riwayat stok, ubah data, foto, dan hapus. */
 export function DialogProduk({ produk, tutup, berubah, fotoUnggahan }: {
@@ -32,6 +32,7 @@ export function DialogProduk({ produk, tutup, berubah, fotoUnggahan }: {
   const [galat, setGalat] = useState<string | null>(null)
   const [simpan, setSimpan] = useState(false)
   const [tanyaHapus, setTanyaHapus] = useState(false)
+  const [harga, setHarga] = useState('')
   const berkas = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -41,7 +42,8 @@ export function DialogProduk({ produk, tutup, berubah, fotoUnggahan }: {
     setArah('masuk')
     setAlasan('')
     setUbahData(baru)
-    setIsi(p ? { code: p.code, name: p.name, class: p.class, kind: p.kind, gender: p.gender ?? '', notes: p.notes ?? '' } : kosong)
+    setIsi(p ? { code: p.code, name: p.name, class: p.class, kind: p.kind, gender: p.gender ?? '', notes: p.notes ?? '', harga: p.price != null ? ketikRupiah(String(Math.round(p.price))) : '' } : kosong)
+    setHarga(p?.price != null ? ketikRupiah(String(Math.round(p.price))) : '')
     setRiwayat(null)
     if (p) {
       db().from('product_stock_moves').select('id, delta, stock_after, reason, created_at').eq('product_id', p.id)
@@ -55,7 +57,7 @@ export function DialogProduk({ produk, tutup, berubah, fotoUnggahan }: {
     setSimpan(true)
     setGalat(null)
     try {
-      const muatan = { code: isi.code, name: isi.name, class: isi.class, kind: isi.kind, gender: isi.gender || null, notes: isi.notes || null }
+      const muatan = { code: isi.code, name: isi.name, class: isi.class, kind: isi.kind, gender: isi.gender || null, notes: isi.notes || null, price: bacaRupiah(isi.harga.replace(/\./g, '')) }
       if (!muatan.name.trim()) throw new Error('Nama model wajib diisi.')
       if (!/^[A-Za-z0-9 -]{2,20}$/.test(muatan.code.trim())) throw new Error('Kode 2–20 huruf/angka, contoh LX-M05.')
       if (baru) {
@@ -71,6 +73,23 @@ export function DialogProduk({ produk, tutup, berubah, fotoUnggahan }: {
         setUbahData(false)
         berubah()
       }
+    } catch (e) {
+      setGalat(pesanGalat(e))
+    } finally {
+      setSimpan(false)
+    }
+  }
+
+  const simpanHarga = async () => {
+    if (!p) return
+    setSimpan(true)
+    setGalat(null)
+    try {
+      const nilai = bacaRupiah(harga.replace(/\./g, ''))
+      const { error } = await db().from('products').update({ price: nilai }).eq('id', p.id)
+      if (error) throw error
+      beri(nilai == null ? `Harga ${p.name} dikosongkan.` : `Harga ${p.name} disimpan: ${formatRupiah(nilai)}.`)
+      berubah()
     } catch (e) {
       setGalat(pesanGalat(e))
     } finally {
@@ -144,6 +163,9 @@ export function DialogProduk({ produk, tutup, berubah, fotoUnggahan }: {
               {pilihan('MAN', isi.gender === 'MAN', () => setIsi({ ...isi, gender: 'MAN' }))}
               {pilihan('Tanpa gender', isi.gender === '', () => setIsi({ ...isi, gender: '' }))}
             </div></div>
+            <Bidang label="Harga jual (Rp)" id="pr-harga" bantuan="Tampil sebagai label harga di kartu. Boleh dikosongkan.">
+              <Isian id="pr-harga" inputMode="numeric" value={isi.harga} placeholder="Contoh: 2.500.000" onChange={(e) => setIsi({ ...isi, harga: ketikRupiah(e.target.value) })} />
+            </Bidang>
             <Bidang label="Catatan" id="pr-catatan"><Isian id="pr-catatan" value={isi.notes} maxLength={300} onChange={(e) => setIsi({ ...isi, notes: e.target.value })} /></Bidang>
           </div>
         ) : p && (
@@ -162,6 +184,18 @@ export function DialogProduk({ produk, tutup, berubah, fotoUnggahan }: {
                 </div>
                 <input ref={berkas} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void unggahFoto(f); e.target.value = '' }} />
               </div>
+            </div>
+
+            <div className="flex flex-wrap items-end gap-2 rounded-xl border border-gold-200 bg-gold-50/60 p-3">
+              <label className="min-w-[10rem] flex-1 text-sm">
+                <span className="mb-1 flex items-center gap-1.5 font-semibold text-navy-900"><Tag className="h-4 w-4 text-gold-600" /> Label harga</span>
+                <span className="flex items-center rounded-xl border border-ice-300 bg-white pl-3 focus-within:border-gold-400 focus-within:ring-2 focus-within:ring-gold-300">
+                  <span className="text-ink-muted">Rp</span>
+                  <input inputMode="numeric" aria-label="Harga jual" value={harga} placeholder="belum diatur" onChange={(e) => setHarga(ketikRupiah(e.target.value))}
+                    className="h-11 w-full rounded-xl bg-transparent px-2 font-semibold tabular-nums focus:outline-none" />
+                </span>
+              </label>
+              <Tombol ragam="kedua" memuat={simpan} disabled={harga === (p.price != null ? ketikRupiah(String(Math.round(p.price))) : '')} onClick={() => void simpanHarga()}>Simpan harga</Tombol>
             </div>
 
             <div className="rounded-xl bg-ice-50 p-4">

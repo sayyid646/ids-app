@@ -848,4 +848,25 @@ end $$;
 reset role;
 
 \echo
+\echo '== T28 Harga stok barang, foto tanpa latar, tanda tangan'
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false);
+do $$
+declare p uuid;
+begin
+  perform tes.sama('foto katalog memakai versi tanpa latar', (select count(*) from public.products where photo_static like 'katalog/v2/%.webp')::text, '49');
+  select id into p from public.products where code = 'SL-M01';
+  update public.products set price = 2500000 where id = p;
+  perform tes.sama('harga tersimpan', (select trim_scale(price)::text from public.products where id = p), '2500000');
+  perform tes.sama('ubah harga tercatat', (select count(*) from public.activity_logs where entity_id = p and action = 'harga_produk_diubah')::text, '1');
+  perform tes.sama('ubah harga tidak tercatat sebagai ubah data', (select count(*) from public.activity_logs where entity_id = p and action = 'produk_diubah')::text, '0');
+  perform tes.gagal('harga minus ditolak', format('update public.products set price = -1 where id = %L', p), 'check');
+  update public.products set price = null where id = p;
+  perform tes.sama('harga boleh dikosongkan', (select coalesce(price::text, 'kosong') from public.products where id = p), 'kosong');
+  update public.app_settings set signature_path = 'tanda-tangan/ttd-1.png' where id = 1;
+  perform tes.sama('tanda tangan tersimpan', (select signature_path from public.app_settings), 'tanda-tangan/ttd-1.png');
+end $$;
+reset role;
+
+\echo
 \echo '== SEMUA TES LULUS'

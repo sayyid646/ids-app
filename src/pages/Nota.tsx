@@ -1,6 +1,9 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Eye, Printer, X } from 'lucide-react'
+import { ArrowLeft, Download, Eye, Printer, X } from 'lucide-react'
+import { pdfNotaPembayaran } from '../lib/pdfNota'
+import { pesanGalat } from '../lib/errors'
+import { useNotifikasi } from '../components/ui/Notifikasi'
 import { db } from '../lib/supabase'
 import type { Barang } from '../lib/types'
 import { akhirBulan, bacaRupiah, formatRupiah, formatTanggalHari, hariIni as tglHariIni, ketikRupiah, lokalKeIso } from '../lib/format'
@@ -36,15 +39,19 @@ function Baris({ label, isi }: { label: string; isi: ReactNode }) {
 
 interface Kelompok { id: string; kode: string; nama: string | null; barang: Barang[] }
 
-function HalamanNota({ g, sempit, zona, harga, ubahHarga }: {
+interface KeadaanHalaman { tglBayar: string; sembunyi: Set<string> }
+
+function HalamanNota({ g, sempit, zona, harga, ubahHarga, lapor }: {
   g: Kelompok
   sempit: boolean
   zona: string
   harga: Record<string, number>
   ubahHarga: (id: string, n: number | null) => void
+  lapor: (id: string, k: KeadaanHalaman) => void
 }) {
   const [tglBayar, setTglBayar] = useState(() => tglHariIni(zona))
   const [sembunyi, setSembunyi] = useState<Set<string>>(new Set())
+  useEffect(() => { lapor(g.id, { tglBayar, sembunyi }) }, [g.id, tglBayar, sembunyi, lapor])
   const barang = g.barang.filter((b) => !sembunyi.has(b.id))
   const total = barang.reduce((t, b) => t + (harga[b.id] ?? 0), 0)
   // Kode OR: nomor order; bila satu order punya beberapa barang pengrajin ini, ditambah nomor barangnya.
@@ -134,6 +141,10 @@ export default function Nota() {
   const { pengaturan, zona } = useSinkron()
   const [kertas, setKertas] = useState<Kertas>('A4')
   const [harga, setHarga] = useState<Record<string, number>>(bacaHarga)
+  const keadaan = useRef(new Map<string, KeadaanHalaman>())
+  const [lapor] = useState(() => (idHal: string, k: KeadaanHalaman) => { keadaan.current.set(idHal, k) })
+  const [membuatPdf, setMembuatPdf] = useState(false)
+  const { beri } = useNotifikasi()
   const periode = jenis === 'pembayaran'
   const awalBulan = `${tglHariIni(zona).slice(0, 8)}01`
   const dari = cari.get('dari') ?? awalBulan
@@ -190,6 +201,33 @@ export default function Nota() {
   if (!kelompok.length && !periode) return <div className="p-6"><KotakGalat pesan="Order tidak ditemukan atau belum punya barang aktif." /></div>
   if (!kelompok.length) return <div className="p-6"><KotakGalat pesan="Pengrajin tidak ditemukan." /></div>
 
+  const simpanPdfNota = async () => {
+    setMembuatPdf(true)
+    try {
+      const halaman = kelompok.map((g) => {
+        const k = keadaan.current.get(g.id)
+        const kembar = new Map<string, number>()
+        g.barang.forEach((b) => kembar.set(b.order_number, (kembar.get(b.order_number) ?? 0) + 1))
+        return {
+          kode: g.kode,
+          nama: g.nama,
+          tanggalBayar: formatTanggalHari(k?.tglBayar ?? tglHariIni(zona)),
+          baris: g.barang.filter((b) => !k?.sembunyi.has(b.id)).map((b) => ({
+            kodeOr: (kembar.get(b.order_number) ?? 0) > 1 ? `${b.order_number}-${b.item_no}` : b.order_number,
+            kategori: `${b.category_name} ${b.gender}`,
+            harga: harga[b.id] ?? null,
+          })),
+        }
+      })
+      const nama = kelompok.length === 1 ? `Nota-Pembayaran-${kelompok[0].kode.replace(/\s+/g, '')}` : 'Nota-Pembayaran'
+      await pdfNotaPembayaran(halaman, kertas, formatTanggalHari(tglHariIni(zona)), `${nama}-${tglHariIni(zona)}.pdf`)
+    } catch (e) {
+      beri(pesanGalat(e), 'galat')
+    } finally {
+      setMembuatPdf(false)
+    }
+  }
+
   const sempit = kertas === '80mm' || kertas === '58mm'
   const lebar = kertas === 'A4' ? 'max-w-[190mm]' : kertas === 'A5' ? 'max-w-[128mm]' : kertas === '80mm' ? 'max-w-[74mm]' : 'max-w-[52mm]'
 
@@ -201,6 +239,10 @@ export default function Nota() {
           <select aria-label="Ukuran kertas" value={kertas} onChange={(e) => setKertas(e.target.value as Kertas)} className="h-10 rounded-xl border border-ice-300 bg-white px-3 text-sm">
             <option value="A4">A4</option><option value="A5">A5</option><option value="80mm">Thermal 80 mm</option><option value="58mm">Thermal 58 mm</option>
           </select>
+          <button type="button" disabled={membuatPdf} onClick={() => void simpanPdfNota()}
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-gold-300 bg-white px-4 text-sm font-semibold text-navy-900 hover:bg-gold-50 disabled:opacity-60">
+            <Download className="h-4 w-4" /> {membuatPdf ? 'Membuat PDF…' : 'Simpan PDF'}
+          </button>
           <button type="button" onClick={() => window.print()} className="inline-flex h-10 items-center gap-2 rounded-xl bg-navy-900 px-4 text-sm font-semibold text-white">
             <Printer className="h-4 w-4" /> Cetak
           </button>
@@ -217,14 +259,14 @@ export default function Nota() {
         )}
         <p className="w-full text-xs text-ink-muted">
           Ketik harga satuan langsung di nota; totalnya dihitung otomatis dan harga tersimpan di perangkat ini. Tanda × menyembunyikan barang dari nota.
-          Tombol Cetak membuka pilihan printer, atau pilih "Simpan sebagai PDF".
+          Simpan PDF membuat berkas nota langsung (bisa dibagikan ke WhatsApp atau disimpan di File); Cetak membuka pilihan printer.
         </p>
       </div>
 
       <div className={cx('mx-auto my-6 bg-white p-6 text-black shadow-card print:my-0 print:max-w-none print:p-0 print:shadow-none', lebar, sempit ? 'text-[11px]' : kertas === 'A5' ? 'text-[12px]' : 'text-[13px]')}>
         {kelompok.map((g, gi, arr) => (
           <section key={g.id} className={cx(gi < arr.length - 1 && 'break-after-page pb-12 print:pb-0')}>
-            <HalamanNota g={g} sempit={sempit} zona={zona} harga={harga} ubahHarga={ubahHarga} />
+            <HalamanNota g={g} sempit={sempit} zona={zona} harga={harga} ubahHarga={ubahHarga} lapor={lapor} />
           </section>
         ))}
       </div>

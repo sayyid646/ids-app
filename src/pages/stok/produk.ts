@@ -9,6 +9,7 @@ export interface Produk {
   photo_static: string | null
   photo_path: string | null
   stock: number
+  price: number | null
   notes: string | null
   sort_order: number
 }

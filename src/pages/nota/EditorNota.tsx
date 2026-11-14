@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Plus, Printer, Save, Trash2, X } from 'lucide-react'
+import { ArrowLeft, Download, Plus, Printer, Save, Trash2, X } from 'lucide-react'
+import { pdfNotaManual } from '../../lib/pdfNota'
 import { db } from '../../lib/supabase'
 import { bacaRupiah, formatRupiah, formatTanggalHari, hariIni, ketikRupiah } from '../../lib/format'
 import { pesanGalat } from '../../lib/errors'
@@ -36,7 +37,7 @@ export default function EditorNota() {
   const { id } = useParams()
   const baru = !id
   const navigasi = useNavigate()
-  const { zona } = useSinkron()
+  const { zona, pengaturan } = useSinkron()
   const { beri } = useNotifikasi()
   const [tanggal, setTanggal] = useState(() => hariIni(zona))
   const [kepada, setKepada] = useState('')
@@ -46,6 +47,17 @@ export default function EditorNota() {
   const [menyimpan, setMenyimpan] = useState(false)
   const [tanyaHapus, setTanyaHapus] = useState(false)
   const [kertas, setKertas] = useState<Kertas>('A5')
+  const [ttd, setTtd] = useState<string | null>(null)
+  const [membuatPdf, setMembuatPdf] = useState(false)
+
+  // Tanda tangan dari Pengaturan (disimpan privat, dibuka dengan tautan sementara).
+  useEffect(() => {
+    let aktif = true
+    const path = pengaturan?.signature_path
+    if (!path) { setTtd(null); return }
+    db().storage.from('identitas').createSignedUrl(path, 3600).then(({ data: d }) => { if (aktif) setTtd(d?.signedUrl ?? null) })
+    return () => { aktif = false }
+  }, [pengaturan?.signature_path])
 
   const data = useMuat(async () => {
     if (!id) return null
@@ -115,6 +127,25 @@ export default function EditorNota() {
     window.setTimeout(() => window.print(), 150)
   }
 
+  const simpanPdf = async () => {
+    if (berubah || baru) {
+      const ok = await simpan()
+      if (!ok) return
+    }
+    setMembuatPdf(true)
+    try {
+      const isi = baris.filter((b) => b.nama.trim() || b.banyak.trim() || b.harga.trim())
+        .map((b) => ({ banyak: angka(b.banyak), nama: b.nama.trim(), harga: bacaRupiah(b.harga) ?? 0, jumlah: jumlahBaris(b) }))
+      const no = nomor != null ? String(nomor).padStart(4, '0') : 'baru'
+      await pdfNotaManual({ nomor: no, tanggal: formatTanggalHari(tanggal), kepada: kepada.trim() || null, baris: isi, total, tandaTanganUrl: ttd },
+        kertas, `Nota-${no}-${tanggal}.pdf`)
+    } catch (e) {
+      beri(pesanGalat(e), 'galat')
+    } finally {
+      setMembuatPdf(false)
+    }
+  }
+
   if (!baru && data.memuat && !data.data) return <Pemuat />
   if (!baru && data.galat) return <KotakGalat pesan={data.galat} ulangi={data.muatUlang} />
   if (!baru && !data.memuat && !data.data) return <KotakGalat pesan="Nota tidak ditemukan atau sudah dihapus." />
@@ -131,6 +162,7 @@ export default function EditorNota() {
           <Tombol ragam="kedua" ikon={<Save className="h-4 w-4" />} memuat={menyimpan} disabled={!berubah && !baru} onClick={() => void simpan()}>
             {berubah || baru ? 'Simpan' : 'Tersimpan'}
           </Tombol>
+          <Tombol ragam="kedua" ikon={<Download className="h-4 w-4" />} memuat={membuatPdf} disabled={menyimpan} onClick={() => void simpanPdf()}>Simpan PDF</Tombol>
           <Tombol ikon={<Printer className="h-4 w-4" />} disabled={menyimpan} onClick={() => void cetak()}>Cetak</Tombol>
         </div>
       </div>
@@ -209,7 +241,11 @@ export default function EditorNota() {
         <div className="mt-12 flex items-end justify-end gap-5 break-inside-avoid">
           <div className="w-48 text-center">
             <p>Hormat kami,</p>
-            <div className="mt-16 border-b border-black" />
+            <div className="flex h-16 items-end justify-center">
+              {ttd ? <img src={ttd} alt="Tanda tangan" className="max-h-16 max-w-full object-contain" />
+                : <Link to="/pengaturan" className="mb-1 text-[11px] text-ink-muted underline print:hidden">Pasang tanda tangan di Pengaturan</Link>}
+            </div>
+            <div className="border-b border-black" />
           </div>
           <LogoResmi className="mb-0.5 max-h-9" />
         </div>

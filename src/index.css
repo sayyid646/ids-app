@@ -329,3 +329,48 @@ html[data-tema='emas-terbalik'] { --latar-menu: #8E6C27; --latar-kepala: #FFFDF9
 /* Kode pengrajin (IDS 001 ...) di Stok perak: coklat keemasan; di tema Emas terbalik menjadi putih di atas emas. */
 .kode-ids { color: #8E6C27; font-weight: 800; letter-spacing: 0.04em; }
 html[data-tema='emas-terbalik'] .kode-ids { color: #FFFFFF; background: #8E6C27; border-radius: 0.4rem; padding: 0.05rem 0.4rem; }
+
+/* =====================================================================
+   Panggung perhiasan di Stok barang: foto tanpa latar berayun atau berputar
+   di atas bayangan yang ikut menyempit dan melebar.
+   ===================================================================== */
+.panggung { position: relative; perspective: 700px; perspective-origin: 50% 35%; }
+.panggung .perhiasan { transform-style: preserve-3d; transform-origin: 50% 55%; will-change: transform; }
+.panggung .bayangan {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: 7%;
+  height: 9%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(15, 20, 30, 0.38), rgba(15, 20, 30, 0.16) 55%, transparent);
+  filter: blur(2px);
+  transform-origin: 50% 50%;
+}
+.panggung.ayun .perhiasan { animation: perhiasan-ayun 5.5s ease-in-out infinite; }
+.panggung.ayun .bayangan { animation: bayangan-ayun 5.5s ease-in-out infinite; }
+.panggung.putar .perhiasan { animation: perhiasan-putar 7s linear infinite; }
+.panggung.putar .bayangan { animation: bayangan-putar 7s linear infinite; }
+.panggung.berhenti .perhiasan, .panggung.berhenti .bayangan { animation-play-state: paused; }
+@keyframes perhiasan-ayun {
+  0%, 100% { transform: translateY(0) rotateY(-28deg) rotateX(4deg); }
+  50% { transform: translateY(-6%) rotateY(28deg) rotateX(4deg); }
+}
+@keyframes bayangan-ayun {
+  0%, 100% { transform: scale(1, 1); opacity: 1; }
+  50% { transform: scale(0.82, 0.8); opacity: 0.7; }
+}
+@keyframes perhiasan-putar {
+  0% { transform: translateY(0) rotateY(0deg); }
+  25% { transform: translateY(-4%) rotateY(90deg); }
+  50% { transform: translateY(0) rotateY(180deg); }
+  75% { transform: translateY(-4%) rotateY(270deg); }
+  100% { transform: translateY(0) rotateY(360deg); }
+}
+@keyframes bayangan-putar {
+  0%, 50%, 100% { transform: scale(1, 1); opacity: 1; }
+  25%, 75% { transform: scale(0.3, 0.85); opacity: 0.75; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panggung .perhiasan, .panggung .bayangan { animation: none !important; }
+}

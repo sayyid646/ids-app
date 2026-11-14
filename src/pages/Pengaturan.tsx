@@ -18,7 +18,7 @@ import { useMaster } from '../sync/useMaster'
 import { useNotifikasi } from '../components/ui/Notifikasi'
 import { Bidang, Isian, IsianPanjang, Kartu, KepalaHalaman, LencanaAktif, Pemuat, Tombol, cx } from '../components/ui/ui'
 import { aturMusik, aturSfx, musikAktif, sfxAktif } from '../lib/suara'
-import { animasiPembukaAktif, aturAnimasiPembuka, aturLampuSorot, lampuSorotAktif, aturTema, temaAktif, type Tema } from '../components/animasi/pengaturanAnimasi'
+import { animasiPembukaAktif, aturAnimasiPembuka, aturLampuSorot, aturPutaran, lampuSorotAktif, putaranAktif, type Putaran, aturTema, temaAktif, type Tema } from '../components/animasi/pengaturanAnimasi'
 
 function Bagian({ judul, sub, children }: { judul: string; sub?: string; children: ReactNode }) {
   return (
@@ -229,6 +229,102 @@ function Logo({ p }: { p: TPengaturan }) {
   )
 }
 
+function TandaTangan({ p }: { p: TPengaturan }) {
+  const { beri } = useNotifikasi()
+  const [url, setUrl] = useState<string | null>(null)
+  const [proses, setProses] = useState(false)
+  const input = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    let aktif = true
+    if (!p.signature_path) { setUrl(null); return }
+    db().storage.from('identitas').createSignedUrl(p.signature_path, 3600).then(({ data }) => { if (aktif) setUrl(data?.signedUrl ?? null) })
+    return () => { aktif = false }
+  }, [p.signature_path])
+
+  const pilih = async (f: File | undefined) => {
+    if (!f) return
+    if (!/^image\/(png|jpeg|webp)$/.test(f.type)) { beri('Gunakan foto PNG, JPG, atau WEBP.', 'galat'); return }
+    if (f.size > 3 * 1024 * 1024) { beri('Ukuran foto tanda tangan maksimal 3 MB.', 'galat'); return }
+    setProses(true)
+    try {
+      const bersih = await bersihkanTandaTangan(f)
+      const path = `tanda-tangan/ttd-${Date.now()}.png`
+      const up = await db().storage.from('identitas').upload(path, bersih, { contentType: 'image/png', upsert: false })
+      if (up.error) throw up.error
+      const { error } = await db().from('app_settings').update({ signature_path: path }).eq('id', 1)
+      if (error) throw error
+      if (p.signature_path) await db().storage.from('identitas').remove([p.signature_path])
+      beri('Tanda tangan disimpan. Akan tampil di nota.')
+    } catch (e) {
+      beri(pesanGalat(e), 'galat')
+    } finally {
+      setProses(false)
+      if (input.current) input.current.value = ''
+    }
+  }
+  const hapus = async () => {
+    setProses(true)
+    try {
+      const { error } = await db().from('app_settings').update({ signature_path: null }).eq('id', 1)
+      if (error) throw error
+      if (p.signature_path) await db().storage.from('identitas').remove([p.signature_path])
+      beri('Tanda tangan dihapus. Nota kembali memakai garis kosong.')
+    } catch (e) { beri(pesanGalat(e), 'galat') } finally { setProses(false) }
+  }
+  return (
+    <Bagian judul="Tanda tangan nota" sub="Foto tanda tangan yang tampil di atas garis tanda tangan pada menu Nota. Tanda tangan di kertas putih, difoto terang; latar putihnya dibuang otomatis.">
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex h-24 w-48 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-ice-300 bg-white">
+          {url ? <img src={url} alt="Tanda tangan" className="h-full w-full object-contain p-2" /> : <span className="text-xs text-ink-muted">Belum ada</span>}
+        </div>
+        <input ref={input} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => void pilih(e.target.files?.[0])} />
+        <Tombol ragam="kedua" ikon={<ImageUp className="h-4 w-4" />} memuat={proses} onClick={() => input.current?.click()}>{p.signature_path ? 'Ganti tanda tangan' : 'Unggah tanda tangan'}</Tombol>
+        {p.signature_path && <Tombol ragam="hantu" ikon={<Trash2 className="h-4 w-4" />} disabled={proses} onClick={hapus}>Hapus</Tombol>}
+      </div>
+    </Bagian>
+  )
+}
+
+/**
+ * Merapikan foto tanda tangan: latar terang dibuat transparan, tinta digelapkan,
+ * lalu dipotong pas di sekitar coretan. Hasilnya PNG transparan.
+ */
+async function bersihkanTandaTangan(f: File): Promise<Blob> {
+  const gambar = await createImageBitmap(f)
+  const skala = Math.min(1, 1400 / Math.max(gambar.width, gambar.height))
+  const w = Math.round(gambar.width * skala), h = Math.round(gambar.height * skala)
+  const kanvas = document.createElement('canvas')
+  kanvas.width = w; kanvas.height = h
+  const c = kanvas.getContext('2d')!
+  c.drawImage(gambar, 0, 0, w, h)
+  const data = c.getImageData(0, 0, w, h)
+  const d = data.data
+  // ambang otomatis: rata-rata kecerahan dikurangi sedikit, supaya bayangan kertas ikut hilang
+  let jumlah = 0
+  for (let i = 0; i < d.length; i += 4) jumlah += (d[i] + d[i + 1] + d[i + 2]) / 3
+  const ambang = Math.min(215, (jumlah / (d.length / 4)) - 35)
+  let x0 = w, y0 = h, x1 = 0, y1 = 0
+  for (let i = 0; i < d.length; i += 4) {
+    const terang = (d[i] + d[i + 1] + d[i + 2]) / 3
+    const alfa = Math.max(0, Math.min(1, (ambang - terang) / 60))
+    d[i + 3] = Math.round(alfa * 255)
+    d[i] = Math.round(d[i] * 0.35); d[i + 1] = Math.round(d[i + 1] * 0.35); d[i + 2] = Math.round(d[i + 2] * 0.45)
+    if (alfa > 0.3) {
+      const px = (i / 4) % w, py = Math.floor(i / 4 / w)
+      if (px < x0) x0 = px; if (px > x1) x1 = px; if (py < y0) y0 = py; if (py > y1) y1 = py
+    }
+  }
+  c.putImageData(data, 0, 0)
+  if (x1 <= x0 || y1 <= y0) throw new Error('Tanda tangan tidak terlihat jelas di foto. Coba foto lebih dekat dengan cahaya terang.')
+  const tepi = 12
+  const kx = Math.max(0, x0 - tepi), ky = Math.max(0, y0 - tepi)
+  const kw = Math.min(w, x1 + tepi) - kx, kh = Math.min(h, y1 + tepi) - ky
+  const hasil = document.createElement('canvas')
+  hasil.width = kw; hasil.height = kh
+  hasil.getContext('2d')!.drawImage(kanvas, kx, ky, kw, kh, 0, 0, kw, kh)
+  return await new Promise<Blob>((ok, gagal) => hasil.toBlob((b) => (b ? ok(b) : gagal(new Error('Gagal memproses foto.'))), 'image/png'))
+}
+
 function KelolaKategori() {
   const master = useMaster()
   const { beri } = useNotifikasi()
@@ -367,6 +463,7 @@ const PILIHAN_TEMA: { nilai: Tema; judul: string; isi: string; latar: string; me
 function Tampilan() {
   const [pembuka, setPembuka] = useState(animasiPembukaAktif)
   const [sorot, setSorot] = useState(lampuSorotAktif)
+  const [putaran, setPutaran] = useState<Putaran>(putaranAktif)
   const [tema, setTema] = useState<Tema>(temaAktif)
   const [musik, setMusik] = useState(musikAktif)
   const [sfx, setSfx] = useState(sfxAktif)
@@ -398,6 +495,19 @@ function Tampilan() {
           <span><span className="block font-semibold text-navy-900">Lampu sorot</span><span className="text-sm text-ink-soft">Cahaya kuning hangat yang mengikuti kursor di komputer. Di HP tidak tampil.</span></span>
           <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={sorot} onChange={(e) => { setSorot(e.target.checked); aturLampuSorot(e.target.checked) }} />
         </label>
+        <fieldset className="rounded-xl bg-ice-50 px-4 py-3">
+          <legend className="sr-only">Putaran perhiasan</legend>
+          <span className="block font-semibold text-navy-900">Putaran perhiasan di Stok barang</span>
+          <span className="text-sm text-ink-soft">Foto perhiasan bergerak di atas bayangannya. Bisa juga dihentikan dari halaman Stok barang.</span>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {([['ayun', 'Berayun (berdiri)'], ['putar', 'Berputar penuh'], ['mati', 'Diam']] as const).map(([v, l]) => (
+              <button key={v} type="button" aria-pressed={putaran === v} onClick={() => { setPutaran(v); aturPutaran(v) }}
+                className={cx('rounded-full border px-3.5 py-1.5 text-sm font-semibold', putaran === v ? 'border-navy-900 bg-navy-900 text-white' : 'border-ice-300 bg-white text-ink-soft')}>
+                {l}
+              </button>
+            ))}
+          </div>
+        </fieldset>
         <label className="flex items-center justify-between gap-3 rounded-xl bg-ice-50 px-4 py-3">
           <span><span className="block font-semibold text-navy-900">Efek suara pembuka</span><span className="text-sm text-ink-soft">Denting dan kilau yang mengikuti animasi pembuka. Bila menyala, pembuka menunggu satu ketukan karena HP baru mengizinkan suara setelah layar disentuh.</span></span>
           <input type="checkbox" className="h-5 w-5 accent-navy-900" checked={sfx} onChange={(e) => { setSfx(e.target.checked); aturSfx(e.target.checked) }} />
@@ -451,6 +561,7 @@ export default function Pengaturan() {
         {!pengaturan ? <Pemuat /> : (
           <>
             <Logo p={pengaturan} />
+            <TandaTangan p={pengaturan} />
             <FormUsaha p={pengaturan} />
           </>
         )}

@@ -74,3 +74,15 @@ export const aturLampuSorot = (aktif: boolean) => {
   tulis(KUNCI_LAMPU, aktif ? 'hidup' : 'mati')
   window.dispatchEvent(new Event('ids-lampu-sorot'))
 }
+
+/** Gaya putaran foto perhiasan di Stok barang: berayun (berdiri, bergoyang kiri-kanan), berputar penuh, atau diam. */
+export type Putaran = 'ayun' | 'putar' | 'mati'
+const KUNCI_PUTARAN = 'ids-putaran-perhiasan'
+export function putaranAktif(): Putaran {
+  const v = baca(KUNCI_PUTARAN)
+  return v === 'putar' || v === 'mati' ? v : 'ayun'
+}
+export function aturPutaran(p: Putaran): void {
+  tulis(KUNCI_PUTARAN, p)
+  window.dispatchEvent(new Event('ids-putaran'))
+}

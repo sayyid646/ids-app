@@ -12,6 +12,7 @@ migrasi: 20261110000900_sampah_a5.sql
 migrasi: 20261112001000_berat_pengrajin.sql
 migrasi: 20261113001100_perak_nota.sql
 migrasi: 20261113001200_stok_barang.sql
+migrasi: 20261114001300_harga_tandatangan.sql
 
 == Persiapan akun
                     jadikan_admin                     
@@ -462,6 +463,20 @@ psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/
 
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:847: NOTICE:  ok  bukan admin: katalog tidak terlihat
 psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:847: NOTICE:  ok  bukan admin: tidak bisa ubah stok (ditolak: Akses ditolak. Akun ini bukan administrator IDS.)
+
+== T28 Harga stok barang, foto tanpa latar, tanda tangan
+              set_config              
+--------------------------------------
+ 00000000-0000-0000-0000-00000000000a
+(1 row)
+
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:868: NOTICE:  ok  foto katalog memakai versi tanpa latar
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:868: NOTICE:  ok  harga tersimpan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:868: NOTICE:  ok  ubah harga tercatat
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:868: NOTICE:  ok  ubah harga tidak tercatat sebagai ubah data
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:868: NOTICE:  ok  harga minus ditolak (ditolak: new row for relation "products" violates check constraint "products_price_check")
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:868: NOTICE:  ok  harga boleh dikosongkan
+psql:/tmp/claude-0/-home-claude/dae7313c-8675-5678-ab5f-76362731ee98/scratchpad/ids-app/supabase/tests/10_tes_bisnis.sql:868: NOTICE:  ok  tanda tangan tersimpan
 
 == SEMUA TES LULUS
 menjalankan ulang semua migrasi (harus aman diulang)...

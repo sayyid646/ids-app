@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Minus, PackageOpen, Plus, Search } from 'lucide-react'
+import { Minus, PackageOpen, Pause, Play, Plus, Search, Tag } from 'lucide-react'
 import { db } from '../../lib/supabase'
-import { formatAngka } from '../../lib/format'
+import { formatAngka, formatRupiah } from '../../lib/format'
+import { aturPutaran, putaranAktif, type Putaran } from '../../components/animasi/pengaturanAnimasi'
 import { pesanGalat } from '../../lib/errors'
 import { useMuat } from '../../sync/useMuat'
 import { useVersiData } from '../../sync/SyncProvider'
@@ -24,6 +25,17 @@ export default function StokBarang() {
   const [buka, setBuka] = useState<Produk | 'baru' | null>(null)
   const [proses, setProses] = useState<string | null>(null)
   const [foto, setFoto] = useState<Record<string, string>>({})
+  const [putaran, setPutaran] = useState<Putaran>(putaranAktif)
+  const [gayaTerakhir, setGayaTerakhir] = useState<Exclude<Putaran, 'mati'>>(() => (putaranAktif() === 'putar' ? 'putar' : 'ayun'))
+  useEffect(() => {
+    const ikut = () => setPutaran(putaranAktif())
+    window.addEventListener('ids-putaran', ikut)
+    return () => window.removeEventListener('ids-putaran', ikut)
+  }, [])
+  const jedaPutaran = () => {
+    if (putaran === 'mati') aturPutaran(gayaTerakhir)
+    else { setGayaTerakhir(putaran); aturPutaran('mati') }
+  }
 
   const data = useMuat(async () => {
     const { data, error } = await db().from('products').select('*').is('deleted_at', null).order('sort_order').order('name')
@@ -53,6 +65,7 @@ export default function StokBarang() {
   const kelompok = KELAS.map((k) => ({ k, isi: tampil.filter((p) => p.class === k) })).filter((x) => x.isi.length)
   const totalStok = semua.reduce((t, p) => t + p.stock, 0)
   const habis = semua.filter((p) => p.stock === 0).length
+  const nilai = semua.reduce((t, p) => t + (p.price ?? 0) * p.stock, 0)
 
   const ubah = async (p: Produk, delta: number) => {
     setProses(p.id)
@@ -72,14 +85,22 @@ export default function StokBarang() {
       <KepalaHalaman
         judul="Stok barang"
         sub="Jumlah perhiasan jadi yang tersedia untuk setiap model katalog. Tekan + atau − untuk mengubah satu per satu, atau buka kartunya untuk jumlah banyak dan riwayat."
-        aksi={<Tombol ikon={<Plus className="h-4 w-4" />} onClick={() => setBuka('baru')}>Tambah model</Tombol>}
+        aksi={
+          <div className="flex flex-wrap gap-2">
+            <Tombol ragam="kedua" ikon={putaran === 'mati' ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />} onClick={jedaPutaran}>
+              {putaran === 'mati' ? 'Putar perhiasan' : 'Hentikan putaran'}
+            </Tombol>
+            <Tombol ikon={<Plus className="h-4 w-4" />} onClick={() => setBuka('baru')}>Tambah model</Tombol>
+          </div>
+        }
       />
 
-      <div className="mb-5 grid grid-cols-3 gap-3">
-        {([['Model', semua.length, 'text-navy-900'], ['Total stok', totalStok, 'text-gold-600'], ['Stok habis', habis, habis ? 'text-bad-700' : 'text-ok-700']] as const).map(([l, n, w]) => (
+      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {([['Model', formatAngka(semua.length), 'text-navy-900'], ['Total stok', `${formatAngka(totalStok)} pcs`, 'text-gold-600'],
+          ['Stok habis', formatAngka(habis), habis ? 'text-bad-700' : 'text-ok-700'], ['Nilai stok', formatRupiah(nilai), 'text-navy-900']] as const).map(([l, n, w]) => (
           <Kartu key={l} className="p-3 sm:p-4">
             <p className="text-[11px] font-semibold tracking-wide text-ink-muted">{l.toUpperCase()}</p>
-            <p className={cx('mt-1 font-display text-2xl font-semibold tabular-nums sm:text-3xl', w)}>{formatAngka(n)}</p>
+            <p className={cx('mt-1 truncate font-display text-xl font-semibold tabular-nums sm:text-2xl', w)}>{n}</p>
           </Kartu>
         ))}
       </div>
@@ -135,9 +156,19 @@ export default function StokBarang() {
                 <motion.li key={p.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(i, 12) * 0.03 }}>
                   <Kartu className={cx('flex h-full flex-col overflow-hidden', p.stock === 0 && 'opacity-80')}>
                     <button type="button" onClick={() => setBuka(p)} className="block text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400" aria-label={`Buka ${p.name}`}>
-                      <div className="relative aspect-square bg-white">
-                        {src ? <img src={src} alt={p.name} loading="lazy" className="h-full w-full object-contain p-2" />
-                          : <div className="grid h-full place-items-center text-ink-muted"><PackageOpen className="h-10 w-10" /></div>}
+                      <div className={cx('panggung relative aspect-square overflow-hidden bg-[radial-gradient(circle_at_50%_38%,#FFFFFF,#F1F4F8_70%,#E4E9EF)]', putaran !== 'mati' && putaran)}>
+                        {src ? (
+                          <>
+                            <span className="bayangan" style={{ animationDelay: `${-(i * 0.7) % 7}s` }} aria-hidden />
+                            <img src={src} alt={p.name} loading="lazy" draggable={false} style={{ animationDelay: `${-(i * 0.7) % 7}s` }}
+                              className="perhiasan relative h-full w-full object-contain p-[12%]" />
+                          </>
+                        ) : <div className="grid h-full place-items-center text-ink-muted"><PackageOpen className="h-10 w-10" /></div>}
+                        {p.price != null && (
+                          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-md bg-gold-600 px-2 py-0.5 text-[11px] font-bold tabular-nums text-white shadow-sm">
+                            <Tag className="h-3 w-3" aria-hidden />{formatRupiah(p.price)}
+                          </span>
+                        )}
                         <span className={cx('absolute right-2 top-2 rounded-full px-2.5 py-0.5 text-xs font-bold tabular-nums shadow-sm',
                           p.stock > 0 ? 'bg-navy-900 text-white' : 'bg-bad-50 text-bad-700')}>
                           {p.stock > 0 ? `${formatAngka(p.stock)} pcs` : 'Habis'}

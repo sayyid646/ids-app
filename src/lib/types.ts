@@ -87,6 +87,7 @@ export interface Pengaturan {
   min_weight_grams: number
   silver_lady_grams: number
   silver_man_grams: number
+  signature_path: string | null
   receipt_show_signature: boolean
   receipt_footer: string
   wa_template_proses: string
@@ -130,6 +131,7 @@ export const LABEL_AKSI: Record<string, string> = {
   produk_dihapus: 'Model barang dipindah ke Sampah',
   produk_dipulihkan: 'Model barang dipulihkan',
   stok_produk_diubah: 'Stok barang diubah',
+  harga_produk_diubah: 'Harga barang diubah',
   perak_diubah: 'Pembelian perak diubah',
   perak_dihapus: 'Pembelian perak dipindah ke Sampah',
   perak_dipulihkan: 'Pembelian perak dipulihkan',

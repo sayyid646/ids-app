@@ -1,6 +1,6 @@
 // Service worker sederhana: membuat IDS bisa dipasang sebagai aplikasi dan tetap terbuka saat sinyal lemah.
 // Data order TIDAK disimpan di sini; data selalu diambil langsung dari database.
-const CACHE = 'ids-v5'
+const CACHE = 'ids-v6'
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './index.html', './manifest.webmanifest', './ikon-192.png'])))
   self.skipWaiting()
